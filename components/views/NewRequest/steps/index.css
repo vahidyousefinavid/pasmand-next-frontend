@@ -1,0 +1,24 @@
+.react-date-picker {
+    border: 1px solid #e5e7eb; /* Gray border similar to your other form elements */
+    border-radius: 0.375rem; /* Rounded corners */
+    padding: 0.75rem;
+    font-family: 'Vazir', sans-serif; /* Persian font family for better compatibility */
+  }
+  
+  .react-date-picker .react-date-picker__calendar {
+    border-radius: 0.375rem; /* Match rounded corners */
+  }
+  
+  .react-date-picker .react-date-picker__button {
+    background-color: #6366f1; /* Blue button color */
+    color: white;
+  }
+  
+  .react-date-picker .react-date-picker__calendar .react-date-picker__day:hover {
+    background-color: #3b82f6; /* Blue hover color */
+  }
+  
+  .react-date-picker .react-date-picker__calendar .react-date-picker__day--selected {
+    background-color: #3b82f6; /* Selected day background */
+    color: white;
+  }
