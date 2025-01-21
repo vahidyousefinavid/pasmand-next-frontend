@@ -13,8 +13,12 @@ export function TopMenu() {
             href: '/'
         },
         {
-            title: 'ثبت درخواست فروش',
-            href: '/sellRequest'
+            title: 'ثبت درخواست جدید',
+            href: '/new-request'
+        },
+        {
+            title: 'سوابق فروش',
+            href: '/history'
         },
         {
             title: 'تعرفه قیمت‌ها',
@@ -23,7 +27,7 @@ export function TopMenu() {
     ]
 
     return (
-        <div className="fixed shadow-custom-elevated rounded-b-[20px] top-0 right-0 left-0 py-2 z-[1000] bg-secondary/100 backdrop-blur supports-[backdrop-filter]:bg-secondary/100">
+        <div className="fixed shadow-custom-elevated rounded-b-[20px] top-0 right-0 left-0 py-2 z-[10000] bg-secondary/100 backdrop-blur supports-[backdrop-filter]:bg-secondary/100">
             <div className="flex items-center justify-between p-4">
                 <div className="flex gap-4">
                     <div className="flex md:hidden">
@@ -31,7 +35,7 @@ export function TopMenu() {
                             <SheetTrigger>
                                 <MenuIcon />
                             </SheetTrigger>
-                            <SheetContent side={'right'} className="pt-24 flex flex-col">
+                            <SheetContent side={'right'} className="pt-24 flex flex-col z-[10000]">
                                 <div className="flex flex-col gap-12">
                                     {
                                         menuItems?.map((item) => (
@@ -48,14 +52,6 @@ export function TopMenu() {
                     <h1 className="text-xl text-white font-bold">برنامه پسماند</h1>
                 </div>
                 <div className="flex items-center gap-2">
-                    {/* <input
-                        type="text"
-                        placeholder="جستجو..."
-                        className="bg-transparent outline-none text-right"
-                    // value={searchQuery}
-                    // onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                    <Search className="h-5 w-5" /> */}
                 </div>
             </div>
         </div>

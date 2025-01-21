@@ -19,7 +19,6 @@ function LocationMarker({ onLocationSelect, selectedLocation }: {
   });
 
   useEffect(() => {
-    // Fix for Leaflet default icon
     const L = require('leaflet');
     delete L.Icon.Default.prototype._getIconUrl;
     L.Icon.Default.mergeOptions({

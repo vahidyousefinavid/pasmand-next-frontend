@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import ReactDatePicker from 'react-multi-date-picker';
 import moment from 'jalali-moment';
-import 'react-multi-date-picker/styles/colors/purple.css'; // You can use other themes/styles too
+import 'react-multi-date-picker/styles/colors/purple.css'; 
 import persian from 'react-date-object/calendars/persian';
 import persian_fa from 'react-date-object/locales/persian_fa';
 import './index.css'
@@ -23,7 +23,7 @@ export default function ThirdStep({ onComplete, onBack }: ThirdStepProps) {
 
   const handleDateChange = (date: any) => {
     if (date) {
-      const persianDate = date.format('YYYY/MM/DD'); // Format to Persian date
+      const persianDate = date.format('YYYY/MM/DD'); 
       setSelectedDate(persianDate);
     } else {
       setSelectedDate('');
@@ -41,9 +41,9 @@ export default function ThirdStep({ onComplete, onBack }: ThirdStepProps) {
           <ReactDatePicker
             value={selectedDate}
             onChange={handleDateChange}
-            locale={persian_fa} // Persian locale
-            calendar={persian} // Use Persian (Jalali) calendar
-            minDate={moment().toDate()} // Disable past dates
+            locale={persian_fa} 
+            calendar={persian} 
+            minDate={moment().toDate()} 
             className="react-date-picker w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             style={{
               display:'flex',
