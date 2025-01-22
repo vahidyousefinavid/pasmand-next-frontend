@@ -23,6 +23,10 @@ export function TopMenu() {
         {
             title: 'تعرفه قیمت‌ها',
             href: '/tariff'
+        },
+        {
+            title: 'آدرس های ثبت شده',
+            href: '/addresses'
         }
     ]
 

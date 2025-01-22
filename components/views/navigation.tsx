@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
-import { Cross, FileClock, Home, LogOut } from "lucide-react";
+import { Banknote, Cross, FileClock, Home, LogOut } from "lucide-react";
 
 export function Navigation() {
     const pathname = usePathname(); // Get the current path
@@ -53,12 +53,12 @@ export function Navigation() {
                         variant="ghost"
                         size="icon"
                         className={`text-background hover:text-secondary-foreground ${
-                            isActive("/login") ? "bg-white text-black" : ""
+                            isActive("/tariff") ? "bg-white text-black" : ""
                         }`}
                         asChild
                     >
-                        <Link href="/login">
-                            <LogOut className="h-6 w-6" />
+                        <Link href="/tariff">
+                            <Banknote className="h-6 w-6" />
                         </Link>
                     </Button>
                 </div>

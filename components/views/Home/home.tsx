@@ -39,7 +39,7 @@ const items = [
         title: 'آدرس ها',
         description: 'آدرس های ثبت شده',
         color: 'text-[hsl(25,84%,48%)]',
-        href:'adresses'
+        href:'addresses'
     },
 ];
 
