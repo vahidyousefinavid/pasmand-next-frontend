@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import ReactDatePicker from 'react-multi-date-picker';
 import moment from 'jalali-moment';
-import 'react-multi-date-picker/styles/colors/purple.css'; 
+import 'react-multi-date-picker/styles/colors/purple.css';
 import persian from 'react-date-object/calendars/persian';
 import persian_fa from 'react-date-object/locales/persian_fa';
 import './index.css'
+import { Loading } from '@/components/ui/loading';
 interface ThirdStepProps {
+  loading: boolean;
   onComplete: (timeSlot: { date: string; time: string }) => void;
   onBack: () => void;
 }
 
-export default function ThirdStep({ onComplete, onBack }: ThirdStepProps) {
+export default function ThirdStep({ onComplete, onBack, loading }: ThirdStepProps) {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
 
@@ -23,7 +25,7 @@ export default function ThirdStep({ onComplete, onBack }: ThirdStepProps) {
 
   const handleDateChange = (date: any) => {
     if (date) {
-      const persianDate = date.format('YYYY/MM/DD'); 
+      const persianDate = date.format('YYYY/MM/DD');
       setSelectedDate(persianDate);
     } else {
       setSelectedDate('');
@@ -41,19 +43,18 @@ export default function ThirdStep({ onComplete, onBack }: ThirdStepProps) {
           <ReactDatePicker
             value={selectedDate}
             onChange={handleDateChange}
-            locale={persian_fa} 
-            calendar={persian} 
-            minDate={moment().toDate()} 
+            locale={persian_fa}
+            calendar={persian}
+            minDate={moment().toDate()}
             className="react-date-picker w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             style={{
-              display:'flex',
-              width:'100%',
-              minHeight:'40px',
-              borderRadius:'10px'
+              display: 'flex',
+              width: '100%',
+              minHeight: '40px',
+              borderRadius: '10px'
             }}
           />
         </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             انتخاب بازه زمانی
@@ -63,11 +64,10 @@ export default function ThirdStep({ onComplete, onBack }: ThirdStepProps) {
               <button
                 key={slot}
                 onClick={() => setSelectedTime(slot)}
-                className={`p-4 rounded-lg border ${
-                  selectedTime === slot
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-gray-200 hover:border-blue-500'
-                }`}
+                className={`p-4 rounded-lg border ${selectedTime === slot
+                  ? 'border-blue-500 bg-blue-50'
+                  : 'border-gray-200 hover:border-blue-500'
+                  }`}
               >
                 {slot}
               </button>
@@ -81,7 +81,8 @@ export default function ThirdStep({ onComplete, onBack }: ThirdStepProps) {
             disabled={!selectedDate || !selectedTime}
             className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           >
-            ثبت درخواست
+
+            {loading ? 'در حال درخواست ...' : 'ثبت درخواست'}
           </button>
           <button
             onClick={onBack}

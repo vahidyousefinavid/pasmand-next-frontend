@@ -1,5 +1,4 @@
-'use client';
-
+"use client"
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Phone } from 'lucide-react';
+import axios from "axios";
+import { API } from '@/services/const';
+import Cookies from 'js-cookie';  
 
 export default function LoginPage() {
   const [verifyCodeStatus, setVerifyCodeStatus] = useState(false);
@@ -48,7 +50,7 @@ export default function LoginPage() {
   const handleSendCode = (e: React.FormEvent) => {
     e.preventDefault();
 
-    let code = generateFourDigitCode()
+    let code = generateFourDigitCode();
 
     var myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
@@ -73,7 +75,7 @@ export default function LoginPage() {
     fetch("https://api.sms.ir/v1/send/verify", requestOptions)
       .then(response => response.text())
       .then(result => {
-        setCode(code)
+        setCode(code);
         setVerifyCodeStatus(true);
         setIsTimerRunning(true);
         setTimer(90);
@@ -95,12 +97,23 @@ export default function LoginPage() {
   const handleVerifyCode = (e: React.FormEvent) => {
     e.preventDefault();
     if (parseInt(enteredCode) === code) {
-      toast({
-        variant: 'success',
-        title: 'موفقیت',
-        description: 'با موفقیت وارد شدید',
-      });
-      router.push('/'); // Navigate to home
+      axios.post(API.SIGN_UP, { phone: `${phone}` })
+        .then((res: any) => {
+          Cookies.set('auth_token', res.data.token, { expires: 1 });  
+          toast({
+            variant: 'success',
+            title: 'موفقیت',
+            description: 'با موفقیت وارد شدید',
+          });
+          router.push('/');
+        }).catch((err) => {
+          toast({
+            variant: 'destructive',
+            title: 'ناموفق',
+            description: 'متاسفانه انجام نشد مجدد تلاش کنید',
+          });
+        });
+
     } else {
       toast({
         variant: 'destructive',
@@ -138,9 +151,9 @@ export default function LoginPage() {
                   type="phone"
                   value={phone}
                   onChange={(e) => {
-                    setPhone(e.target.value)
-                    setVerifyCodeStatus(false)
-                    setEnteredCode('')
+                    setPhone(e.target.value);
+                    setVerifyCodeStatus(false);
+                    setEnteredCode('');
                   }}
                   className="pr-10"
                   required

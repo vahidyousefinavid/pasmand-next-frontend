@@ -4,6 +4,11 @@ import { useState } from "react";
 import FirstStep from "./steps/first";
 import SecondStep from "./steps/second";
 import ThirdStep from "./steps/third";
+import axios from "axios";
+import { API } from "@/services/const";
+import { useToast } from "@/hooks/use-toast";
+import { axiosService } from "@/lib/axiosService";
+import Cookies from 'js-cookie';
 
 interface RequestData {
   wasteType?: string;
@@ -19,8 +24,37 @@ interface RequestData {
 }
 
 export default function NewRequestView() {
+  const { toast } = useToast();
+
+  const [loading, setLoading] = useState(false)
   const [step, setStep] = useState('first');
   const [requestData, setRequestData] = useState<RequestData>({});
+
+  const newRequest = (data: any) => {
+    setLoading(true)
+    axiosService({
+      url: API.NEW_REQUEST,
+      method: 'post',
+      body: data,
+      token: Cookies.get('auth_token')
+    })
+      .then((res: any) => {
+        toast({
+          variant: 'success',
+          title: 'موفقیت',
+          description: 'با موفقیت وارد شدید',
+        });
+        setLoading(false)
+        setStep('success');
+      }).catch((err) => {
+        toast({
+          variant: 'destructive',
+          title: 'ناموفق',
+          description: 'متاسفانه انجام نشد مجدد تلاش کنید',
+        });
+        setLoading(false)
+      })
+  }
 
   const handleWasteTypeSelect = (wasteType: string) => {
     setRequestData({ ...requestData, wasteType });
@@ -34,7 +68,7 @@ export default function NewRequestView() {
 
   const handleTimeSlotSelect = (timeSlot: { date: string; time: string }) => {
     setRequestData({ ...requestData, timeSlot });
-    setStep('success');
+    newRequest({ ...requestData, timeSlot })
   };
 
   const renderContent = (step: string) => {
@@ -51,6 +85,7 @@ export default function NewRequestView() {
       case 'third':
         return (
           <ThirdStep
+            loading={loading}
             onComplete={handleTimeSlotSelect}
             onBack={() => setStep('second')}
           />
@@ -94,21 +129,19 @@ export default function NewRequestView() {
                 className="flex items-center"
               >
                 <div
-                  className={`w-8 h-8 rounded-full bg-[hsl(25,84%,48%)] flex items-center justify-center ${
-                    ['first', 'second', 'third'].indexOf(step) >= index
-                      ? 'bg-[hsl(25,84%,48%)] text-white'
-                      : 'bg-[hsl(25,84%,48%)] text-white'
-                  }`}
+                  className={`w-8 h-8 rounded-full bg-[hsl(25,84%,48%)] flex items-center justify-center ${['first', 'second', 'third'].indexOf(step) >= index
+                    ? 'bg-[hsl(25,84%,48%)] text-white'
+                    : 'bg-[hsl(25,84%,48%)] text-white'
+                    }`}
                 >
                   {index + 1}
                 </div>
                 {index < 2 && (
                   <div
-                    className={`w-12 h-1 mx-2 ${
-                      ['first', 'second', 'third'].indexOf(step) > index
-                        ? 'bg-[hsl(25,84%,48%)]'
-                        : 'bg-gray-200'
-                    }`}
+                    className={`w-12 h-1 mx-2 ${['first', 'second', 'third'].indexOf(step) > index
+                      ? 'bg-[hsl(25,84%,48%)]'
+                      : 'bg-gray-200'
+                      }`}
                   />
                 )}
               </div>
