@@ -42,8 +42,8 @@ export function TopMenu() {
                             <SheetContent side={'right'} className="pt-24 flex flex-col z-[10000]">
                                 <div className="flex flex-col gap-12">
                                     {
-                                        menuItems?.map((item) => (
-                                            <Link href={item?.href} className="font-bold text-xl ">
+                                        menuItems?.map((item, index) => (
+                                            <Link key={index} href={item?.href} className="font-bold text-xl ">
                                                 {item?.title}
                                             </Link>
                                         ))

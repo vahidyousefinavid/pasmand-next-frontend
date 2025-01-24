@@ -18,28 +18,28 @@ const items = [
         title: 'درخواست جمع آوری',
         description: 'درخواست جمع آوری جهت تصفیه و کمک به محیط زیست',
         color: 'text-[hsl(25,84%,48%)]',
-        href:'/new-request'
+        href: '/new-request'
     },
     {
         icon: <Banknote className="h-7 w-7" />,
         title: 'تعرفه قیمت‌ها',
         description: 'قیمت روز تمامی اقلام',
         color: 'text-[hsl(25,84%,48%)]',
-        href:'tariff'
+        href: 'tariff'
     },
     {
         icon: <FileClock className="h-7 w-7" />,
         title: 'سوابق جمع آوری',
         description: ' لیست سوابق درخواست های شما',
         color: 'text-[hsl(25,84%,48%)]',
-        href:'history'
+        href: 'history'
     },
     {
         icon: <MapPinned className="h-7 w-7" />,
         title: 'آدرس ها',
         description: 'آدرس های ثبت شده',
         color: 'text-[hsl(25,84%,48%)]',
-        href:'addresses'
+        href: 'addresses'
     },
 ];
 
@@ -51,7 +51,7 @@ export default function HomeView() {
                 <div className=" p-4">
                     <div className="grid grid-cols-1 md:grid-cols gap-4">
                         {items.map((item, index) => (
-                            <Link href={item?.href}>
+                            <Link key={index} href={item?.href}>
                                 <Card
                                     key={index}
                                     className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border-none cursor-pointer rounded-xl"
