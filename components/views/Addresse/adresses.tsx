@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { MapPin, Plus, X, Home, Building2, Briefcase } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import { LatLng } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 
 // Dynamic import of Map component with no SSR
 const MapWithNoSSR = dynamic(
@@ -66,7 +64,7 @@ export default function AddressesPage() {
     title: '',
     type: 'home' as Address['type'],
     address: '',
-    location: null as LatLng | null
+    location: null as { lat: number; lng: number } | null
   });
   const [suggestions, setSuggestions] = useState<{ display_name: string; lat: string; lon: string }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -98,7 +96,7 @@ export default function AddressesPage() {
     setAddresses(addresses.filter(address => address.id !== id));
   };
 
-  const handleLocationSelect = async (latlng: LatLng) => {
+  const handleLocationSelect = async (latlng: { lat: number; lng: number }) => {
     setNewAddress(prev => ({ ...prev, location: latlng }));
     setLoading(true);
     try {
@@ -137,10 +135,9 @@ export default function AddressesPage() {
   };
 
   const handleSuggestionClick = (suggestion: { display_name: string; lat: string; lon: string }) => {
-    const latlng = new LatLng(parseFloat(suggestion.lat), parseFloat(suggestion.lon));
     setNewAddress(prev => ({
       ...prev,
-      location: latlng,
+      location: { lat: parseFloat(suggestion.lat), lng: parseFloat(suggestion.lon) },
       address: suggestion.display_name
     }));
     setSuggestions([]);

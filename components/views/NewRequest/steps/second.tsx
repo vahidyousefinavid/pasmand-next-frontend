@@ -1,7 +1,5 @@
-
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { LatLng } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const MapWithNoSSR = dynamic(() => import('./map-component'), {
@@ -19,7 +17,7 @@ interface SecondStepProps {
 }
 
 export default function SecondStep({ onNext, onBack }: SecondStepProps) {
-  const [selectedLocation, setSelectedLocation] = useState<LatLng | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [address, setAddress] = useState('');
   const [suggestions, setSuggestions] = useState<
     { display_name: string; lat: string; lon: string }[]
@@ -28,7 +26,7 @@ export default function SecondStep({ onNext, onBack }: SecondStepProps) {
 
   const defaultCenter = { lat: 35.6892, lng: 51.3890 }; // تهران
 
-  const handleLocationSelect = async (latlng: LatLng) => {
+  const handleLocationSelect = async (latlng: { lat: number; lng: number }) => {
     setSelectedLocation(latlng);
     setLoading(true);
     try {
@@ -69,7 +67,7 @@ export default function SecondStep({ onNext, onBack }: SecondStepProps) {
   };
 
   const handleSuggestionClick = (suggestion: { display_name: string; lat: string; lon: string }) => {
-    const latlng = new LatLng(parseFloat(suggestion.lat), parseFloat(suggestion.lon));
+    const latlng = { lat: parseFloat(suggestion.lat), lng: parseFloat(suggestion.lon) }; // Use plain object for lat/lng
     setSelectedLocation(latlng);
     setAddress(suggestion.display_name);
     setSuggestions([]);

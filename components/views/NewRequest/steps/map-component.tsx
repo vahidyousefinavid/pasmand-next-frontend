@@ -1,16 +1,15 @@
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import { LatLng, Icon } from 'leaflet';
 
 interface MapComponentProps {
   center: { lat: number; lng: number };
-  onLocationSelect: (latlng: LatLng) => void;
-  selectedLocation: LatLng | null;
+  onLocationSelect: (latlng: { lat: number; lng: number }) => void;
+  selectedLocation: { lat: number; lng: number } | null;
 }
 
 function LocationMarker({ onLocationSelect, selectedLocation }: { 
-  onLocationSelect: (latlng: LatLng) => void;
-  selectedLocation: LatLng | null;
+  onLocationSelect: (latlng: { lat: number; lng: number }) => void;
+  selectedLocation: { lat: number; lng: number } | null;
 }) {
   const map = useMapEvents({
     click(e) {
