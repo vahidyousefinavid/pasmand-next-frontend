@@ -1,12 +1,16 @@
-'use client'
+'use client';
 
-import { MenuIcon, Search } from "lucide-react";
+import { CircleUser, MenuIcon, LogIn } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import Link from "next/link";
 import { useState } from "react";
+import { useAuth } from "@/context/auth-context";
+import { Button } from "../ui/button";
 
 export function TopMenu() {
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
+    const { isAuthenticated } = useAuth();
+    
     const menuItems = [
         {
             title: 'صفحه اصلی',
@@ -28,11 +32,11 @@ export function TopMenu() {
             title: 'آدرس های ثبت شده',
             href: '/addresses'
         }
-    ]
+    ];
 
     return (
         <div className="fixed shadow-custom-elevated rounded-b-[20px] top-0 right-0 left-0 py-2 z-[10000] bg-secondary/100 backdrop-blur supports-[backdrop-filter]:bg-secondary/100">
-            <div className="flex items-center justify-between p-4">
+            <div className="flex items-center justify-between p-4 text-xl text-white">
                 <div className="flex gap-4">
                     <div className="flex md:hidden">
                         <Sheet open={open} onOpenChange={setOpen}>
@@ -43,7 +47,7 @@ export function TopMenu() {
                                 <div className="flex flex-col gap-12">
                                     {
                                         menuItems?.map((item, index) => (
-                                            <Link key={index} href={item?.href} className="font-bold text-xl ">
+                                            <Link key={index} href={item?.href} className="font-bold text-xl">
                                                 {item?.title}
                                             </Link>
                                         ))
@@ -51,13 +55,24 @@ export function TopMenu() {
                                 </div>
                             </SheetContent>
                         </Sheet>
-
                     </div>
                     <h1 className="text-xl text-white font-bold">برنامه پسماند</h1>
                 </div>
                 <div className="flex items-center gap-2">
+                    {isAuthenticated ? (
+                        <Link href="/profile">
+                            <CircleUser className="cursor-pointer w-7 h-7" />
+                        </Link>
+                    ) : (
+                        <Link href="/login">
+                            <Button variant="ghost" className="text-white gap-2">
+                                <LogIn className="w-5 h-5" />
+                                ورود / ثبت نام
+                            </Button>
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>
-    )
+    );
 }

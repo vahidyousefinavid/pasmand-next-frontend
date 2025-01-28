@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/context/auth-context';
 
 export const metadata: Metadata = {
   title: 'برنامه مدرن',
@@ -16,10 +17,12 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body>
-        <Providers>
-          {children}
-          <Toaster />
-        </Providers>
+        <AuthProvider>
+          <Providers>
+            {children}
+            <Toaster />
+          </Providers>
+        </AuthProvider>
       </body>
     </html>
   );

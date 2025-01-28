@@ -1,4 +1,5 @@
-"use client"
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Phone } from 'lucide-react';
 import axios from "axios";
 import { API } from '@/services/const';
-import Cookies from 'js-cookie';  
+import Cookies from 'js-cookie';
+import { useAuth } from '@/context/auth-context';
 
 export default function LoginPage() {
   const [verifyCodeStatus, setVerifyCodeStatus] = useState(false);
@@ -20,6 +22,7 @@ export default function LoginPage() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const { login } = useAuth();
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -99,7 +102,9 @@ export default function LoginPage() {
     if (parseInt(enteredCode) === code) {
       axios.post(API.SIGN_UP, { phone: `${phone}` })
         .then((res: any) => {
-          Cookies.set('auth_token', res.data.token, { expires: 1 });  
+          const token = res.data.token;
+          Cookies.set('auth_token', token, { expires: 1 });
+          login({ id: res.data.id || '1', phone: phone, token });
           toast({
             variant: 'success',
             title: 'موفقیت',
@@ -113,7 +118,6 @@ export default function LoginPage() {
             description: 'متاسفانه انجام نشد مجدد تلاش کنید',
           });
         });
-
     } else {
       toast({
         variant: 'destructive',
@@ -211,6 +215,6 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
-    </div >
+    </div>
   );
 }
