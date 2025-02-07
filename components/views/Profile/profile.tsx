@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { User, Phone, Mail, Edit2, Camera, Package2, MapPin, Bell, LogOut } from 'lucide-react';
+import Link from 'next/link';
 
 interface UserProfile {
   name: string;
@@ -148,7 +149,7 @@ export default function ProfilePage() {
             </div>
 
             {/* تنظیمات اعلان‌ها */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
+            {/* <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-xl font-bold mb-6">تنظیمات اعلان‌ها</h2>
               <div className="space-y-6">
                 {notifications.map((notification) => (
@@ -169,7 +170,7 @@ export default function ProfilePage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* ستون کناری */}
@@ -194,31 +195,30 @@ export default function ProfilePage() {
               </div>
               <h3 className="font-bold text-lg">{profile.name}</h3>
             </div>
-
-            {/* منوی دسترسی سریع */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
+          </div>
+        </div>
+         {/* منوی دسترسی سریع */}
+         <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="font-bold mb-4">دسترسی سریع</h3>
               <div className="space-y-2">
-                <button className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
+                <Link href={'/history'} className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
                   <Package2 className="w-5 h-5 text-gray-500" />
-                  <span>سفارش‌های من</span>
-                </button>
-                <button className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
+                  <span>درخواست های من</span>
+                </Link>
+                <Link href={'/addresses'} className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
                   <MapPin className="w-5 h-5 text-gray-500" />
                   <span>آدرس‌های من</span>
-                </button>
-                <button className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
+                </Link>
+                {/* <button className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
                   <Bell className="w-5 h-5 text-gray-500" />
                   <span>اعلان‌ها</span>
-                </button>
+                </button> */}
                 <button className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg text-red-500 transition-colors">
                   <LogOut className="w-5 h-5" />
                   <span>خروج از حساب</span>
                 </button>
               </div>
             </div>
-          </div>
-        </div>
       </div>
     </div>
   );
