@@ -1,9 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MapPin, Plus, X, Home, Building2, Briefcase } from 'lucide-react';
 import dynamic from 'next/dynamic';
-
+import { axiosService } from '@/lib/axiosService';
+import { API } from '@/services/const';
+import Cookies from 'js-cookie';
+import { useToast } from '@/hooks/use-toast';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 // Dynamic import of Map component with no SSR
 const MapWithNoSSR = dynamic(
   () => import('@/components/views/NewRequest/steps/map-component'),
@@ -18,7 +22,7 @@ const MapWithNoSSR = dynamic(
 );
 
 interface Address {
-  id: string;
+  _id: string;
   title: string;
   type: 'home' | 'work' | 'other';
   address: string;
@@ -27,23 +31,6 @@ interface Address {
     lng: number;
   };
 }
-
-const mockAddresses: Address[] = [
-  {
-    id: '1',
-    title: 'منزل',
-    type: 'home',
-    address: 'تهران، خیابان ولیعصر، کوچه مهر، پلاک ۱۲',
-    location: { lat: 35.6892, lng: 51.3890 }
-  },
-  {
-    id: '2',
-    title: 'محل کار',
-    type: 'work',
-    address: 'تهران، خیابان شریعتی، کوچه بهار، ساختمان آفتاب',
-    location: { lat: 35.7219, lng: 51.4081 }
-  }
-];
 
 const addressTypeIcons = {
   home: <Home className="w-5 h-5" />,
@@ -58,7 +45,7 @@ const addressTypeLabels = {
 };
 
 export default function AddressesPage() {
-  const [addresses, setAddresses] = useState<Address[]>(mockAddresses);
+  const [addresses, setAddresses] = useState<Address[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newAddress, setNewAddress] = useState({
     title: '',
@@ -69,31 +56,88 @@ export default function AddressesPage() {
   const [suggestions, setSuggestions] = useState<{ display_name: string; lat: string; lon: string }[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const { toast } = useToast();
+
+  const getAddresses = () => {
+    setLoading(true)
+    axiosService({
+      url: API.GET_PROFILE,
+      method: 'get',
+      token: Cookies.get('auth_token')
+    })
+      .then((res: any) => {
+        setAddresses(res?.data?.user?.addresses)
+        setLoading(false)
+      }).catch((err) => {
+        toast({
+          variant: 'destructive',
+          title: 'ناموفق',
+          description: 'متاسفانه انجام نشد صفحه را دوباره بارگزاری کنید',
+        });
+        setLoading(false)
+      })
+  }
+
   const handleAddAddress = () => {
     if (newAddress.title && newAddress.address && newAddress.location) {
-      const address: Address = {
-        id: (addresses.length + 1).toString(),
-        title: newAddress.title,
-        type: newAddress.type,
-        address: newAddress.address,
-        location: {
-          lat: newAddress.location.lat,
-          lng: newAddress.location.lng
-        }
-      };
-      setAddresses([...addresses, address]);
-      setIsModalOpen(false);
-      setNewAddress({
-        title: '',
-        type: 'home',
-        address: '',
-        location: null
-      });
+      try {
+        axiosService({
+          url: API.ADD_ADDRESS,
+          method: 'post',
+          token: Cookies.get('auth_token'),
+          body: {
+            title: newAddress.title,
+            type: newAddress.type,
+            address: newAddress.address,
+            location: newAddress.location
+          }
+        }).then((res) => {
+          setAddresses(res?.data?.addresses)
+          toast({
+            variant: 'success',
+            title: 'موفق',
+            description: 'آدرس جدید با موفقیت اضافه شد.',
+          });
+          setIsModalOpen(false);
+          setNewAddress({
+            title: '',
+            type: 'home',
+            address: '',
+            location: null
+          });
+        })
+      } catch (err) {
+        toast({
+          variant: 'destructive',
+          title: 'خطا',
+          description: 'افزودن آدرس با مشکل مواجه شد. لطفاً دوباره تلاش کنید.',
+        });
+      }
     }
   };
 
   const handleDeleteAddress = (id: string) => {
-    setAddresses(addresses.filter(address => address.id !== id));
+    try {
+      axiosService({
+        url: `${API.DELETE_ADDRESS}?addressId=${id}`,
+        method: 'delete',
+        token: Cookies.get('auth_token')
+      }).then((res) => {
+        setAddresses(res?.data?.addresses)
+        toast({
+          variant: 'success',
+          title: 'موفق',
+          description: 'آدرس با موفقیت حذف شد.',
+        });
+      });
+
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'خطا',
+        description: 'حذف آدرس با مشکل مواجه شد. لطفاً دوباره تلاش کنید.',
+      });
+    }
   };
 
   const handleLocationSelect = async (latlng: { lat: number; lng: number }) => {
@@ -143,6 +187,10 @@ export default function AddressesPage() {
     setSuggestions([]);
   };
 
+  useEffect(() => {
+    getAddresses()
+  }, [])
+
   return (
     <div className="min-h-screen py-24 px-4">
       <div className="max-w-4xl mx-auto">
@@ -159,7 +207,7 @@ export default function AddressesPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {addresses.map((address) => (
-            <div key={address.id} className="bg-white p-6 rounded-lg shadow-md">
+            <div key={address._id} className="bg-white p-6 rounded-lg shadow-md">
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-blue-100 text-blue-600 rounded-full">
@@ -171,7 +219,7 @@ export default function AddressesPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => handleDeleteAddress(address.id)}
+                  onClick={() => handleDeleteAddress(address._id)}
                   className="p-1 hover:bg-gray-100 rounded-full transition-colors"
                 >
                   <X className="w-5 h-5 text-gray-500" />

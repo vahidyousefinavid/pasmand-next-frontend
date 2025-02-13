@@ -7,6 +7,11 @@ import { AuthProvider } from '@/context/auth-context';
 export const metadata: Metadata = {
   title: 'برنامه مدرن',
   description: 'یک برنامه مدرن و زیبا',
+  themeColor: "#00613b",
+  manifest: "/manifest.json",
+  icons: {
+    apple: "/icons/192x192.png",
+  },
 };
 
 export default function RootLayout({

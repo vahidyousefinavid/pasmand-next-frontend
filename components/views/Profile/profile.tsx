@@ -1,14 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { User, Phone, Mail, Edit2, Camera, Package2, MapPin, Bell, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { axiosService } from '@/lib/axiosService';
+import { API } from '@/services/const';
+import Cookies from 'js-cookie';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
-  name: string;
-  phone: string;
-  email: string;
-  avatar?: string;
+  first_name: string
+  last_name: string
+  phone: string
+  email: string
+  description: string
+  has_password: boolean
+  accessible: boolean
+  personalPicture: string
+  addresses: any[]
+  pasmandRequests: any[]
 }
 
 interface NotificationSetting {
@@ -19,9 +29,16 @@ interface NotificationSetting {
 }
 
 const mockProfile: UserProfile = {
-  name: 'علی محمدی',
-  phone: '۰۹۱۲۳۴۵۶۷۸۹',
-  email: 'ali@example.com',
+  first_name: 'کاربر جدید',
+  last_name: '',
+  phone: '',
+  email: '',
+  description: '',
+  has_password: false,
+  accessible: false,
+  personalPicture: '',
+  addresses: [],
+  pasmandRequests: []
 };
 
 const mockNotificationSettings: NotificationSetting[] = [
@@ -48,11 +65,14 @@ const mockNotificationSettings: NotificationSetting[] = [
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile>(mockProfile);
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [editedProfile, setEditedProfile] = useState<UserProfile>(mockProfile);
   const [notifications, setNotifications] = useState<NotificationSetting[]>(mockNotificationSettings);
 
+  const { toast } = useToast();
+
   const handleSaveProfile = () => {
-    setProfile(editedProfile);
+    updateProfile()
     setIsEditing(false);
   };
 
@@ -63,6 +83,51 @@ export default function ProfilePage() {
         : notification
     ));
   };
+
+  const getProfile = () => {
+    setLoading(true)
+    axiosService({
+      url: API.GET_PROFILE,
+      method: 'get',
+      token: Cookies.get('auth_token')
+    })
+      .then((res: any) => {
+        setProfile(res?.data?.user)
+        setLoading(false)
+      }).catch((err) => {
+        toast({
+          variant: 'destructive',
+          title: 'ناموفق',
+          description: 'متاسفانه انجام نشد صفحه را دوباره بارگزاری کنید',
+        });
+        setLoading(false)
+      })
+  }
+
+  const updateProfile = () => {
+    setLoading(true)
+    axiosService({
+      url: API.UPDATE_PROFILE,
+      method: 'put',
+      body: editedProfile,
+      token: Cookies.get('auth_token')
+    })
+      .then((res: any) => {
+        setProfile(res?.data?.user)
+        setLoading(false)
+      }).catch((err) => {
+        toast({
+          variant: 'destructive',
+          title: 'ناموفق',
+          description: 'متاسفانه انجام نشد صفحه را دوباره بارگزاری کنید',
+        });
+        setLoading(false)
+      })
+  }
+
+  useEffect(() => {
+    getProfile()
+  }, [])
 
   return (
     <div className="min-h-screen py-24 px-4">
@@ -87,11 +152,20 @@ export default function ProfilePage() {
               {isEditing ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">نام و نام خانوادگی</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">نام </label>
                     <input
                       type="text"
-                      value={editedProfile.name}
-                      onChange={(e) => setEditedProfile({ ...editedProfile, name: e.target.value })}
+                      value={editedProfile.first_name}
+                      onChange={(e) => setEditedProfile({ ...editedProfile, first_name: e.target.value })}
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">نام خانوادگی </label>
+                    <input
+                      type="text"
+                      value={editedProfile.last_name}
+                      onChange={(e) => setEditedProfile({ ...editedProfile, last_name: e.target.value })}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
                     />
                   </div>
@@ -99,6 +173,7 @@ export default function ProfilePage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">شماره موبایل</label>
                     <input
                       type="tel"
+                      disabled
                       value={editedProfile.phone}
                       onChange={(e) => setEditedProfile({ ...editedProfile, phone: e.target.value })}
                       className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
@@ -134,7 +209,7 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <User className="w-5 h-5 text-gray-500" />
-                    <span>{profile.name}</span>
+                    <span>{(profile.first_name || '') + ' ' + (profile?.last_name || '')}</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Phone className="w-5 h-5 text-gray-500" />
@@ -179,10 +254,10 @@ export default function ProfilePage() {
             <div className="bg-white p-6 rounded-lg shadow-md text-center">
               <div className="relative inline-block">
                 <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-4">
-                  {profile.avatar ? (
+                  {profile.personalPicture ? (
                     <img
-                      src={profile.avatar}
-                      alt={profile.name}
+                      src={profile.personalPicture}
+                      alt={(profile.first_name || '') + ' ' + (profile.last_name || '')}
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
@@ -193,32 +268,32 @@ export default function ProfilePage() {
                   <Camera className="w-4 h-4" />
                 </button>
               </div>
-              <h3 className="font-bold text-lg">{profile.name}</h3>
+              <h3 className="font-bold text-lg">{(profile.first_name || '') + ' ' + (profile.last_name || '')}</h3>
             </div>
           </div>
         </div>
-         {/* منوی دسترسی سریع */}
-         <div className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="font-bold mb-4">دسترسی سریع</h3>
-              <div className="space-y-2">
-                <Link href={'/history'} className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Package2 className="w-5 h-5 text-gray-500" />
-                  <span>درخواست های من</span>
-                </Link>
-                <Link href={'/addresses'} className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
-                  <MapPin className="w-5 h-5 text-gray-500" />
-                  <span>آدرس‌های من</span>
-                </Link>
-                {/* <button className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
+        {/* منوی دسترسی سریع */}
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h3 className="font-bold mb-4">دسترسی سریع</h3>
+          <div className="space-y-2">
+            <Link href={'/history'} className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
+              <Package2 className="w-5 h-5 text-gray-500" />
+              <span>درخواست های من</span>
+            </Link>
+            <Link href={'/addresses'} className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
+              <MapPin className="w-5 h-5 text-gray-500" />
+              <span>آدرس‌های من</span>
+            </Link>
+            {/* <button className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
                   <Bell className="w-5 h-5 text-gray-500" />
                   <span>اعلان‌ها</span>
                 </button> */}
-                <button className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg text-red-500 transition-colors">
-                  <LogOut className="w-5 h-5" />
-                  <span>خروج از حساب</span>
-                </button>
-              </div>
-            </div>
+            <button className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg text-red-500 transition-colors">
+              <LogOut className="w-5 h-5" />
+              <span>خروج از حساب</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

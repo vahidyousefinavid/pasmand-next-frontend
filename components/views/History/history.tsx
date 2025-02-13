@@ -67,8 +67,6 @@ export default function HistoryPage() {
     getRequests()
   }, [])
 
-  console.log('requestsItems:', requestsItems);
-
   const sortedHistory = [...requestsItems].sort((a, b) => {
     const order = sortOrder === 'asc' ? 1 : -1;
     if (sortBy === 'date') {
