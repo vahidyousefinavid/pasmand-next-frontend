@@ -37,7 +37,7 @@ next-env.d.ts
 
 # Ignore PWA service worker
 public/sw.js
-public/sw.js.js
+public/sw.js.map
 public/sw-worker-development.js
 public/workbox-*.js
 public/workbox-*.json
