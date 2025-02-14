@@ -1,5 +1,5 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/auth-context';
@@ -7,11 +7,11 @@ import { AuthProvider } from '@/context/auth-context';
 export const metadata: Metadata = {
   title: 'برنامه مدرن',
   description: 'یک برنامه مدرن و زیبا',
-  themeColor: "#00613b",
   manifest: "/manifest.json",
-  icons: {
-    apple: "/icons/192x192.png",
-  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#00613b",
 };
 
 export default function RootLayout({
