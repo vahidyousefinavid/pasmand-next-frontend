@@ -8,10 +8,44 @@ import { AuthProvider } from '@/context/auth-context';
 //   ? `https://${process.env.VERCEL_URL}`
 //   : "http://localhost:3000"
 
+const APP_NAME = "برنامه شهروند";
+const APP_DEFAULT_TITLE = "برنامه شهروند";
+const APP_TITLE_TEMPLATE = "برنامه شهروند";
+const APP_DESCRIPTION = "برنامه شهروند";
+
 export const metadata: Metadata = {
-  // metadataBase: new URL(defaultUrl),
-  title: 'برنامه مدرن',
-  description: 'یک برنامه مدرن و زیبا',
+  applicationName: APP_NAME,
+  title: {
+    default: APP_DEFAULT_TITLE,
+    template: APP_TITLE_TEMPLATE,
+  },
+  description: APP_DESCRIPTION,
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: APP_DEFAULT_TITLE,
+    // startUpImage: [],
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    siteName: APP_NAME,
+    title: {
+      default: APP_DEFAULT_TITLE,
+      template: APP_TITLE_TEMPLATE,
+    },
+    description: APP_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary",
+    title: {
+      default: APP_DEFAULT_TITLE,
+      template: APP_TITLE_TEMPLATE,
+    },
+    description: APP_DESCRIPTION,
+  },
 };
 
 export const viewport: Viewport = {

@@ -3,9 +3,9 @@
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
   disable: false,
-  aggressiveFrontEndNavCaching: true,
-  cacheOnFrontEndNav: true,
-  reloadOnOnline: true,
+  // aggressiveFrontEndNavCaching: true,
+  // cacheOnFrontEndNav: true,
+  // reloadOnOnline: true,
 });
 
 async function rewrites() {
