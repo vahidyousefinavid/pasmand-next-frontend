@@ -4,10 +4,14 @@ import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/auth-context';
 
+// const defaultUrl = process.env.VERCEL_URL
+//   ? `https://${process.env.VERCEL_URL}`
+//   : "http://localhost:3000"
+
 export const metadata: Metadata = {
+  // metadataBase: new URL(defaultUrl),
   title: 'برنامه مدرن',
   description: 'یک برنامه مدرن و زیبا',
-  manifest: "/manifest.json",
 };
 
 export const viewport: Viewport = {

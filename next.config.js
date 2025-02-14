@@ -19,7 +19,7 @@ async function rewrites() {
 }
 
 const nextConfig = {
-  // output: 'export',
+  output: 'export',
   reactStrictMode: true,
   swcMinify: true,
   compress: true,
@@ -27,7 +27,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  images: { unoptimized: true },
+  // images: { unoptimized: true },
 };
 
 module.exports = withPWA(nextConfig);
