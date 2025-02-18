@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
+import { Input } from '@/components/ui/input';
 
 const MapWithNoSSR = dynamic(() => import('./map-component'), {
   ssr: false,
@@ -23,6 +24,7 @@ export default function SecondStep({ onNext, onBack }: SecondStepProps) {
     { display_name: string; lat: string; lon: string }[]
   >([]);
   const [loading, setLoading] = useState(false);
+  const [geoLocationError, setGeoLocationError] = useState<string>('');
 
   const defaultCenter = { lat: 35.6892, lng: 51.3890 }; // تهران
 
@@ -67,26 +69,84 @@ export default function SecondStep({ onNext, onBack }: SecondStepProps) {
   };
 
   const handleSuggestionClick = (suggestion: { display_name: string; lat: string; lon: string }) => {
-    const latlng = { lat: parseFloat(suggestion.lat), lng: parseFloat(suggestion.lon) }; // Use plain object for lat/lng
+    const latlng = { lat: parseFloat(suggestion.lat), lng: parseFloat(suggestion.lon) };
     setSelectedLocation(latlng);
     setAddress(suggestion.display_name);
     setSuggestions([]);
+  };
+
+  const getCurrentLocation = () => {
+    setGeoLocationError('');
+    setLoading(true);
+    
+    if (!navigator.geolocation) {
+      setGeoLocationError('مرورگر شما از موقعیت‌یابی پشتیبانی نمی‌کند');
+      setLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latlng = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        setSelectedLocation(latlng);
+        await handleLocationSelect(latlng);
+        setLoading(false);
+      },
+      (error) => {
+        let errorMessage = 'خطا در دریافت موقعیت مکانی';
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = 'دسترسی به موقعیت مکانی رد شد';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = 'موقعیت مکانی در دسترس نیست';
+            break;
+          case error.TIMEOUT:
+            errorMessage = 'درخواست موقعیت مکانی با تاخیر مواجه شد';
+            break;
+        }
+        setGeoLocationError(errorMessage);
+        setLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      }
+    );
   };
 
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold text-center mb-8">موقعیت مکانی را انتخاب کنید</h2>
       <div className="bg-white p-6 rounded-lg shadow-lg">
-        <div className="h-[400px] rounded-lg mb-6 overflow-hidden border-2 border-gray-200">
+        <div className="relative h-[400px] rounded-lg mb-6 overflow-hidden border-2 border-gray-200">
           <MapWithNoSSR
             center={defaultCenter}
             onLocationSelect={handleLocationSelect}
             selectedLocation={selectedLocation}
           />
+          <button
+            onClick={getCurrentLocation}
+            className="absolute top-4 left-4 px-4 py-2 bg-white text-blue-600 rounded-lg shadow-md hover:bg-blue-50 transition-colors z-[1000] flex items-center gap-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+            </svg>
+            موقعیت فعلی
+          </button>
         </div>
         <div className="space-y-4">
+          {geoLocationError && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-right">
+              {geoLocationError}
+            </div>
+          )}
           <div className="relative">
-            <input
+            <Input
               type="text"
               value={address}
               onChange={handleAddressChange}

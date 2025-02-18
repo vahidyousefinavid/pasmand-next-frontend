@@ -7,6 +7,7 @@ import { axiosService } from '@/lib/axiosService';
 import { API } from '@/services/const';
 import Cookies from 'js-cookie';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from '@/components/ui/input';
 
 interface UserProfile {
   first_name: string
@@ -153,7 +154,7 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">نام </label>
-                    <input
+                    <Input
                       type="text"
                       value={editedProfile.first_name}
                       onChange={(e) => setEditedProfile({ ...editedProfile, first_name: e.target.value })}
@@ -162,7 +163,7 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">نام خانوادگی </label>
-                    <input
+                    <Input
                       type="text"
                       value={editedProfile.last_name}
                       onChange={(e) => setEditedProfile({ ...editedProfile, last_name: e.target.value })}
@@ -171,7 +172,7 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">شماره موبایل</label>
-                    <input
+                    <Input
                       type="tel"
                       disabled
                       value={editedProfile.phone}
@@ -182,7 +183,7 @@ export default function ProfilePage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">ایمیل</label>
-                    <input
+                    <Input
                       type="email"
                       value={editedProfile.email}
                       onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
@@ -234,7 +235,7 @@ export default function ProfilePage() {
                       <p className="text-sm text-gray-500">{notification.description}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input
+                      <Input
                         type="checkbox"
                         className="sr-only peer"
                         checked={notification.enabled}

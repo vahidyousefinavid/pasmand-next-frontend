@@ -8,6 +8,7 @@ import { API } from '@/services/const';
 import Cookies from 'js-cookie';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Input } from '@/components/ui/input';
 // Dynamic import of Map component with no SSR
 const MapWithNoSSR = dynamic(
   () => import('@/components/views/NewRequest/steps/map-component'),
@@ -253,7 +254,7 @@ export default function AddressesPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       عنوان آدرس
                     </label>
-                    <input
+                    <Input
                       type="text"
                       value={newAddress.title}
                       onChange={(e) => setNewAddress({ ...newAddress, title: e.target.value })}
@@ -301,7 +302,7 @@ export default function AddressesPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       آدرس دقیق
                     </label>
-                    <input
+                    <Input
                       type="text"
                       value={newAddress.address}
                       onChange={handleAddressChange}
