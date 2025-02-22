@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
 import { Input } from '@/components/ui/input';
 
-const MapWithNoSSR = dynamic(() => import('./map-component'), {
+const MapWithNoSSR = dynamic(() => import('./map-component-deprecated'), {
   ssr: false,
   loading: () => (
     <div className="h-[400px] bg-gray-100 rounded-lg flex items-center justify-center">

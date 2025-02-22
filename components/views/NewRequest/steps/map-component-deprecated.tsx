@@ -1,26 +1,10 @@
 import { useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 
 interface MapComponentProps {
   center: { lat: number; lng: number };
   onLocationSelect: (latlng: { lat: number; lng: number }) => void;
   selectedLocation: { lat: number; lng: number } | null;
-}
-
-// This component handles updating the map's center
-function ChangeView({ center, selectedLocation }: { 
-  center: { lat: number; lng: number };
-  selectedLocation: { lat: number; lng: number } | null;
-}) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (selectedLocation) {
-      map.setView([selectedLocation.lat, selectedLocation.lng], map.getZoom());
-    }
-  }, [selectedLocation, map]);
-
-  return null;
 }
 
 function LocationMarker({ onLocationSelect, selectedLocation }: { 
@@ -53,7 +37,6 @@ export default function MapComponent({ center, onLocationSelect, selectedLocatio
       zoom={13}
       style={{ height: '100%', width: '100%' }}
     >
-      <ChangeView center={center} selectedLocation={selectedLocation} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

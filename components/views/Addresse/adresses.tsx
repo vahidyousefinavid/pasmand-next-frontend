@@ -11,7 +11,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Input } from '@/components/ui/input';
 // Dynamic import of Map component with no SSR
 const MapWithNoSSR = dynamic(
-  () => import('@/components/views/NewRequest/steps/map-component'),
+  () => import('@/components/views/NewRequest/steps/map-component-deprecated'),
   {
     ssr: false,
     loading: () => (
