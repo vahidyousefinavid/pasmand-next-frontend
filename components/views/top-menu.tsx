@@ -6,11 +6,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
 import { Button } from "../ui/button";
+import InstallButton from "./InstallButton";
 
 export function TopMenu() {
     const [open, setOpen] = useState(false);
     const { isAuthenticated } = useAuth();
-    
+
     const menuItems = [
         {
             title: 'صفحه اصلی',
@@ -52,6 +53,7 @@ export function TopMenu() {
                                             </Link>
                                         ))
                                     }
+                                    <InstallButton />
                                 </div>
                             </SheetContent>
                         </Sheet>
