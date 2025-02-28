@@ -140,7 +140,11 @@ export default function LoginPage() {
 
     if (enteredCode.length !== 4 || enteredCode !== code?.toString()) {
       setLoading(false);
-      setCodeError('کد تایید اشتباه است');
+      toast({
+        variant: 'destructive',
+        title: 'خطا',
+        description: 'کد تایید اشتباه است',
+      });
       return;
     }
 
