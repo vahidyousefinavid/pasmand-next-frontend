@@ -22,6 +22,8 @@ export default function LoginPage() {
   const [enteredCode, setEnteredCode] = useState('');
   const [timer, setTimer] = useState(90);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+  const [codeError, setCodeError] = useState('');
   const router = useRouter();
   const { toast } = useToast();
   const { login } = useAuth();
@@ -51,6 +53,37 @@ export default function LoginPage() {
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, ''); // فقط عدد
+    setPhone(value);
+    setVerifyCodeStatus(false);
+    setEnteredCode('');
+
+    if (/^09\d{9}$/.test(value) || value === '') {
+      setPhoneError('');
+    } else {
+      setPhoneError('شماره موبایل معتبر نیست');
+    }
+  };
+
+  const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  console.log( e.target.value);
+  
+    const value = e.target.value.replace(/\D/g, ''); // حذف کاراکترهای غیر عددی
+  
+    if (value.length <= 4) {
+      setEnteredCode(value);
+    }
+  
+    if (value.length === 4) {
+      setCodeError('');
+    } else if (value.length > 0) {
+      setCodeError('کد تایید باید ۴ رقم باشد');
+    } else {
+      setCodeError('');
+    }
+  };
 
   const handleSendCode = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,7 +129,7 @@ export default function LoginPage() {
         toast({
           variant: 'destructive',
           title: 'متاسفانه انجام نشد',
-          description: 'لطفاً کد تایید را مجدد دریافت کنید',
+          description: 'ارسال کد تایید ناموفق بود، دوباره تلاش کنید',
         });
       });
   };
@@ -104,7 +137,14 @@ export default function LoginPage() {
   const handleVerifyCode = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true)
-    if (parseInt(enteredCode) === code) {
+
+    if (enteredCode.length !== 4 || enteredCode !== code?.toString()) {
+      setLoading(false);
+      setCodeError('کد تایید اشتباه است');
+      return;
+    }
+
+    if (enteredCode === code?.toString()) {
       axios.post(API.SIGN_UP, { phone: `${phone}` })
         .then((res: any) => {
           setLoading(false)
@@ -160,33 +200,34 @@ export default function LoginPage() {
                 <Input
                   id="phone"
                   placeholder="شماره همراه خود را وارد کنید"
-                  type="phone"
+                  type="tel"
                   value={phone}
                   disabled={loading || verifyCodeStatus}
-                  onChange={(e) => {
-                    setPhone(e.target.value);
-                    setVerifyCodeStatus(false);
-                    setEnteredCode('');
-                  }}
+                  onChange={handlePhoneChange}
                   className="pr-10"
                   required
                 />
               </div>
+              {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
             </div>
             {verifyCodeStatus && (
               <div className="space-y-2">
-                <Label htmlFor="code">کد تایید</Label>
-                <Input
-                  id="code"
-                  placeholder="کد تایید را وارد کنید"
-                  type="number"
-                  lang='en'
-                  value={enteredCode}
-                  disabled={loading}
-                  onChange={(e) => setEnteredCode(e.target.value)}
-                  className="pr-10"
-                  required
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="code">کد تایید</Label>
+                  <Input
+                    id="code"
+                    placeholder="کد تایید را وارد کنید"
+                    type="text"
+                    maxLength={4}
+                    lang="en"
+                    value={enteredCode}
+                    disabled={loading}
+                    onChange={handleCodeChange}
+                    className="pr-10"
+                    required
+                  />
+                  {/* {codeError && <p className="text-red-500 text-sm">{codeError}</p>} */}
+                </div>
                 {timer > 0 && <div className="text-sm text-muted-foreground">
                   <div className="text-sm text-muted-foreground text-center py-4 px-2">
                     {timer > 0
@@ -198,7 +239,7 @@ export default function LoginPage() {
             )}
             {!verifyCodeStatus && (
               <Button
-                disabled={loading}
+                disabled={loading || phone.length !== 11 || !!phoneError}
                 onClick={handleSendCode}
                 variant={'secondary'}
                 className="w-full bg-secondary text-background"
@@ -210,7 +251,7 @@ export default function LoginPage() {
             )}
             {verifyCodeStatus && timer === 0 && (
               <Button
-                disabled={loading}
+                disabled={loading }
                 onClick={handleSendCode}
                 variant={'secondary'}
                 className="w-full bg-secondary text-background"
@@ -222,7 +263,7 @@ export default function LoginPage() {
             )}
             {verifyCodeStatus && (
               <Button
-                disabled={loading}
+                disabled={loading || enteredCode.length !== 4 || !!codeError}
                 onClick={handleVerifyCode}
                 variant={'secondary'}
                 className="w-full bg-secondary text-background"
