@@ -179,7 +179,8 @@ export default function LoginPage() {
                 <Input
                   id="code"
                   placeholder="کد تایید را وارد کنید"
-                  type="text"
+                  type="number"
+                  lang='en'
                   value={enteredCode}
                   disabled={loading}
                   onChange={(e) => setEnteredCode(e.target.value)}
