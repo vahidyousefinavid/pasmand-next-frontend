@@ -1,17 +1,23 @@
 import { useEffect, useState } from "react";
 
 export function usePWA() {
-  const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState(
+    typeof window !== "undefined" ? JSON.parse(localStorage.getItem("deferredPrompt") as any) : null
+  );
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault(); // جلوگیری از نمایش خودکار دیالوگ نصب
+    const handleBeforeInstallPrompt = (event:any) => {
+      event.preventDefault();
+      console.log("beforeinstallprompt event fired");
       setDeferredPrompt(event);
+      localStorage.setItem("deferredPrompt", JSON.stringify(true)); // ذخیره در localStorage
     };
 
     const handleAppInstalled = () => {
+      console.log("PWA installed");
       setIsInstalled(true);
+      localStorage.removeItem("deferredPrompt"); // پاک کردن از localStorage بعد از نصب
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -25,10 +31,18 @@ export function usePWA() {
 
   const installPWA = () => {
     if (deferredPrompt) {
-      (deferredPrompt as any).prompt();
-      (deferredPrompt as any).userChoice.then(() => setDeferredPrompt(null));
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult:any) => {
+        if (choiceResult.outcome === "accepted") {
+          console.log("User accepted PWA install");
+        } else {
+          console.log("User dismissed PWA install");
+        }
+        setDeferredPrompt(null);
+        localStorage.removeItem("deferredPrompt");
+      });
     }
   };
 
-  return { installPWA, isInstalled, deferredPrompt };
+  return { installPWA, deferredPrompt, isInstalled };
 }

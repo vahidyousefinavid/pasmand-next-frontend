@@ -5,7 +5,7 @@ import { usePWA } from "@/hooks/usePWA";
 export default function InstallButton() {
   const { installPWA, deferredPrompt, isInstalled } = usePWA();
 
-  // if (isInstalled || !deferredPrompt) return null; 
+  if (isInstalled || !deferredPrompt) return null; // اگر نصب شده یا امکان نصب نیست، دکمه نمایش داده نشود.
 
   return (
     <button 
