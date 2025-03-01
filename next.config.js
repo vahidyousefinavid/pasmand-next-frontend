@@ -1,11 +1,12 @@
 /** @type {import('next').NextConfig} */
 
-const withPWA = require("next-pwa").default({
+const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
-  disable: false,
-  // aggressiveFrontEndNavCaching: true,
-  // cacheOnFrontEndNav: true,
-  // reloadOnOnline: true,
+  // disable: false,
+  aggressiveFrontEndNavCaching: true,
+  cacheOnFrontEndNav: true,
+  reloadOnOnline: true,
+  
 });
 
 async function rewrites() {
