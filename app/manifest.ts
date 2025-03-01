@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: "شهروند",
         description: "برنامه شهروند",
         start_url: "/",
-        display: "standalone",
+        display: "fullscreen",
         orientation: "portrait",
         background_color: "#ffffff",
         theme_color: "#00613b",
