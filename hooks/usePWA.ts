@@ -1,31 +1,39 @@
 import { useEffect, useState } from "react";
 
 export function usePWA() {
-  const [deferredPrompt, setDeferredPrompt] = useState(
-    typeof window !== "undefined" ? JSON.parse(localStorage.getItem("deferredPrompt") as any) : null
-  );
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
+    const checkInstalled = () => {
+      if (window.matchMedia("(display-mode: standalone)").matches) {
+        setIsInstalled(true);
+      } else {
+        setIsInstalled(false);
+      }
+    };
+
     const handleBeforeInstallPrompt = (event:any) => {
       event.preventDefault();
-      console.log("beforeinstallprompt event fired");
       setDeferredPrompt(event);
-      localStorage.setItem("deferredPrompt", JSON.stringify(true)); // ذخیره در localStorage
+      localStorage.setItem("deferredPrompt", JSON.stringify(true));
     };
 
     const handleAppInstalled = () => {
-      console.log("PWA installed");
       setIsInstalled(true);
-      localStorage.removeItem("deferredPrompt"); // پاک کردن از localStorage بعد از نصب
+      localStorage.removeItem("deferredPrompt");
     };
 
+    // بررسی نصب برنامه
+    checkInstalled();
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
+    window.addEventListener("visibilitychange", checkInstalled);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
+      window.removeEventListener("visibilitychange", checkInstalled);
     };
   }, []);
 
