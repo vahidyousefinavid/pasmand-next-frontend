@@ -3,10 +3,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContextType, User, AuthState } from '@/lib/types/auth';
 import Cookies from 'js-cookie';
+import { useRouter } from 'next/navigation';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
@@ -32,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     Cookies.remove('auth_token');
     localStorage.removeItem('user');
     setAuthState({ user: null, isAuthenticated: false });
+    router.push('/login')
   };
 
   return (

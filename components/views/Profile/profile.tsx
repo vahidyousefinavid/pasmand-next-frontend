@@ -8,6 +8,7 @@ import { API } from '@/services/const';
 import Cookies from 'js-cookie';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/context/auth-context';
 
 interface UserProfile {
   first_name: string
@@ -70,6 +71,7 @@ export default function ProfilePage() {
   const [editedProfile, setEditedProfile] = useState<UserProfile>(mockProfile);
   const [notifications, setNotifications] = useState<NotificationSetting[]>(mockNotificationSettings);
 
+  const { logout } = useAuth()
   const { toast } = useToast();
 
   const handleSaveProfile = () => {
@@ -289,7 +291,11 @@ export default function ProfilePage() {
                   <Bell className="w-5 h-5 text-gray-500" />
                   <span>اعلان‌ها</span>
                 </button> */}
-            <button className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg text-red-500 transition-colors">
+            <button
+              onClick={() => {
+                logout()
+              }}
+              className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg text-red-500 transition-colors">
               <LogOut className="w-5 h-5" />
               <span>خروج از حساب</span>
             </button>
