@@ -249,10 +249,10 @@ export default function HomeView() {
                     </Swiper>
                 )}
             </div>
-            <div className="p-4 md:p-6">
+            <div className="p-4 md:p-6 ">
                 <motion.div
                     dir="rtl"
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-20"
                     variants={containerVariants}
                     initial="hidden"
                     animate="visible"
