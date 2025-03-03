@@ -249,39 +249,37 @@ export default function HomeView() {
                     </Swiper>
                 )}
             </div>
-
-            {/* <ScrollArea className="h-[calc(100vh-12rem)] mb-16 rtl overflow-hidden"> */}
-                <div className="p-4 md:p-6">
-                    <motion.div
+            <div className="p-4 md:p-6">
+                <motion.div
                     dir="rtl"
-                        className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 rtl overflow-hidden"
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
-                    >
-                        {items.map((item, index) => (
-                            <motion.div key={index} variants={itemVariants}>
-                                <Link href={item?.href}>
-                                    <Card
-                                        className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border-none cursor-pointer rounded-xl group"
-                                    >
-                                        <CardContent className="p-6">
-                                            <div className="flex justify-end items-center space-x-4">
-                                                <div className="space-y-2 flex-1">
-                                                    <h3 className="font-medium text-lg leading-none group-hover:text-[hsl(25,84%,48%)] transition-colors duration-300">{item.title}</h3>
-                                                    <p className="text-sm text-muted-foreground">{item.description}</p>
-                                                </div>
-                                                <div className={`p-3 rounded-xl ${item.bgColor} ${item.color} group-hover:scale-110 transition-transform duration-300`}>
-                                                    {item.icon}
-                                                </div>
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
+                    {items.map((item, index) => (
+                        <motion.div key={index} variants={itemVariants}>
+                            <Link href={item?.href}>
+                                <Card
+                                    className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border-none cursor-pointer rounded-xl group"
+                                >
+                                    <CardContent className="p-6">
+                                        <div className="flex justify-start items-center space-x-4">
+                                            <div className="space-y-2 flex-1">
+                                                <h3 className="font-medium text-lg leading-none group-hover:text-[hsl(25,84%,48%)] transition-colors duration-300">{item.title}</h3>
+                                                <p className="text-sm text-muted-foreground">{item.description}</p>
                                             </div>
-                                        </CardContent>
-                                    </Card>
-                                </Link>
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                </div>
+                                            <div className={`p-3 rounded-xl ${item.bgColor} ${item.color} group-hover:scale-110 transition-transform duration-300`}>
+                                                {item.icon}
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </Link>
+                        </motion.div>
+                    ))}
+                </motion.div>
+            </div>
             {/* </ScrollArea> */}
             <Navigation />
         </div>
