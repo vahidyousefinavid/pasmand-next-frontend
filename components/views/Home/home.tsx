@@ -250,11 +250,11 @@ export default function HomeView() {
                 )}
             </div>
 
-            <ScrollArea className="h-[calc(100vh-12rem)] mb-16 rtl">
+            {/* <ScrollArea className="h-[calc(100vh-12rem)] mb-16 rtl overflow-hidden"> */}
                 <div className="p-4 md:p-6">
                     <motion.div
                     dir="rtl"
-                        className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 rtl "
+                        className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 rtl overflow-hidden"
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
@@ -282,7 +282,7 @@ export default function HomeView() {
                         ))}
                     </motion.div>
                 </div>
-            </ScrollArea>
+            {/* </ScrollArea> */}
             <Navigation />
         </div>
     );
