@@ -13,7 +13,8 @@ import {
     Leaf,
     Gift,
     Recycle,
-    ArrowUpRight
+    ArrowUpRight,
+    Wallet
 } from 'lucide-react';
 import { Navigation } from '@/components/views/navigation';
 import { TopMenu } from '@/components/views/top-menu';
@@ -27,6 +28,7 @@ import 'swiper/css/effect-fade';
 import 'swiper/css/effect-creative';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useAuth } from '@/context/auth-context';
 
 const items = [
     {
@@ -36,6 +38,14 @@ const items = [
         color: 'text-[hsl(25,84%,48%)]',
         bgColor: 'bg-[hsl(25,84%,48%)]/10',
         href: '/new-request'
+    },
+    {
+        icon: <Wallet className="h-7 w-7" />,
+        title: 'کیف پول',
+        description: 'خدمات مالی شما',
+        color: 'text-[hsl(25,84%,48%)]',
+        bgColor: 'bg-[hsl(25,84%,48%)]/10',
+        href: 'wallet'
     },
     {
         icon: <Banknote className="h-7 w-7" />,
@@ -129,10 +139,12 @@ const itemVariants = {
 export default function HomeView() {
     const [mounted, setMounted] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
-
+    const { user } = useAuth()
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    console.log(user);
 
     return (
         <div className="min-h-screen bg-background">

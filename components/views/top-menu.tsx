@@ -32,6 +32,10 @@ export function TopMenu() {
         {
             title: 'آدرس های ثبت شده',
             href: '/addresses'
+        },
+        {
+            title: 'کیف پول',
+            href: '/wallet'
         }
     ];
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
-import { Banknote, Cross, FileClock, Home, LogOut } from "lucide-react";
+import { Banknote, Cross, FileClock, Home, LogOut, Wallet } from "lucide-react";
 
 export function Navigation() {
     const pathname = usePathname(); // Get the current path
@@ -57,8 +57,8 @@ export function Navigation() {
                         }`}
                         asChild
                     >
-                        <Link href="/tariff">
-                            <Banknote className="h-6 w-6" />
+                        <Link href="/wallet">
+                            <Wallet className="h-6 w-6" />
                         </Link>
                     </Button>
                 </div>
