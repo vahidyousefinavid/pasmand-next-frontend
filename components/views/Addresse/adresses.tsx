@@ -7,15 +7,14 @@ import { axiosService } from '@/lib/axiosService';
 import { API } from '@/services/const';
 import Cookies from 'js-cookie';
 import { useToast } from '@/hooks/use-toast';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { Input } from '@/components/ui/input';
 // Dynamic import of Map component with no SSR
 const MapWithNoSSR = dynamic(
-  () => import('@/components/views/NewRequest/steps/map-component-deprecated'),
+  () => import('@/components/views/Components/map'),
   {
     ssr: false,
     loading: () => (
-      <div className="h-[400px] bg-gray-100 rounded-lg flex items-center justify-center">
+      <div className="h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
         در حال بارگذاری نقشه...
       </div>
     )

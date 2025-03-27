@@ -1,0 +1,55 @@
+.carouselWrapper {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.slick-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slick-slide img {
+    width: 100%;
+    height: auto;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    object-fit: cover;
+}
+
+.slick-prev,
+.slick-next {
+    z-index: 10;
+}
+
+.slick-prev {
+    left: 15px;
+}
+
+.slick-next {
+    right: 15px;
+}
+
+.slick-slide {
+    opacity: 0.5;
+}
+
+.slick-active {
+    opacity: 1;
+}
+
+.slick-track {
+    display: flex;
+    transition: transform 0.3s ease;
+}
+
+.city-icons-carousel {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.city-icon img {
+    object-fit: contain;
+    margin: 0 auto;
+}

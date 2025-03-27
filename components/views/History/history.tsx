@@ -21,7 +21,7 @@ interface HistoryItem {
     description: string;
     _id: string;
   }[];
-  status: 'pending' | 'collecting' | 'completed' | 'cancelled';
+  status: 'pending' | 'collecting' | 'completed' | 'canceled';
   totalPrice: number;
   location: {
     address: string;
@@ -43,7 +43,7 @@ const statusMap = {
   pending: { label: 'در انتظار تایید', color: 'bg-yellow-100 text-yellow-800' },
   collecting: { label: 'در حال جمع‌آوری', color: 'bg-blue-100 text-blue-800' },
   completed: { label: 'تکمیل شده', color: 'bg-green-100 text-green-800' },
-  cancelled: { label: 'لغو شده', color: 'bg-red-100 text-red-800' }
+  canceled: { label: 'لغو شده', color: 'bg-red-100 text-red-800' }
 };
 
 const ItemsSkeleton = () => (
@@ -129,7 +129,7 @@ export default function HistoryPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [loading, setLoading] = useState(true);
   const [requestsItems, setRequestsItems] = useState<HistoryItem[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState<'all' | 'pending' | 'collecting' | 'completed' | 'cancelled'>('all');
+  const [selectedStatus, setSelectedStatus] = useState<'all' | 'pending' | 'collecting' | 'completed' | 'canceled'>('all');
 
   const formatPrice = (price: number) => {
     return price?.toLocaleString('fa-IR');
