@@ -1,32 +1,78 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Phone } from 'lucide-react';
+import { Phone, Leaf, X, Building2, MapPin } from 'lucide-react';
 import axios from "axios";
 import { API } from '@/services/const';
 import Cookies from 'js-cookie';
 import { useAuth } from '@/context/auth-context';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const cities = [
+  { id: 'nahavand', name: 'نهاوند', icon: '/img/cities/icons/nahavand.png' },
+];
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [verifyCodeStatus, setVerifyCodeStatus] = useState(false);
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState<number>();
-  const [enteredCode, setEnteredCode] = useState('');
+  const [enteredCode, setEnteredCode] = useState(['', '', '', '']);
   const [timer, setTimer] = useState(90);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [phoneError, setPhoneError] = useState('');
   const [codeError, setCodeError] = useState('');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [selectedCity, setSelectedCity] = useState('');
+  const [showCitySelect, setShowCitySelect] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [welcomeMessage, setWelcomeMessage] = useState('');
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
   const { toast } = useToast();
   const { login } = useAuth();
+
+  useEffect(() => {
+    const checkLocalStorage = () => {
+      const savedCity = localStorage.getItem('selectedCity');
+      const savedPhone = localStorage.getItem('userPhone');
+
+      if (savedCity) {
+        setSelectedCity(savedCity);
+        setShowCitySelect(false);
+        const cityData = cities.find(city => city.id === savedCity);
+        if (cityData) {
+          setWelcomeMessage(`به سامانه مدیریت پسماند ${cityData.name} خوش آمدید`);
+        }
+      }
+
+      if (savedPhone) {
+        setPhone(savedPhone);
+        setWelcomeMessage(prev =>
+          prev ? `${prev}\nشماره همراه شما: ${savedPhone}` : `شماره همراه شما: ${savedPhone}`
+        );
+      }
+
+      setTimeout(() => {
+        setShowWelcome(false);
+      }, 3000);
+    };
+
+    checkLocalStorage();
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
@@ -55,10 +101,10 @@ export default function LoginPage() {
   }
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, ''); // فقط عدد
+    const value = e.target.value.replace(/\D/g, '');
     setPhone(value);
     setVerifyCodeStatus(false);
-    setEnteredCode('');
+    setEnteredCode(['', '', '', '']);
 
     if (/^09\d{9}$/.test(value) || value === '') {
       setPhoneError('');
@@ -67,27 +113,33 @@ export default function LoginPage() {
     }
   };
 
-  const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  console.log( e.target.value);
-  
-    const value = e.target.value.replace(/\D/g, ''); // حذف کاراکترهای غیر عددی
-  
-    if (value.length <= 4) {
-      setEnteredCode(value);
+  const handleCodeChange = (value: string, index: number) => {
+    if (value.length <= 1 && /^\d*$/.test(value)) {
+      const newCode = [...enteredCode];
+      newCode[index] = value;
+      setEnteredCode(newCode);
+
+      if (value !== '' && index < 3) {
+        inputRefs.current[index + 1]?.focus();
+      }
     }
-  
-    if (value.length === 4) {
-      setCodeError('');
-    } else if (value.length > 0) {
-      setCodeError('کد تایید باید ۴ رقم باشد');
-    } else {
-      setCodeError('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
+    if (e.key === 'Backspace' && !enteredCode[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
     }
+  };
+
+  const handleCitySelect = (value: string) => {
+    setSelectedCity(value);
+    localStorage.setItem('selectedCity', value);
+    setShowCitySelect(false);
   };
 
   const handleSendCode = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
     let code = generateFourDigitCode();
 
     var myHeaders = new Headers();
@@ -113,7 +165,7 @@ export default function LoginPage() {
     fetch("https://api.sms.ir/v1/send/verify", requestOptions)
       .then(response => response.text())
       .then(result => {
-        setLoading(false)
+        setLoading(false);
         setCode(code);
         setVerifyCodeStatus(true);
         setIsTimerRunning(true);
@@ -125,7 +177,7 @@ export default function LoginPage() {
         });
       })
       .catch(error => {
-        setLoading(false)
+        setLoading(false);
         toast({
           variant: 'destructive',
           title: 'متاسفانه انجام نشد',
@@ -136,9 +188,10 @@ export default function LoginPage() {
 
   const handleVerifyCode = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true)
+    const combinedCode = enteredCode.join('');
+    setLoading(true);
 
-    if (enteredCode.length !== 4 || enteredCode !== code?.toString()) {
+    if (combinedCode.length !== 4 || combinedCode !== code?.toString()) {
       setLoading(false);
       toast({
         variant: 'destructive',
@@ -148,12 +201,13 @@ export default function LoginPage() {
       return;
     }
 
-    if (enteredCode === code?.toString()) {
+    if (combinedCode === code?.toString()) {
       axios.post(API.SIGN_UP, { phone: `${phone}` })
         .then((res: any) => {
-          setLoading(false)
+          setLoading(false);
           const token = res.data.token;
           Cookies.set('auth_token', token, { expires: 1 });
+          localStorage.setItem('userPhone', phone);
           login({ id: res.data.id || '1', phone: phone, token });
           toast({
             variant: 'success',
@@ -162,124 +216,227 @@ export default function LoginPage() {
           });
           router.push('/');
         }).catch((err) => {
-          setLoading(false)
+          setLoading(false);
           toast({
             variant: 'destructive',
             title: 'ناموفق',
             description: 'متاسفانه انجام نشد مجدد تلاش کنید',
           });
         });
-    } else {
-      setLoading(false)
-      toast({
-        variant: 'destructive',
-        title: 'خطا',
-        description: 'کد تایید اشتباه است',
-      });
     }
   };
 
+  const selectedCityData = cities.find(city => city.id === selectedCity);
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-      <div className="text-2xl font-bold">شهروند (جمع آوری پسماند)</div>
-      <div className="flex h-[35vh] md:h-[40vh] max-w-[450px] md:w-[450px] overflow-hidden rounded-lg">
-        <img
-          src="/img/re.jpg"
-          alt="Construction Hero"
-          className="object-cover h-full w-full"
-        />
-      </div>
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">
-            زندگی سالم در محیط سالم
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="phone">شماره همراه</Label>
-              <div className="relative">
-                <Phone className="absolute right-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="phone"
-                  placeholder="شماره همراه خود را وارد کنید"
-                  type="tel"
-                  value={phone}
-                  disabled={loading || verifyCodeStatus}
-                  onChange={handlePhoneChange}
-                  className="pr-10"
-                  required
+    <div
+      className="min-h-screen w-full relative overflow-hidden bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: `url('https://images.unsplash.com/photo-1493246507139-91e8fad9978e?q=80&w=2940&auto=format&fit=crop')`
+      }}
+    >
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+
+      {/* <AnimatePresence>
+        {showWelcome && welcomeMessage && (
+          <motion.div
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-secondary/100 text-white px-6 py-3 rounded-full shadow-lg"
+          >
+            <div className="flex items-center gap-2">
+              <MapPin className="w-5 h-5" />
+              <span className="text-lg font-medium whitespace-pre-line text-center">
+                {welcomeMessage}
+              </span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence> */}
+
+      <div className="relative z-10 w-full h-full min-h-screen flex flex-col items-center justify-between p-6">
+        <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="bg-white/10 backdrop-blur-md p-3 rounded-full">
+              <Leaf className="w-8 h-8 text-green-400" />
+            </div>
+            {selectedCityData && (
+              <div className="bg-white/10 backdrop-blur-md p-3 rounded-full">
+                <img
+                  src={selectedCityData.icon}
+                  alt={selectedCityData.name}
+                  className="w-8 h-8 rounded-full object-cover"
                 />
               </div>
-              {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
+            )}
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-white">شهروند سبز</h1>
+              <p className="text-green-200 text-sm md:text-base">
+                {selectedCityData ? `شهرداری ${selectedCityData.name}` : 'مدیریت هوشمند پسماند'}
+              </p>
             </div>
-            {verifyCodeStatus && (
-              <div className="space-y-2">
-                <div className="space-y-2">
-                  <Label htmlFor="code">کد تایید</Label>
-                  <Input
-                    id="code"
-                    placeholder="کد تایید را وارد کنید"
-                    type="number"
-                    maxLength={4}
-                    lang="en"
-                    value={enteredCode}
-                    disabled={loading}
-                    onChange={handleCodeChange}
-                    className="pr-10"
-                    required
-                  />
-                  {/* {codeError && <p className="text-red-500 text-sm">{codeError}</p>} */}
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-8 my-auto">
+          <div className="text-center space-y-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-white">
+              برای زمینی پاک‌تر
+            </h2>
+            <p className="text-lg md:text-xl text-green-100">
+              با مدیریت هوشمند پسماند، به حفظ محیط زیست کمک کنید
+            </p>
+          </div>
+          <Button
+            onClick={() => setIsDrawerOpen(true)}
+            className="bg-secondary/100 hover:bg-secondary/200 text-white px-8 py-6 text-lg rounded-full transition-all duration-300 hover:scale-105"
+          >
+            شروع کنید
+          </Button>
+        </div>
+
+        <div className="w-full max-w-7xl mx-auto text-center">
+          <p className="text-white/60">با همکاری سازمان مدیریت پسماند شهرداری</p>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {isDrawerOpen && (
+          <motion.div
+            dir="rtl"
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[2rem] shadow-2xl z-50"
+          >
+            <div className="relative w-full max-w-2xl mx-auto p-6">
+              <button
+                onClick={() => setIsDrawerOpen(false)}
+                className="absolute top-6 left-6 p-2 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <X className="w-6 h-6 text-gray-500" />
+              </button>
+
+              <div className="space-y-6">
+                <div className="text-center">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {showCitySelect
+                      ? 'انتخاب شهر'
+                      : verifyCodeStatus
+                        ? 'تایید شماره همراه'
+                        : 'ورود به حساب کاربری'}
+                  </h3>
+                  <p className="mt-2 text-gray-600">
+                    {showCitySelect
+                      ? 'لطفا شهر خود را انتخاب کنید'
+                      : verifyCodeStatus
+                        ? 'کد تایید ارسال شده را وارد کنید'
+                        : 'لطفا شماره همراه خود را وارد کنید'}
+                  </p>
                 </div>
-                {timer > 0 && <div className="text-sm text-muted-foreground">
-                  <div className="text-sm text-muted-foreground text-center py-4 px-2">
-                    {timer > 0
-                      ? ` ${formatTimer(timer)} دقیقه دیگر کد را مجدد دریافت کنید.`
-                      : ''}
-                  </div>
-                </div>}
+
+                <form className="space-y-4">
+                  {showCitySelect ? (
+                    <div className="space-y-4">
+                      <Label htmlFor="city" className="text-gray-700">شهر</Label>
+                      <Select onValueChange={handleCitySelect}>
+                        <SelectTrigger className="w-full h-14 text-lg" dir="rtl">
+                          <SelectValue placeholder="شهر خود را انتخاب کنید" />
+                        </SelectTrigger>
+                        <SelectContent dir="rtl">
+                          {cities.map((city) => (
+                            <SelectItem key={city.id} value={city.id}>
+                              <div className="flex items-center gap-2">
+                                <Building2 className="w-4 h-4" />
+                                <span>{city.name}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ) : !verifyCodeStatus ? (
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-gray-700">شماره همراه</Label>
+                      <div className="relative">
+                        <Input
+                          dir='rtl'
+                          id="phone"
+                          placeholder="شماره همراه خود را وارد کنید"
+                          type="tel"
+                          value={phone}
+                          disabled={loading || verifyCodeStatus}
+                          onChange={handlePhoneChange}
+                          className="pl-10 py-6 text-lg rounded-xl border-gray-200"
+                          required
+                        />
+                        <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                      </div>
+                      {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <Label htmlFor="code" className="text-gray-700">کد تایید</Label>
+                      <div className="flex justify-center gap-2">
+                        {[3, 2, 1, 0].map((index) => (
+                          <Input
+                            key={index}
+                            ref={el => inputRefs.current[index] = el}
+                            type="text"
+                            maxLength={1}
+                            value={enteredCode[index]}
+                            onChange={(e) => handleCodeChange(e.target.value, index)}
+                            onKeyDown={(e) => handleKeyDown(e, index)}
+                            className="w-14 h-14 text-center text-2xl rounded-xl border-gray-200"
+                            disabled={loading}
+                          />
+                        ))}
+                      </div>
+                      {timer > 0 && (
+                        <div className="text-sm text-gray-500 text-center mt-4">
+                          {formatTimer(timer)} دقیقه دیگر کد را مجدد دریافت کنید
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!showCitySelect && !verifyCodeStatus && (
+                    <Button
+                      disabled={loading || phone.length !== 11 || !!phoneError}
+                      onClick={handleSendCode}
+                      className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
+                    >
+                      {loading ? <LoadingSpinner className="text-white" /> : "ارسال کد تایید"}
+                    </Button>
+                  )}
+
+                  {verifyCodeStatus && timer === 0 && (
+                    <Button
+                      disabled={loading}
+                      onClick={handleSendCode}
+                      className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
+                    >
+                      {loading ? <LoadingSpinner className="text-white" /> : "ارسال مجدد کد تایید"}
+                    </Button>
+                  )}
+
+                  {verifyCodeStatus && (
+                    <Button
+                      disabled={loading || enteredCode.some(digit => !digit) || !!codeError}
+                      onClick={handleVerifyCode}
+                      className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
+                    >
+                      {loading ? <LoadingSpinner className="text-white" /> : "تایید و ورود"}
+                    </Button>
+                  )}
+                </form>
               </div>
-            )}
-            {!verifyCodeStatus && (
-              <Button
-                disabled={loading || phone.length !== 11 || !!phoneError}
-                onClick={handleSendCode}
-                variant={'secondary'}
-                className="w-full bg-secondary text-background"
-              >
-                {
-                  loading ? <LoadingSpinner className='text-[secondary]' /> : "ارسال کد تایید"
-                }
-              </Button>
-            )}
-            {verifyCodeStatus && timer === 0 && (
-              <Button
-                disabled={loading }
-                onClick={handleSendCode}
-                variant={'secondary'}
-                className="w-full bg-secondary text-background"
-              >
-                {
-                  loading ? <LoadingSpinner className='text-[secondary]' /> : "ارسال مجدد کد تایید"
-                }
-              </Button>
-            )}
-            {verifyCodeStatus && (
-              <Button
-                disabled={loading || enteredCode.length !== 4 || !!codeError}
-                onClick={handleVerifyCode}
-                variant={'secondary'}
-                className="w-full bg-secondary text-background"
-              >
-                {
-                  loading ? <LoadingSpinner className='text-[secondary]' /> : "تایید کد"
-                }
-              </Button>
-            )}
-          </form>
-        </CardContent>
-      </Card>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
