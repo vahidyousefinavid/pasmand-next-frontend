@@ -308,7 +308,7 @@ export default function LoginPage() {
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            transition={{  damping: 30, stiffness: 150 }}
             className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[2rem] shadow-2xl z-50"
           >
             <div className="relative w-full max-w-2xl mx-auto p-6">
