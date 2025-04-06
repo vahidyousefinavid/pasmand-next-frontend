@@ -38,40 +38,39 @@ export default function LoginPage() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState('');
   const [showCitySelect, setShowCitySelect] = useState(true);
-  const [showWelcome, setShowWelcome] = useState(true);
   const [welcomeMessage, setWelcomeMessage] = useState('');
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
   const { toast } = useToast();
   const { login } = useAuth();
 
+  const checkLocalStorage = async () => {
+    const savedCity = localStorage.getItem('selectedCity');
+    const savedPhone = localStorage.getItem('userPhone');
+
+    if (savedCity) {
+      setSelectedCity(savedCity);
+      setShowCitySelect(false);
+      const cityData = cities.find(city => city.id === savedCity);
+      if (cityData) {
+        setWelcomeMessage(`به سامانه مدیریت پسماند ${cityData.name} خوش آمدید`);
+      }
+
+    }
+    if (savedPhone) {
+      setPhone(savedPhone);
+      setWelcomeMessage(prev =>
+        prev ? `${prev}\nشماره همراه شما: ${savedPhone}` : `شماره همراه شما: ${savedPhone}`
+      );
+    }
+    if (!isDrawerOpen) {
+      setIsDrawerOpen(true)
+    }
+  };
+
   useEffect(() => {
-    const checkLocalStorage = () => {
-      const savedCity = localStorage.getItem('selectedCity');
-      const savedPhone = localStorage.getItem('userPhone');
-
-      if (savedCity) {
-        setSelectedCity(savedCity);
-        setShowCitySelect(false);
-        const cityData = cities.find(city => city.id === savedCity);
-        if (cityData) {
-          setWelcomeMessage(`به سامانه مدیریت پسماند ${cityData.name} خوش آمدید`);
-        }
-      }
-
-      if (savedPhone) {
-        setPhone(savedPhone);
-        setWelcomeMessage(prev =>
-          prev ? `${prev}\nشماره همراه شما: ${savedPhone}` : `شماره همراه شما: ${savedPhone}`
-        );
-      }
-
-      setTimeout(() => {
-        setShowWelcome(false);
-      }, 3000);
-    };
-
     checkLocalStorage();
+
   }, []);
 
   useEffect(() => {
@@ -232,7 +231,7 @@ export default function LoginPage() {
     <div
       className="min-h-screen w-full relative overflow-hidden bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `url('https://images.unsplash.com/photo-1493246507139-91e8fad9978e?q=80&w=2940&auto=format&fit=crop')`
+        backgroundImage: `url('img/back.avif')`
       }}
     >
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
@@ -308,9 +307,9 @@ export default function LoginPage() {
             initial={{ transform: 'translateY(100%)' }}
             animate={{ transform: 'translateY(0)' }}
             exit={{ transform: 'translateY(100%)' }}
-            transition={{ damping: 20, stiffness: 100 }} 
+            transition={{ damping: 20, stiffness: 100 }}
             className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[2rem] shadow-2xl z-50"
-            style={{ willChange: 'transform' }} 
+            style={{ willChange: 'transform' }}
           >
             <div className="relative w-full max-w-2xl mx-auto p-6">
               <button
