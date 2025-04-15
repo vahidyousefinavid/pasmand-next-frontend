@@ -11,9 +11,9 @@ export function Navigation() {
     const isActive = (link:string) => pathname === link; // Check if the link matches the current URL
 
     return (
-        <div className="fixed bottom-3 right-0 left-0 z-[10000]">
+        <div className="fixed bottom-3 right-0 left-0">
             <div className="flex justify-center">
-                <div className="flex items-center justify-around p-4 shadow-custom-elevated rounded-[230px] w-[90%] max-w-[450px] bg-secondary/100 backdrop-blur supports-[backdrop-filter]:bg-secondary/100">
+                <div className="flex items-center justify-around p-4 shadow-custom-elevated rounded-[230px] w-[90%] max-w-[450px] bg-secondary/100 backdrop-blur supports-[backdrop-filter]:bg-secondary/100 z-[10000]">
                     <Button
                         variant="ghost"
                         size="icon"

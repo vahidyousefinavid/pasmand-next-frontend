@@ -20,10 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const cities = [
-  { id: 'nahavand', name: 'نهاوند', icon: '/img/cities/icons/nahavand.png' },
-];
+import { cities } from '@/variables';
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);

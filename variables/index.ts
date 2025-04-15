@@ -14,24 +14,6 @@ export const mainSliderImages = [
   ];
   
  export const cities = [
-    {
-      name: "تهران",
-      map: "https://images.unsplash.com/photo-1587474260584-136574528ed5",
-    },
-    {
-      name: "اصفهان",
-      map: "https://images.unsplash.com/photo-1601547574276-4f3c258850e8",
-    },
-    {
-      name: "شیراز",
-      map: "https://images.unsplash.com/photo-1601547574276-4f3c258850e8",
-    },
-    {
-      name: "تبریز",
-      map: "https://images.unsplash.com/photo-1601547574276-4f3c258850e8",
-    },
-    {
-      name: "مشهد",
-      map: "https://images.unsplash.com/photo-1601547574276-4f3c258850e8",
-    }
+    { id: 'nahavand', name: 'نهاوند', icon: '/img/cities/icons/nahavand.png' },
+    // { id: 'isfahan', name: 'اصفهان', icon: '/img/cities/icons/isfahan.png' },
   ];
