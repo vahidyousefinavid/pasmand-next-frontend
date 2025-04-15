@@ -15,7 +15,8 @@ import {
     Recycle,
     ArrowUpRight,
     Wallet,
-    Phone
+    Phone,
+    Trash2
 } from 'lucide-react';
 import { Navigation } from '@/components/views/navigation';
 import { TopMenu } from '@/components/views/top-menu';
@@ -87,6 +88,14 @@ const items = [
         color: 'text-[hsl(25,84%,48%)]',
         bgColor: 'bg-[hsl(25,84%,48%)]/10',
         href: 'contact-us'
+    },
+    {
+        icon: <Trash2 className="h-7 w-7" />,
+        title: 'انواع پسماند',
+        description: 'آموزش و اطلاع رسانی انواع پسماند',
+        color: 'text-[hsl(25,84%,48%)]',
+        bgColor: 'bg-[hsl(25,84%,48%)]/10',
+        href: 'waste-types'
     },
 ];
 

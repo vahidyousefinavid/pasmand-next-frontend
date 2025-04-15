@@ -41,6 +41,7 @@ export function TopMenu() {
         { title: 'آدرس های ثبت شده', href: '/addresses' },
         { title: 'کیف پول', href: '/wallet' },
         { title: 'پشتیبانی', href: '/contact-us' },
+        { title: 'انواع پسماند', href: '/waste-types' },
     ];
 
     return (
