@@ -8,10 +8,10 @@ import { AuthProvider } from '@/context/auth-context';
 //   ? `https://${process.env.VERCEL_URL}`
 //   : "http://localhost:3000"
 
-const APP_NAME = "برنامه شهروند";
-const APP_DEFAULT_TITLE = "برنامه شهروند";
-const APP_TITLE_TEMPLATE = "برنامه شهروند";
-const APP_DESCRIPTION = "برنامه شهروند";
+const APP_NAME = "برنامه شهروند (شهر شهر)";
+const APP_DEFAULT_TITLE = "برنامه شهروند (شهر شهر)";
+const APP_TITLE_TEMPLATE = "برنامه شهروند (شهر شهر)";
+const APP_DESCRIPTION = "برنامه شهروند (شهر شهر)";
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,

@@ -293,7 +293,7 @@ export default function LoginPage() {
         </div>
 
         <div className="w-full max-w-7xl mx-auto text-center">
-          <p className="text-white/60">با همکاری سازمان مدیریت پسماند شهرداری</p>
+          {/* <p className="text-white/60">با همکاری سازمان مدیریت پسماند شهرداری</p> */}
         </div>
       </div>
 
