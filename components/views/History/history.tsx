@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { ArrowUpIcon, ArrowDownIcon, Package2Icon, TruckIcon, BanknoteIcon, ScaleIcon, Pencil, X, Trash2, Recycle, Battery, Box, Car, Construction } from 'lucide-react';
+import { ArrowUpIcon, ArrowDownIcon, Package2Icon, TruckIcon, BanknoteIcon, ScaleIcon, Pencil, X, Trash2, Recycle, Battery, Box, Car, Construction, Loader2 } from 'lucide-react';
 import { axiosService } from '@/lib/axiosService';
 import { API } from '@/services/const';
 import Cookies from 'js-cookie';
@@ -43,7 +43,7 @@ interface HistoryItem {
     lng: number;
     _id: string;
   };
-  wasteType?:string;
+  wasteType?: string;
   timeSlot: {
     date: string;
     time: string;
@@ -182,6 +182,7 @@ export default function HistoryPage() {
   const [sortBy, setSortBy] = useState<'date' | 'totalPrice'>('date');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [loading, setLoading] = useState(true);
+  const [loadingRequest, setLoadingRequest] = useState(false);
   const [requestsItems, setRequestsItems] = useState<HistoryItem[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'pending' | 'collecting' | 'completed' | 'canceled'>('all');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -198,7 +199,7 @@ export default function HistoryPage() {
       unit: string;
       description: string;
       _id: string;
-     
+
     }[],
     address: '',
     location: null as { lat: number; lng: number } | null,
@@ -222,6 +223,7 @@ export default function HistoryPage() {
 
   const handleCancelRequest = async (requestId: string) => {
     try {
+      setLoadingRequest(true)
       await axiosService({
         url: `${API.CANCEL_REQUEST}/${requestId}`,
         method: 'put',
@@ -236,12 +238,14 @@ export default function HistoryPage() {
       getRequests();
       setShowConfirmCancel(false);
       setRequestToCancel(null);
+      setLoadingRequest(false)
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'خطا',
         description: 'لغو درخواست با مشکل مواجه شد',
       });
+      setLoadingRequest(false)
     }
   };
 
@@ -256,7 +260,7 @@ export default function HistoryPage() {
       },
       date: request.timeSlot.date,
       time: request.timeSlot.time,
-      wasteType:request.wasteType
+      wasteType: request.wasteType
     });
     setIsEditModalOpen(true);
   };
@@ -320,6 +324,7 @@ export default function HistoryPage() {
   const handleSaveEdit = async () => {
     if (!selectedRequest || !editFormData.location || !editFormData.address) return;
     try {
+      setLoadingRequest(true)
       await axiosService({
         url: `${API.UPDATE_REQUEST}/${selectedRequest._id}`,
         method: 'put',
@@ -334,7 +339,7 @@ export default function HistoryPage() {
             date: editFormData.date,
             time: editFormData.time
           },
-          wasteType:editFormData.wasteType
+          wasteType: editFormData.wasteType
         }
       });
       toast({
@@ -344,12 +349,14 @@ export default function HistoryPage() {
       getRequests();
       setIsEditModalOpen(false);
       setSelectedRequest(null);
+      setLoadingRequest(false)
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'خطا',
         description: 'ویرایش درخواست با مشکل مواجه شد',
       });
+      setLoadingRequest(false)
     }
   };
 
@@ -596,7 +603,13 @@ export default function HistoryPage() {
                 onClick={() => requestToCancel && handleCancelRequest(requestToCancel)}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
-                تایید لغو
+                <div className="w-[80px] flex justify-center items-center">
+                  {loadingRequest ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    'تایید لغو'
+                  )}
+                </div>
               </button>
             </div>
           </div>
@@ -633,7 +646,7 @@ export default function HistoryPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="relative">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     آدرس دقیق
@@ -655,35 +668,35 @@ export default function HistoryPage() {
                     </div>
                   )}
                   <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-4 mt-4">
-                    نوع پسماند
-                  </label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {wasteTypes.map((type) => (
-                      <button
-                        key={type.id}
-                        onClick={() => {
-                          setEditFormData(prev => ({
-                            ...prev,
-                            wasteType: type.id
-                          }));
-                        }}
-                        className={`p-4 bg-white rounded-lg shadow-sm hover:shadow transition-shadow duration-200 flex items-center space-x-3 border ${editFormData.wasteType === type.id
+                    <label className="block text-sm font-medium text-gray-700 mb-4 mt-4">
+                      نوع پسماند
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {wasteTypes.map((type) => (
+                        <button
+                          key={type.id}
+                          onClick={() => {
+                            setEditFormData(prev => ({
+                              ...prev,
+                              wasteType: type.id
+                            }));
+                          }}
+                          className={`p-4 bg-white rounded-lg shadow-sm hover:shadow transition-shadow duration-200 flex items-center space-x-3 border ${editFormData.wasteType === type.id
                             ? 'border-blue-500 bg-blue-50'
                             : 'border-gray-200 hover:border-blue-500'
-                          }`}
-                      >
-                        <div className="p-2 bg-blue-50 rounded-full">
-                          {type.icon}
-                        </div>
-                        <div className="text-right">
-                          <h3 className="font-semibold">{type.name}</h3>
-                          <p className="text-sm text-gray-600">{type.description}</p>
-                        </div>
-                      </button>
-                    ))}
+                            }`}
+                        >
+                          <div className="p-2 bg-blue-50 rounded-full">
+                            {type.icon}
+                          </div>
+                          <div className="text-right">
+                            <h3 className="font-semibold">{type.name}</h3>
+                            <p className="text-sm text-gray-600">{type.description}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
                   {suggestions.length > 0 && (
                     <ul className="absolute z-10 bg-white border border-gray-300 rounded-lg w-full mt-1 max-h-40 overflow-y-auto text-right">
                       {suggestions.map((suggestion, index) => (
@@ -734,7 +747,13 @@ export default function HistoryPage() {
                     disabled={!editFormData.address || !editFormData.location}
                     className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                   >
-                    ذخیره تغییرات
+                    <div className="w-[100px] flex justify-center items-center">
+                      {loadingRequest ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        'ذخیره تغییرات'
+                      )}
+                    </div>
                   </button>
                 </div>
               </div>
