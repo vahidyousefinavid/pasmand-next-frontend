@@ -145,7 +145,10 @@ export default function ProfilePage() {
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold">اطلاعات شخصی</h2>
                 <button
-                  onClick={() => setIsEditing(!isEditing)}
+                  onClick={() => {
+                    setIsEditing(!isEditing)
+                    setEditedProfile(profile)
+                  }}
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
                   <Edit2 className="w-5 h-5 text-gray-600" />
