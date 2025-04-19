@@ -223,15 +223,15 @@ export default function WalletPage() {
                                     {balance.toLocaleString("fa-IR")} تومان
                                 </div>
                             )}
-                            <div className="grid grid-cols-2 gap-3">
-                                <Button
+                            <div className="gap-3">
+                                {/* <Button
                                     onClick={handleDeposit}
                                     variant="secondary"
                                     className="bg-white/20 hover:bg-white/30 backdrop-blur-sm transform hover:scale-105 transition-all"
                                 >
                                     <PlusIcon className="w-5 h-5 ml-2" />
                                     افزایش موجودی
-                                </Button>
+                                </Button> */}
                                 <Button
                                     onClick={() => setIsWithdrawModalOpen(true)}
                                     variant="secondary"
