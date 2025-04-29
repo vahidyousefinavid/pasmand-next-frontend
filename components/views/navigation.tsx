@@ -8,18 +8,17 @@ import { Banknote, Cross, FileClock, Home, LogOut, Wallet } from "lucide-react";
 export function Navigation() {
     const pathname = usePathname(); // Get the current path
 
-    const isActive = (link:string) => pathname === link; // Check if the link matches the current URL
+    const isActive = (link: string) => pathname === link; // Check if the link matches the current URL
 
     return (
-        <div className="fixed bottom-3 right-0 left-0">
+        <div className="fixed bottom-3 right-0 left-0 pointer-events-none z-[100000]">
             <div className="flex justify-center">
-                <div className="flex items-center justify-around p-4 shadow-custom-elevated rounded-[230px] w-[90%] max-w-[450px] bg-secondary/100 backdrop-blur supports-[backdrop-filter]:bg-secondary/100 z-[10000]">
+                <div className="pointer-events-auto relative  flex items-center justify-around p-4 shadow-custom-elevated rounded-[230px] w-[90%] max-w-[450px] bg-secondary/100 backdrop-blur supports-[backdrop-filter]:bg-secondary/100">
                     <Button
                         variant="ghost"
                         size="icon"
-                        className={`text-background hover:text-secondary-foreground ${
-                            isActive("/") ? "bg-white text-black" : ""
-                        }`}
+                        className={`text-background hover:text-secondary-foreground ${isActive("/") ? "bg-white text-black" : ""
+                            }`}
                         asChild
                     >
                         <Link href="/">
@@ -28,9 +27,8 @@ export function Navigation() {
                     </Button>
                     <Button
                         variant="ghost"
-                        className={`text-background hover:text-secondary-foreground ${
-                            isActive("/new-request") ? "bg-white text-black" : ""
-                        }`}
+                        className={`text-background hover:text-secondary-foreground ${isActive("/new-request") ? "bg-white text-black" : ""
+                            }`}
                         size="icon"
                     >
                         <Link href="/new-request">
@@ -40,9 +38,8 @@ export function Navigation() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className={`text-background hover:text-secondary-foreground ${
-                            isActive("/history") ? "bg-white text-black" : ""
-                        }`}
+                        className={`text-background hover:text-secondary-foreground ${isActive("/history") ? "bg-white text-black" : ""
+                            }`}
                         asChild
                     >
                         <Link href="/history">
@@ -52,9 +49,8 @@ export function Navigation() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className={`text-background hover:text-secondary-foreground ${
-                            isActive("/tariff") ? "bg-white text-black" : ""
-                        }`}
+                        className={`text-background hover:text-secondary-foreground ${isActive("/tariff") ? "bg-white text-black" : ""
+                            }`}
                         asChild
                     >
                         <Link href="/wallet">
