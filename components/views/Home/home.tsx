@@ -31,7 +31,6 @@ import 'swiper/css/effect-creative';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/context/auth-context';
-import { useTheme } from 'next-themes';
 
 const items = [
     {
@@ -157,7 +156,6 @@ const itemVariants = {
 
 export default function HomeView() {
     const [mounted, setMounted] = useState(false);
-    const { theme, setTheme } = useTheme();
     const [activeIndex, setActiveIndex] = useState(0);
     const { user } = useAuth()
     useEffect(() => {
@@ -166,17 +164,11 @@ export default function HomeView() {
 
     useEffect(() => {
         if ("serviceWorker" in navigator) {
-            navigator.serviceWorker.register("/sw.js")
-                .then(() => console.log("✅ Service Worker registered"))
-                .catch(err => console.error("SW error:", err));
+          navigator.serviceWorker.register("/sw.js")
+            .then(() => console.log("✅ Service Worker registered"))
+            .catch(err => console.error("SW error:", err));
         }
-    }, []);
-
-    useEffect(() => {
-        if (theme !== 'light') {
-            setTheme('light');
-        }
-    }, [theme, setTheme]);
+      }, []);
 
     return (
         <div className="min-h-screen bg-background">

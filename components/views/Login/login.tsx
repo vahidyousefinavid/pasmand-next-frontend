@@ -21,11 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cities } from '@/variables';
-import { useTheme } from 'next-themes';
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
-  const { theme, setTheme } = useTheme();
   const [verifyCodeStatus, setVerifyCodeStatus] = useState(false);
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState<number>();
@@ -42,12 +40,6 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { login } = useAuth();
-
-  useEffect(() => {
-    if (theme !== 'light') {
-      setTheme('light');
-    }
-  }, [theme, setTheme]);
 
   const checkLocalStorage = async () => {
     const savedCity = localStorage.getItem('selectedCity');
