@@ -1,17 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+}
 
 export function usePWA() {
-  const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [showInstallButton, setShowInstallButton] = useState(false);
+  const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault(); // جلوگیری از نمایش خودکار دیالوگ نصب
-      setDeferredPrompt(event);
+    const alreadyPrompted = localStorage.getItem("pwa-install-prompt") === "true";
+    if (alreadyPrompted) setShowInstallButton(true);
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      deferredPrompt.current = e as BeforeInstallPromptEvent;
+      localStorage.setItem("pwa-install-prompt", "true");
+      setShowInstallButton(true);
     };
 
     const handleAppInstalled = () => {
-      setIsInstalled(true);
+      deferredPrompt.current = null;
+      localStorage.removeItem("pwa-install-prompt");
+      setShowInstallButton(false);
     };
 
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -23,12 +35,23 @@ export function usePWA() {
     };
   }, []);
 
-  const installPWA = () => {
-    if (deferredPrompt) {
-      (deferredPrompt as any).prompt();
-      (deferredPrompt as any).userChoice.then(() => setDeferredPrompt(null));
+  const installPWA = async () => {
+    if (!deferredPrompt.current) {
+      alert("در حال حاضر امکان نصب وجود ندارد.");
+      return;
+    }
+
+    deferredPrompt.current.prompt();
+    const result = await deferredPrompt.current.userChoice;
+
+    if (result.outcome === "accepted") {
+      localStorage.removeItem("pwa-install-prompt");
+      setShowInstallButton(false);
     }
   };
 
-  return { installPWA, isInstalled, deferredPrompt };
+  return {
+    installPWA,
+    showInstallButton,
+  };
 }

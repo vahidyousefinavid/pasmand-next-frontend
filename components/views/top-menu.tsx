@@ -57,7 +57,7 @@ export function TopMenu() {
                                 </SheetTrigger>
                                 <SheetContent
                                     side={'right'}
-                                    className="pt-24 flex flex-col z-[10000] overflow-y-auto"
+                                    className="pt-24 flex flex-col z-[100000] overflow-y-auto"
                                 >
                                     <div className="flex flex-col gap-6">
                                         <div className="flex items-center gap-3 mb-2">
