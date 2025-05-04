@@ -37,19 +37,12 @@ export default function InstallButton() {
 
   if (!showInstallButton) return null;
 
-  const canInstall = typeof window !== "undefined" && window.matchMedia("(display-mode: standalone)").matches === false;
-
   return (
     <button
       onClick={installPWA}
-      disabled={!canInstall}
-      className={`fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 ${
-        canInstall
-          ? "bg-green-600 text-white animate-bounce"
-          : "bg-gray-400 text-white cursor-not-allowed"
-      }`}
+      className="fixed bottom-4 right-4 px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg z-50 transition-opacity duration-300"
     >
-      {canInstall ? "نصب PWA 📲" : "نصب در حال حاضر ممکن نیست"}
+      نصب اپلیکیشن 📲
     </button>
   );
 }
