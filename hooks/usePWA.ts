@@ -61,7 +61,8 @@ export function usePWA() {
   };
 
   return {
-    installPWA,
-    showInstallButton: !loading && canInstall && !isStandalone(),
-  };
+  installPWA,
+  showInstallButton: !loading && canInstall && !isStandalone(),
+  canPromptInstall: !!deferredPrompt.current,
+};
 }

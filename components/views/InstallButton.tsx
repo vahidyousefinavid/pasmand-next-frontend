@@ -33,14 +33,23 @@
 import { usePWA } from "@/hooks/usePWA";
 
 export default function InstallButton() {
-  const { installPWA, showInstallButton } = usePWA();
+  const { installPWA, showInstallButton, canPromptInstall } = usePWA();
 
   if (!showInstallButton) return null;
 
   return (
     <button
-      onClick={installPWA}
-      className="fixed bottom-4 right-4 px-4 py-2 bg-green-600 text-white rounded-lg shadow-lg z-50 transition-opacity duration-300"
+      onClick={() => {
+        if (!canPromptInstall) {
+          alert("لطفاً چند لحظه صبر کنید تا امکان نصب فعال شود.");
+        } else {
+          installPWA();
+        }
+      }}
+      className={`fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity duration-300 ${
+        canPromptInstall ? "bg-green-600 text-white" : "bg-gray-400 text-gray-200 cursor-not-allowed"
+      }`}
+      disabled={!canPromptInstall}
     >
       نصب اپلیکیشن 📲
     </button>

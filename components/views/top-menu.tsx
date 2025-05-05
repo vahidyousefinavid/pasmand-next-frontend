@@ -16,6 +16,9 @@ import { useAuth } from '@/context/auth-context';
 import { Button } from '../ui/button';
 import InstallButton from './InstallButton';
 import { cities } from '@/variables';
+import { axiosService } from '@/lib/axiosService';
+import { API } from '@/services/const';
+import Cookies from 'js-cookie';
 
 export function TopMenu() {
     const [open, setOpen] = useState(false);
@@ -31,6 +34,12 @@ export function TopMenu() {
 
     useEffect(() => {
         localStorage.setItem('selectedCity', selectedCity.id);
+        axiosService({
+            url: API.UPDATE_PROFILE,
+            method: 'put',
+            body: { currentCity: selectedCity.id },
+            token: Cookies.get('auth_token')
+        })
     }, [selectedCity]);
 
     const menuItems = [
@@ -160,17 +169,17 @@ export function TopMenu() {
                                     <PopoverTrigger asChild
                                     // className='absolute bottom-[-30px] right-[7px]'
                                     >
-                                            <button className="flex items-center gap-2 p-1 rounded-full bg-secondary/100 hover:bg-secondary/100 transition text-sm text-white/90">
-                                        <div className="bg-white/10 backdrop-blur-md p-2 rounded-full">
+                                        <button className="flex items-center gap-2 p-1 rounded-full bg-secondary/100 hover:bg-secondary/100 transition text-sm text-white/90">
+                                            <div className="bg-white/10 backdrop-blur-md p-2 rounded-full">
                                                 <img
                                                     src={selectedCity.icon}
                                                     alt={selectedCity.name}
                                                     className="w-6 h-6 rounded-full object-cover"
                                                 />
-                                        </div>
-                                                {/* <span>{selectedCity.name}</span> */}
-                                                <ChevronDown className="w-4 h-4 text-white/70" />
-                                            </button>
+                                            </div>
+                                            {/* <span>{selectedCity.name}</span> */}
+                                            <ChevronDown className="w-4 h-4 text-white/70" />
+                                        </button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-80 p-2 mt-2 z-[10001]">
                                         <div className="space-y-4">

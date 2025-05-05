@@ -45,7 +45,7 @@ export default function LoginPage() {
     const savedCity = localStorage.getItem('selectedCity');
     const savedPhone = localStorage.getItem('userPhone');
 
-    if (savedCity) {
+    if (savedCity && cities.find(city => city.id === savedCity)) {
       setSelectedCity(savedCity);
       setShowCitySelect(false);
       const cityData = cities.find(city => city.id === savedCity);
@@ -198,7 +198,7 @@ export default function LoginPage() {
     }
 
     if (combinedCode === code?.toString()) {
-      axios.post(API.SIGN_UP, { phone: `${phone}` })
+      axios.post(API.SIGN_UP, { phone: `${phone}`, city: selectedCity })
         .then((res: any) => {
           setLoading(false);
           const token = res.data.token;
@@ -400,13 +400,27 @@ export default function LoginPage() {
                   )}
 
                   {!showCitySelect && !verifyCodeStatus && (
-                    <Button
-                      disabled={loading || phone.length !== 11 || !!phoneError}
-                      onClick={handleSendCode}
-                      className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
-                    >
-                      {loading ? <LoadingSpinner className="text-white" /> : "ارسال کد تایید"}
-                    </Button>
+                    <>
+
+                      <Button
+                        disabled={loading || phone.length !== 11 || !!phoneError}
+                        onClick={handleSendCode}
+                        className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
+                      >
+                        {loading ? <LoadingSpinner className="text-white" /> : "ارسال کد تایید"}
+                      </Button>
+                      <Button
+                        variant='ghost'
+                        onClick={()=>{
+                          setSelectedCity('')
+                          localStorage.removeItem('selectedCity')
+                          setShowCitySelect(true)
+                        }}
+                        className="w-full py-1 text-md rounded-xl"
+                      >
+                        اصلاح شهر
+                      </Button>
+                    </>
                   )}
 
                   {verifyCodeStatus && timer === 0 && (
