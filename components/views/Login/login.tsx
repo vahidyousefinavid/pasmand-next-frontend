@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cities } from '@/variables';
+import { Drawer } from '@/components/ui/drawer';
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -228,29 +229,10 @@ export default function LoginPage() {
     <div
       className="min-h-screen w-full relative overflow-hidden bg-cover bg-center bg-no-repeat"
       style={{
-        backgroundImage: `url('img/back.avif')`
+        backgroundImage: `url('img/back.webp')`
       }}
     >
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-
-      {/* <AnimatePresence>
-        {showWelcome && welcomeMessage && (
-          <motion.div
-            initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -100, opacity: 0 }}
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-secondary/100 text-white px-6 py-3 rounded-full shadow-lg"
-          >
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5" />
-              <span className="text-lg font-medium whitespace-pre-line text-center">
-                {welcomeMessage}
-              </span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence> */}
-
+      <div className="absolute inset-0 bg-black/40" style={{ backdropFilter: 'blur(4px)' }} />
       <div className="relative z-10 w-full h-full min-h-screen flex flex-col items-center justify-between p-6">
         <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -297,157 +279,153 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {isDrawerOpen && (
-          <motion.div
-            dir="rtl"
-            initial={{ transform: 'translateY(100%)' }}
-            animate={{ transform: 'translateY(0)' }}
-            exit={{ transform: 'translateY(100%)' }}
-            transition={{ damping: 20, stiffness: 100 }}
-            className="fixed bottom-0 left-0 right-0 bg-white rounded-t-[2rem] shadow-2xl z-50"
-            style={{ willChange: 'transform' }}
-          >
-            <div className="relative w-full max-w-2xl mx-auto p-6">
-              <button
-                onClick={() => setIsDrawerOpen(false)}
-                className="absolute top-6 left-6 p-2 rounded-full hover:bg-gray-100 transition-colors"
-              >
-                <X className="w-6 h-6 text-gray-500" />
-              </button>
+      <Drawer open={isDrawerOpen}>
+        <div
+          dir="rtl"
+          className={`
+      fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[2rem] shadow-2xl
+      transition-transform duration-300
+      ${isDrawerOpen ? 'translate-y-0' : 'translate-y-full'}
+    `}
+        >
+          <div className="relative w-full max-w-2xl mx-auto p-6">
+            <button
+              onClick={() => setIsDrawerOpen(false)}
+              className="absolute top-6 left-6 p-2 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-6 h-6 text-gray-500" />
+            </button>
 
-              <div className="space-y-6">
-                <div className="text-center">
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    {showCitySelect
-                      ? 'انتخاب شهر'
-                      : verifyCodeStatus
-                        ? 'تایید شماره همراه'
-                        : 'ورود به حساب کاربری'}
-                  </h3>
-                  <p className="mt-2 text-gray-600">
-                    {showCitySelect
-                      ? 'لطفا شهر خود را انتخاب کنید'
-                      : verifyCodeStatus
-                        ? 'کد تایید ارسال شده را وارد کنید'
-                        : 'لطفا شماره همراه خود را وارد کنید'}
-                  </p>
-                </div>
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {showCitySelect
+                    ? 'انتخاب شهر'
+                    : verifyCodeStatus
+                      ? 'تایید شماره همراه'
+                      : 'ورود به حساب کاربری'}
+                </h3>
+                <p className="mt-2 text-gray-600">
+                  {showCitySelect
+                    ? 'لطفا شهر خود را انتخاب کنید'
+                    : verifyCodeStatus
+                      ? 'کد تایید ارسال شده را وارد کنید'
+                      : 'لطفا شماره همراه خود را وارد کنید'}
+                </p>
+              </div>
 
-                <form className="space-y-4">
-                  {showCitySelect ? (
-                    <div className="space-y-4">
-                      <Label htmlFor="city" className="text-gray-700">شهر</Label>
-                      <Select onValueChange={handleCitySelect}>
-                        <SelectTrigger className="w-full h-14 text-lg" dir="rtl">
-                          <SelectValue placeholder="شهر خود را انتخاب کنید" />
-                        </SelectTrigger>
-                        <SelectContent dir="rtl">
-                          {cities.map((city) => (
-                            <SelectItem key={city.id} value={city.id}>
-                              <div className="flex items-center gap-2">
-                                <Building2 className="w-4 h-4" />
-                                <span>{city.name}</span>
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ) : !verifyCodeStatus ? (
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-gray-700">شماره همراه</Label>
-                      <div className="relative">
-                        <Input
-                          dir='rtl'
-                          id="phone"
-                          placeholder="شماره همراه خود را وارد کنید"
-                          type="tel"
-                          value={phone}
-                          disabled={loading || verifyCodeStatus}
-                          onChange={handlePhoneChange}
-                          className="pl-10 py-6 text-lg rounded-xl border-gray-200"
-                          required
-                        />
-                        <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                      </div>
-                      {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <Label htmlFor="code" className="text-gray-700">کد تایید</Label>
-                      <div className="flex justify-center gap-2">
-                        {[3, 2, 1, 0].map((index) => (
-                          <Input
-                            key={index}
-                            ref={el => inputRefs.current[index] = el}
-                            type="text"
-                            maxLength={1}
-                            value={enteredCode[index]}
-                            onChange={(e) => handleCodeChange(e.target.value, index)}
-                            onKeyDown={(e) => handleKeyDown(e, index)}
-                            className="w-14 h-14 text-center text-2xl rounded-xl border-gray-200"
-                            disabled={loading}
-                          />
+              <form className="space-y-4">
+                {showCitySelect ? (
+                  <div className="space-y-4">
+                    <Label htmlFor="city" className="text-gray-700">شهر</Label>
+                    <Select onValueChange={handleCitySelect}>
+                      <SelectTrigger className="w-full h-14 text-lg" dir="rtl">
+                        <SelectValue placeholder="شهر خود را انتخاب کنید" />
+                      </SelectTrigger>
+                      <SelectContent dir="rtl">
+                        {cities.map((city) => (
+                          <SelectItem key={city.id} value={city.id}>
+                            <div className="flex items-center gap-2">
+                              <Building2 className="w-4 h-4" />
+                              <span>{city.name}</span>
+                            </div>
+                          </SelectItem>
                         ))}
-                      </div>
-                      {timer > 0 && (
-                        <div className="text-sm text-gray-500 text-center mt-4">
-                          {formatTimer(timer)} دقیقه دیگر کد را مجدد دریافت کنید
-                        </div>
-                      )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ) : !verifyCodeStatus ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-gray-700">شماره همراه</Label>
+                    <div className="relative">
+                      <Input
+                        dir='rtl'
+                        id="phone"
+                        placeholder="شماره همراه خود را وارد کنید"
+                        type="tel"
+                        value={phone}
+                        disabled={loading || verifyCodeStatus}
+                        onChange={handlePhoneChange}
+                        className="pl-10 py-6 text-lg rounded-xl border-gray-200"
+                        required
+                      />
+                      <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                     </div>
-                  )}
+                    {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <Label htmlFor="code" className="text-gray-700">کد تایید</Label>
+                    <div className="flex justify-center gap-2">
+                      {[3, 2, 1, 0].map((index) => (
+                        <Input
+                          key={index}
+                          ref={el => inputRefs.current[index] = el}
+                          type="text"
+                          maxLength={1}
+                          value={enteredCode[index]}
+                          onChange={(e) => handleCodeChange(e.target.value, index)}
+                          onKeyDown={(e) => handleKeyDown(e, index)}
+                          className="w-14 h-14 text-center text-2xl rounded-xl border-gray-200"
+                          disabled={loading}
+                        />
+                      ))}
+                    </div>
+                    {timer > 0 && (
+                      <div className="text-sm text-gray-500 text-center mt-4">
+                        {formatTimer(timer)} دقیقه دیگر کد را مجدد دریافت کنید
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                  {!showCitySelect && !verifyCodeStatus && (
-                    <>
-
-                      <Button
-                        disabled={loading || phone.length !== 11 || !!phoneError}
-                        onClick={handleSendCode}
-                        className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
-                      >
-                        {loading ? <LoadingSpinner className="text-white" /> : "ارسال کد تایید"}
-                      </Button>
-                      <Button
-                        variant='ghost'
-                        onClick={()=>{
-                          setSelectedCity('')
-                          localStorage.removeItem('selectedCity')
-                          setShowCitySelect(true)
-                        }}
-                        className="w-full py-1 text-md rounded-xl"
-                      >
-                        اصلاح شهر
-                      </Button>
-                    </>
-                  )}
-
-                  {verifyCodeStatus && timer === 0 && (
+                {!showCitySelect && !verifyCodeStatus && (
+                  <>
                     <Button
-                      disabled={loading}
+                      disabled={loading || phone.length !== 11 || !!phoneError}
                       onClick={handleSendCode}
                       className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
                     >
-                      {loading ? <LoadingSpinner className="text-white" /> : "ارسال مجدد کد تایید"}
+                      {loading ? <LoadingSpinner className="text-white" /> : "ارسال کد تایید"}
                     </Button>
-                  )}
-
-                  {verifyCodeStatus && (
                     <Button
-                      disabled={loading || enteredCode.some(digit => !digit) || !!codeError}
-                      onClick={handleVerifyCode}
-                      className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
+                      variant='ghost'
+                      onClick={() => {
+                        setSelectedCity('')
+                        localStorage.removeItem('selectedCity')
+                        setShowCitySelect(true)
+                      }}
+                      className="w-full py-1 text-md rounded-xl"
                     >
-                      {loading ? <LoadingSpinner className="text-white" /> : "تایید و ورود"}
+                      اصلاح شهر
                     </Button>
-                  )}
-                </form>
-              </div>
+                  </>
+                )}
+
+                {verifyCodeStatus && timer === 0 && (
+                  <Button
+                    disabled={loading}
+                    onClick={handleSendCode}
+                    className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
+                  >
+                    {loading ? <LoadingSpinner className="text-white" /> : "ارسال مجدد کد تایید"}
+                  </Button>
+                )}
+
+                {verifyCodeStatus && (
+                  <Button
+                    disabled={loading || enteredCode.some(digit => !digit) || !!codeError}
+                    onClick={handleVerifyCode}
+                    className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
+                  >
+                    {loading ? <LoadingSpinner className="text-white" /> : "تایید و ورود"}
+                  </Button>
+                )}
+              </form>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
+      </Drawer>
     </div>
   );
 }
