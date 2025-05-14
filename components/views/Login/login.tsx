@@ -414,7 +414,7 @@ export default function LoginPage() {
 
                 {verifyCodeStatus && (
                   <Button
-                    disabled={loading || enteredCode.some(digit => !digit) || !!codeError}
+                    disabled={loading || !Array.isArray(enteredCode) || enteredCode.some(digit => !digit)}
                     onClick={handleVerifyCode}
                     className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
                   >

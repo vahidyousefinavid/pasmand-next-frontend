@@ -7,8 +7,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const { theme, setTheme } = useTheme();
 
   useEffect(() => {
-    if (theme !== 'light') {
-      setTheme('light');
+    if (typeof window !== 'undefined') {
+      if (theme !== 'light') {
+        setTheme('light');
+      }
     }
   }, [theme, setTheme]);
 

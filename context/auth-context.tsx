@@ -15,13 +15,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    // Check for auth token in cookies
-    const token = Cookies.get('auth_token');
-    const storedUser = localStorage.getItem('user');
-    
-    if (token && storedUser) {
-      const user = JSON.parse(storedUser);
-      setAuthState({ user, isAuthenticated: true });
+    if (typeof window !== 'undefined') {
+      // Check for auth token in cookies
+      const token = Cookies.get('auth_token');
+      const storedUser = localStorage.getItem('user');
+
+      if (token && storedUser) {
+        const user = JSON.parse(storedUser);
+        setAuthState({ user, isAuthenticated: true });
+      }
     }
   }, []);
 

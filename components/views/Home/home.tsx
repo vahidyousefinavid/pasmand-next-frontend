@@ -1,7 +1,6 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import {
     Cross,
     Banknote,
@@ -157,18 +156,21 @@ const itemVariants = {
 export default function HomeView() {
     const [mounted, setMounted] = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
-    const { user } = useAuth()
+    const { user } = useAuth();
+
     useEffect(() => {
         setMounted(true);
     }, []);
 
     useEffect(() => {
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.register("/sw.js")
-            .then(() => console.log("✅ Service Worker registered"))
-            .catch(err => console.error("SW error:", err));
+        if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(() => console.log('✅ Service Worker registered'))
+                .catch(err => console.error('SW error:', err));
         }
-      }, []);
+    }, []);
+
+    if (!mounted) return null;
 
     return (
         <div className="min-h-screen bg-background">
