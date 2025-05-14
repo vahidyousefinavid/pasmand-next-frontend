@@ -2,10 +2,11 @@
 
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
-    disable: false,
-    register: true,
-    skipWaiting: true,
-  
+  disable: false,
+  register: true,
+  skipWaiting: true,
+  legacyBrowsers: true,
+
 });
 
 async function rewrites() {
