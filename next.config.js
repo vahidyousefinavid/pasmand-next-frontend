@@ -2,11 +2,9 @@
 
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
-  register:true,
-  // disable: false,
-  aggressiveFrontEndNavCaching: true,
-  cacheOnFrontEndNav: true,
-  reloadOnOnline: true,
+    disable: false,
+    register: true,
+    skipWaiting: true,
   
 });
 
