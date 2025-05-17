@@ -361,7 +361,9 @@ export default function LoginPage() {
                         <Input
                           key={index}
                           ref={el => inputRefs.current[index] = el}
-                          type="text"
+                          type="tel"
+                          inputMode="numeric" 
+                          pattern="\d*"       
                           maxLength={1}
                           value={enteredCode[index]}
                           onChange={(e) => handleCodeChange(e.target.value, index)}
