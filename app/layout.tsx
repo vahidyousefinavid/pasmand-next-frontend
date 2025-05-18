@@ -9,7 +9,7 @@ import { AuthProvider } from '@/context/auth-context';
 // const defaultUrl = process.env.VERCEL_URL
 //   ? `https://${process.env.VERCEL_URL}`
 //   : "http://localhost:3000"
-
+ 
 const APP_NAME = "برنامه شهروند (شهر شهر)";
 const APP_DEFAULT_TITLE = "برنامه شهروند (شهر شهر)";
 const APP_TITLE_TEMPLATE = "برنامه شهروند (شهر شهر)";
