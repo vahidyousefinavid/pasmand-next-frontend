@@ -1,4 +1,6 @@
 import './globals.css';
+import 'core-js/stable';
+import 'regenerator-runtime/runtime';
 import type { Metadata, Viewport } from 'next';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';

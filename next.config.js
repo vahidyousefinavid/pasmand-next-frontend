@@ -21,7 +21,7 @@ async function rewrites() {
 
 const nextConfig = {
   reactStrictMode: true,
-  // swcMinify: true,
+  swcMinify: false,
   compress: true,
   rewrites,
   eslint: {
