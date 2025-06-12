@@ -5,11 +5,12 @@ import type { Metadata, Viewport } from 'next';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/auth-context';
+import { CityProvider } from '@/context/data-context';
 
 // const defaultUrl = process.env.VERCEL_URL
 //   ? `https://${process.env.VERCEL_URL}`
 //   : "http://localhost:3000"
- 
+
 const APP_NAME = "برنامه شهروند (شهر شهر)";
 const APP_DEFAULT_TITLE = "برنامه شهروند (شهر شهر)";
 const APP_TITLE_TEMPLATE = "برنامه شهروند (شهر شهر)";
@@ -62,12 +63,14 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" suppressHydrationWarning>
       <body>
-        <AuthProvider>
-          <Providers>
-            {children}
-            <Toaster />
-          </Providers>
-        </AuthProvider>
+        <CityProvider>
+          <AuthProvider>
+            <Providers>
+              {children}
+              <Toaster />
+            </Providers>
+          </AuthProvider>
+        </CityProvider>
       </body>
     </html>
   );

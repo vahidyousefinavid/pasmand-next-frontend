@@ -6,6 +6,7 @@ import persian from 'react-date-object/calendars/persian';
 import persian_fa from 'react-date-object/locales/persian_fa';
 import './index.css'
 import { Loading } from '@/components/ui/loading';
+import { useCity } from '@/context/data-context';
 interface ThirdStepProps {
   loading: boolean;
   onComplete: (timeSlot: { date: string; time: string }) => void;
@@ -15,6 +16,7 @@ interface ThirdStepProps {
 export default function ThirdStep({ onComplete, onBack, loading }: ThirdStepProps) {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
+  const { selectedCity } = useCity();
 
   const timeSlots = [
     '۹:۰۰ - ۱۱:۰۰',
@@ -35,6 +37,12 @@ export default function ThirdStep({ onComplete, onBack, loading }: ThirdStepProp
   return (
     <div className="max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold text-center mb-8">زمان جمع‌آوری را انتخاب کنید</h2>
+      {/* هشدار انتخاب شهر */}
+      {selectedCity?.name && (
+        <div className="mb-6 p-4 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-lg text-sm">
+          <strong>توجه:</strong> شهر انتخابی شما <strong>{selectedCity.name}</strong> است. درخواست شما تنها در این شهر بررسی خواهد شد. لطفاً از صحت انتخاب خود اطمینان حاصل فرمایید.
+        </div>
+      )}
       <div className="bg-white p-6 rounded-lg shadow-md space-y-6">
         <div className='flex w-full flex-col'>
           <label className="block text-sm font-medium text-gray-700 mb-2">

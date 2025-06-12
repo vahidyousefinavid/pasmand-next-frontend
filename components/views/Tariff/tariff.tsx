@@ -5,6 +5,8 @@ import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 import { axiosService } from '@/lib/axiosService';
 import { useToast } from '@/hooks/use-toast';
 import { API } from '@/services/const';
+import { cities } from '@/variables';
+import { useCity } from '@/context/data-context';
 
 interface PriceItem {
   id: string;
@@ -40,6 +42,8 @@ export default function PricesPage() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<PriceItem[]>([]);
   const { toast } = useToast();
+  const { selectedCity } = useCity()
+
 
   const filteredAndSortedPrices = data
     .filter(item => selectedCategory === 'همه' || item.category === selectedCategory)
@@ -82,7 +86,7 @@ export default function PricesPage() {
   const getData = () => {
     setLoading(true)
     axiosService({
-      url: API.GET_MATERIAL,
+      url: `${API.GET_MATERIAL}/${selectedCity?.id}`,
       method: 'get',
     })
       .then((res: any) => {
@@ -99,8 +103,10 @@ export default function PricesPage() {
   }
 
   useEffect(() => {
-    getData()
-  }, [])
+    if (selectedCity) {
+      getData()
+    }
+  }, [selectedCity])
 
   return (
     <div className="min-h-screen bg-gray-50 py-24 px-4">

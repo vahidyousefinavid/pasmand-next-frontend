@@ -11,7 +11,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '../ui/button';
 import InstallButton from './InstallButton';
@@ -19,28 +19,13 @@ import { cities } from '@/variables';
 import { axiosService } from '@/lib/axiosService';
 import { API } from '@/services/const';
 import Cookies from 'js-cookie';
+import { useCity } from '@/context/data-context';
 
 export function TopMenu() {
     const [open, setOpen] = useState(false);
     const { isAuthenticated } = useAuth();
-    const [selectedCity, setSelectedCity] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const savedCity = localStorage.getItem('selectedCity');
-            return cities.find((city) => city.id === savedCity) || cities[0];
-        }
-        return cities[0];
-    });
+    const { selectedCity, setSelectedCity } = useCity()
     const [showCitiesInSideMenu, setShowCitiesInSideMenu] = useState(false);
-
-    useEffect(() => {
-        localStorage.setItem('selectedCity', selectedCity.id);
-        axiosService({
-            url: API.UPDATE_PROFILE,
-            method: 'put',
-            body: { currentCity: selectedCity.id },
-            token: Cookies.get('auth_token')
-        })
-    }, [selectedCity]);
 
     const menuItems = [
         { title: 'صفحه اصلی', href: '/' },
@@ -85,13 +70,13 @@ export function TopMenu() {
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <img
-                                                        src={selectedCity.icon}
-                                                        alt={selectedCity.name}
+                                                        src={selectedCity?.icon}
+                                                        alt={selectedCity?.name}
                                                         className="w-12 h-12 rounded-lg object-cover shadow-sm"
                                                     />
                                                     <div className="text-right">
                                                         <p className="font-medium text-gray-900">
-                                                            {selectedCity.name}
+                                                            {selectedCity?.name}
                                                         </p>
                                                         <p className="text-sm text-gray-500">خدمات شهری</p>
                                                     </div>
@@ -111,7 +96,7 @@ export function TopMenu() {
                                                                 setSelectedCity(city);
                                                                 setShowCitiesInSideMenu(false);
                                                             }}
-                                                            className={`flex items-center gap-3 w-full p-3 rounded-xl transition-all duration-200 ${selectedCity.id === city.id
+                                                            className={`flex items-center gap-3 w-full p-3 rounded-xl transition-all duration-200 ${selectedCity?.id === city.id
                                                                 ? 'bg-emerald-50 border border-emerald-200'
                                                                 : 'hover:bg-gray-50 border border-transparent'
                                                                 }`}
@@ -129,7 +114,7 @@ export function TopMenu() {
                                                                     خدمات شهری
                                                                 </p>
                                                             </div>
-                                                            {selectedCity.id === city.id && (
+                                                            {selectedCity?.id === city.id && (
                                                                 <div className="mr-auto">
                                                                     <div className="w-3 h-3 rounded-full bg-emerald-500" />
                                                                 </div>
@@ -172,8 +157,8 @@ export function TopMenu() {
                                         <button className="flex items-center gap-2 p-1 rounded-full bg-secondary/100 hover:bg-secondary/100 transition text-sm text-white/90">
                                             <div className="bg-white/10 backdrop-blur-md p-2 rounded-full">
                                                 <img
-                                                    src={selectedCity.icon}
-                                                    alt={selectedCity.name}
+                                                    src={selectedCity?.icon}
+                                                    alt={selectedCity?.name}
                                                     className="w-6 h-6 rounded-full object-cover"
                                                 />
                                             </div>
@@ -192,7 +177,7 @@ export function TopMenu() {
                                                     <button
                                                         key={city.id}
                                                         onClick={() => setSelectedCity(city)}
-                                                        className={`flex items-center gap-3 w-full p-2.5 rounded-lg transition-all duration-200 ${selectedCity.id === city.id
+                                                        className={`flex items-center gap-3 w-full p-2.5 rounded-lg transition-all duration-200 ${selectedCity?.id === city.id
                                                             ? 'bg-emerald-50 border border-emerald-200'
                                                             : 'hover:bg-gray-50 border border-transparent'
                                                             }`}
@@ -208,7 +193,7 @@ export function TopMenu() {
                                                             </p>
                                                             <p className="text-sm text-gray-500">خدمات شهری</p>
                                                         </div>
-                                                        {selectedCity.id === city.id && (
+                                                        {selectedCity?.id === city.id && (
                                                             <div className="mr-auto">
                                                                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                                                             </div>
