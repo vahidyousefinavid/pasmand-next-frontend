@@ -2,7 +2,7 @@ import HomeView from "@/components/views/Home/home";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: 'برنامه شهروند (شهر شهر)',
+  title: 'برنامه شهر شهر (شهروند)',
   description: ''
 }
 

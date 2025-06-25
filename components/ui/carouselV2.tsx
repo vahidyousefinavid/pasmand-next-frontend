@@ -17,13 +17,13 @@ const Carousel = () => {
     <div className={styles.carouselWrapper}>
       <Slider {...settings}>
         <div className={styles.slide}>
-          <img src="/img/re.jpg" alt="Slide 1" />
+          <img src="/img/re.jpg" alt="برنامه شهر شهر (اسلاید اول)" />
         </div>
         <div className={styles.slide}>
-          <img src="/images/re.jpg" alt="Slide 2" />
+          <img src="/images/re.jpg" alt="برنامه شهر شهر (اسلاید دوم)"/>
         </div>
         <div className={styles.slide}>
-          <img src="/images/re.jpg" alt="Slide 3" />
+          <img src="/images/re.jpg" alt="برنامه شهر شهر (اسلاید شوم)" />
         </div>
       </Slider>
     </div>

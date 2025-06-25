@@ -11,10 +11,10 @@ import { CityProvider } from '@/context/data-context';
 //   ? `https://${process.env.VERCEL_URL}`
 //   : "http://localhost:3000"
 
-const APP_NAME = "برنامه شهروند (شهر شهر)";
-const APP_DEFAULT_TITLE = "برنامه شهروند (شهر شهر)";
-const APP_TITLE_TEMPLATE = "برنامه شهروند (شهر شهر)";
-const APP_DESCRIPTION = "برنامه شهروند (شهر شهر)";
+const APP_NAME = "برنامه شهر شهر (شهروند)";
+const APP_DEFAULT_TITLE = "برنامه شهر شهر (شهروند)";
+const APP_TITLE_TEMPLATE = "برنامه شهر شهر (شهروند)";
+const APP_DESCRIPTION = "برنامه شهر شهر (شهروند)";
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,
