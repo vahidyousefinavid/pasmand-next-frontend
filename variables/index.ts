@@ -14,7 +14,28 @@ export const mainSliderImages = [
 ];
 
 export const cities = [
-  { id: '6750c9b79ff970c1dc84fe4b', name: 'نهاوند', code: 1086, icon: '/img/cities/icons/nahavand.png' },
-  { id: '6750c9b69ff970c1dc84fa90', name: 'اصفهان', code: 127, icon: '/img/cities/icons/isfahan.png' },
-  { id: '6750c9b79ff970c1dc84fe4a', name: 'ملایر', code: 1085, icon: '/img/cities/icons/malayer.png' },
+  {
+    id: "6750c9b79ff970c1dc84fe4b",
+    name: "نهاوند",
+    code: 1086,
+    icon: "/img/cities/icons/nahavand.png",
+    lat: 34.1884,
+    lng: 48.3714
+  },
+  {
+    id: "6750c9b69ff970c1dc84fa90",
+    name: "اصفهان",
+    code: 127,
+    icon: "/img/cities/icons/isfahan.png",
+    lat: 32.6546,
+    lng: 51.6680
+  },
+  {
+    id: "6750c9b79ff970c1dc84fe4a",
+    name: "ملایر",
+    code: 1085,
+    icon: "/img/cities/icons/malayer.png",
+    lat: 34.2960,
+    lng: 48.8235
+  }
 ];

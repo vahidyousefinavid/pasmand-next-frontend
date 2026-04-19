@@ -6,6 +6,7 @@ import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/auth-context';
 import { CityProvider } from '@/context/data-context';
+import localFont from "next/font/local";
 
 // const defaultUrl = process.env.VERCEL_URL
 //   ? `https://${process.env.VERCEL_URL}`
@@ -15,6 +16,50 @@ const APP_NAME = "برنامه شهر شهر (شهروند)";
 const APP_DEFAULT_TITLE = "برنامه شهر شهر (شهروند)";
 const APP_TITLE_TEMPLATE = "برنامه شهر شهر (شهروند)";
 const APP_DESCRIPTION = "برنامه شهر شهر (شهروند)";
+
+const tanha = localFont({
+  src: [
+    {
+      path: "../public/fonts/tanha/Tanha.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  variable: "--font-tanha",
+});
+
+const parastoo = localFont({
+  src: [
+    {
+      path: "../public/fonts/parastoo/Parastoo.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  variable: "--font-parastoo",
+});
+
+const iranyekan = localFont({
+  src: [
+    {
+      path: "../public/fonts/iranyekan/IRANYekan.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  variable: "--font-iranyekan",
+});
+
+const vazir = localFont({
+  src: [
+    {
+      path: "../public/fonts/vazir/Vazir.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  variable: "--font-vazir",
+});
 
 export const metadata: Metadata = {
   applicationName: APP_NAME,
@@ -61,8 +106,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="fa" dir="rtl" suppressHydrationWarning>
-      <body>
+    <html lang="fa" dir="rtl" suppressHydrationWarning
+    >
+      <body className={`${tanha.variable} ${parastoo.variable} ${iranyekan.variable} ${vazir.variable} font-sans`}>
         <CityProvider>
           <AuthProvider>
             <Providers>

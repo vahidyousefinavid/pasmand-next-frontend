@@ -3,4 +3,6 @@ export type City = {
   name: string;
   code: number;
   icon: string;
+  lat?: number,
+  lng?: number
 };

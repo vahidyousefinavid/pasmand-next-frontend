@@ -1,9 +1,38 @@
+// import { NextResponse } from 'next/server';
+// import type { NextRequest } from 'next/server';
+
+// export function middleware(request: NextRequest) {
+//   const token = request.cookies.get('auth_token');
+//   const isLoginPage = request.nextUrl.pathname === '/login';
+
+//   if (!token && !isLoginPage) {
+//     return NextResponse.redirect(new URL('/login', request.url));
+//   }
+
+//   if (token && isLoginPage) {
+//     return NextResponse.redirect(new URL('/', request.url));
+//   }
+
+//   return NextResponse.next();
+// }
+
+// export const config = {
+//   matcher: [
+//     '/((?!api|_next/static|_next/image|img|favicon.ico|manifest.json|icons/.*).*)',
+//   ],
+// };
+
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
   const token = request.cookies.get('auth_token');
-  const isLoginPage = request.nextUrl.pathname === '/login';
+  const isLoginPage = pathname === '/login';
+
+  if (pathname === '/report') {
+    return NextResponse.next();
+  }
 
   if (!token && !isLoginPage) {
     return NextResponse.redirect(new URL('/login', request.url));
@@ -17,6 +46,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
+ 
   matcher: [
     '/((?!api|_next/static|_next/image|img|favicon.ico|manifest.json|icons/.*).*)',
   ],
