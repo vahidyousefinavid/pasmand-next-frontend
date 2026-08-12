@@ -1,104 +1,111 @@
+'use client';
+
 import { useState } from 'react';
 import ReactDatePicker from 'react-multi-date-picker';
 import moment from 'jalali-moment';
-import 'react-multi-date-picker/styles/colors/purple.css';
 import persian from 'react-date-object/calendars/persian';
 import persian_fa from 'react-date-object/locales/persian_fa';
-import './index.css'
-import { Loading } from '@/components/ui/loading';
-import { useCity } from '@/context/data-context';
+import { CalendarClock, ChevronRight, ChevronLeft, Sun, Sunset, Loader2 } from 'lucide-react';
+import './index.css';
+import { C, S, alpha } from '@/components/ui/tokens';
+import { Card, Btn } from '@/components/ui/kit';
+
 interface ThirdStepProps {
   loading: boolean;
   onComplete: (timeSlot: { date: string; time: string }) => void;
   onBack: () => void;
 }
 
+/**
+ * Step three — when the collector should come.
+ *
+ * The four windows are labelled morning/afternoon rather than being four
+ * identical grey boxes, because "which of these is the morning one" is the only
+ * question a reader actually has here.
+ */
+const TIME_SLOTS = [
+  { value: '۹:۰۰ - ۱۱:۰۰', part: 'صبح', Icon: Sun },
+  { value: '۱۱:۰۰ - ۱۳:۰۰', part: 'اواخر صبح', Icon: Sun },
+  { value: '۱۴:۰۰ - ۱۶:۰۰', part: 'بعدازظهر', Icon: Sunset },
+  { value: '۱۶:۰۰ - ۱۸:۰۰', part: 'عصر', Icon: Sunset },
+];
+
 export default function ThirdStep({ onComplete, onBack, loading }: ThirdStepProps) {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedTime, setSelectedTime] = useState<string>('');
-  const { selectedCity } = useCity();
-
-  const timeSlots = [
-    '۹:۰۰ - ۱۱:۰۰',
-    '۱۱:۰۰ - ۱۳:۰۰',
-    '۱۴:۰۰ - ۱۶:۰۰',
-    '۱۶:۰۰ - ۱۸:۰۰'
-  ];
 
   const handleDateChange = (date: any) => {
-    if (date) {
-      const persianDate = date.format('YYYY/MM/DD');
-      setSelectedDate(persianDate);
-    } else {
-      setSelectedDate('');
-    }
+    setSelectedDate(date ? date.format('YYYY/MM/DD') : '');
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-8">زمان جمع‌آوری را انتخاب کنید</h2>
-      {/* هشدار انتخاب شهر */}
-      {selectedCity?.name && (
-        <div className="mb-6 p-4 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-lg text-sm">
-          <strong>توجه:</strong> شهر انتخابی شما <strong>{selectedCity.name}</strong> است. درخواست شما تنها در این شهر بررسی خواهد شد. لطفاً از صحت انتخاب خود اطمینان حاصل فرمایید.
-        </div>
-      )}
-      <div className="bg-white p-6 rounded-lg shadow-md space-y-6">
-        <div className='flex w-full flex-col'>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            انتخاب تاریخ
-          </label>
-          <ReactDatePicker
-            value={selectedDate}
-            onChange={handleDateChange}
-            locale={persian_fa}
-            calendar={persian}
-            minDate={moment().toDate()}
-            className="react-date-picker w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            style={{
-              display: 'flex',
-              width: '100%',
-              minHeight: '40px',
-              borderRadius: '10px'
-            }}
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            انتخاب بازه زمانی
-          </label>
-          <div className="grid grid-cols-2 gap-4">
-            {timeSlots.map((slot) => (
-              <button
-                key={slot}
-                onClick={() => setSelectedTime(slot)}
-                className={`p-4 rounded-lg border ${selectedTime === slot
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-200 hover:border-blue-500'
-                  }`}
-              >
-                {slot}
-              </button>
-            ))}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
+      <p style={{ margin: 0, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>چه زمانی مراجعه کنیم؟</p>
+
+      <Card>
+        <div style={{ padding: `${S.s4}px`, display: 'flex', flexDirection: 'column', gap: S.s5 }}>
+          <div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: S.sm, fontWeight: 700, color: C.text, marginBottom: S.s2 }}>
+              <CalendarClock className="h-4 w-4" style={{ color: C.green }} />
+              تاریخ مراجعه
+            </label>
+            <ReactDatePicker
+              value={selectedDate}
+              onChange={handleDateChange}
+              locale={persian_fa}
+              calendar={persian}
+              minDate={moment().toDate()}
+              inputClass="pm-date-input"
+              placeholder="انتخاب تاریخ"
+            />
+          </div>
+
+          <div>
+            <p style={{ margin: `0 0 ${S.s2}px`, fontSize: S.sm, fontWeight: 700, color: C.text }}>بازهٔ زمانی</p>
+            <div style={{ display: 'grid', gap: S.s2, gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+              {TIME_SLOTS.map(({ value, part, Icon }) => {
+                const isOn = selectedTime === value;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setSelectedTime(value)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: S.s2, textAlign: 'start',
+                      padding: `${S.s3}px ${S.s3}px`, borderRadius: S.r2, cursor: 'pointer',
+                      background: isOn ? alpha(C.green, 12) : C.surface2,
+                      border: `1.5px solid ${isOn ? C.green : C.border}`,
+                      color: isOn ? C.green : C.text,
+                      fontFamily: 'inherit',
+                      transition: 'background .18s ease, border-color .18s ease',
+                    }}
+                  >
+                    <Icon className="h-4 w-4" style={{ flexShrink: 0, opacity: isOn ? 1 : 0.6 }} />
+                    <span style={{ minWidth: 0 }}>
+                      <span className="tnum" style={{ display: 'block', fontSize: S.sm, fontWeight: 800, direction: 'ltr' }}>{value}</span>
+                      <span style={{ display: 'block', fontSize: S.xs, color: isOn ? C.green : C.muted, marginTop: 2 }}>{part}</span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
+      </Card>
 
-        <div className="flex justify-between pt-4">
-          <button
-            onClick={() => onComplete({ date: selectedDate, time: selectedTime })}
-            disabled={!selectedDate || !selectedTime}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-          >
-
-            {loading ? 'در حال درخواست ...' : 'ثبت درخواست'}
-          </button>
-          <button
-            onClick={onBack}
-            className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-          >
-            بازگشت
-          </button>
-        </div>
+      <div style={{ display: 'flex', gap: S.s3 }}>
+        <Btn variant="ghost" onClick={onBack}>
+          <ChevronRight className="h-4 w-4" />
+          بازگشت
+        </Btn>
+        <Btn
+          full
+          disabled={!selectedDate || !selectedTime || loading}
+          onClick={() => onComplete({ date: selectedDate, time: selectedTime })}
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronLeft className="h-4 w-4" />}
+          ادامه و بازبینی
+        </Btn>
       </div>
     </div>
   );

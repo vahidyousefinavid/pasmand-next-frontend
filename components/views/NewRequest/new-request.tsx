@@ -1,155 +1,297 @@
 'use client';
 
-import { useState } from "react";
-import FirstStep from "./steps/first";
-import SecondStep from "./steps/second";
-import ThirdStep from "./steps/third";
-import axios from "axios";
-import { API } from "@/services/const";
-import { useToast } from "@/hooks/use-toast";
-import { axiosService } from "@/lib/axiosService";
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import Cookies from 'js-cookie';
+import { CheckCircle2, MapPin, CalendarClock, PackagePlus, ChevronRight, Loader2, FileClock } from 'lucide-react';
+
+import FirstStep from './steps/first';
+import SecondStep from './steps/second';
+import ThirdStep from './steps/third';
+import { API } from '@/services/const';
+import { useToast } from '@/hooks/use-toast';
+import { axiosService } from '@/lib/axiosService';
+import { useCity } from '@/context/data-context';
+import { wasteMeta } from '@/lib/wasteTypes';
+import { C, S, alpha } from '@/components/ui/tokens';
+import { Screen, Hero, Card, IconBadge, Btn, StepRail, type Step } from '@/components/ui/kit';
 
 interface RequestData {
   wasteType?: string;
-  location?: {
-    lat: number;
-    lng: number;
-    address: string;
-  };
-  timeSlot?: {
-    date: string;
-    time: string;
-  };
+  location?: { lat: number; lng: number; address: string };
+  timeSlot?: { date: string; time: string };
 }
+
+/**
+ * The four stages the citizen walks through, named as the thing being decided
+ * rather than "مرحله ۲". The rail shows all four from the start: knowing what
+ * is still ahead is most of what makes a multi-step form tolerable.
+ */
+const WIZARD_STEPS: Step[] = [
+  { key: 'type', title: 'نوع پسماند' },
+  { key: 'place', title: 'محل جمع‌آوری' },
+  { key: 'time', title: 'زمان مراجعه' },
+  { key: 'review', title: 'بازبینی و ثبت' },
+];
+
+/** What happens after the citizen presses ثبت — the same rail, other side. */
+const AFTER_STEPS: Step[] = [
+  { key: 'sent', title: 'درخواست ثبت شد', detail: 'در سامانه ثبت شد و برای شهر شما ارسال شد.' },
+  { key: 'review', title: 'بررسی و تأیید', detail: 'کارشناس زمان و محل را بررسی و تأیید می‌کند.' },
+  { key: 'collect', title: 'جمع‌آوری در محل', detail: 'جمع‌آور در بازهٔ انتخابی به آدرس شما مراجعه می‌کند.' },
+  { key: 'settle', title: 'توزین و تسویه', detail: 'پس از توزین، مبلغ به کیف پول شما واریز می‌شود.' },
+];
+
+const ORDER = ['first', 'second', 'third', 'review'] as const;
+type StepName = (typeof ORDER)[number] | 'success';
 
 export default function NewRequestView() {
   const { toast } = useToast();
+  const { selectedCity } = useCity();
 
-  const [loading, setLoading] = useState(false)
-  const [step, setStep] = useState('first');
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<StepName>('first');
   const [requestData, setRequestData] = useState<RequestData>({});
 
-  const newRequest = (data: any) => {
-    setLoading(true)
+  // Read `?type=` without useSearchParams: that hook forces a Suspense boundary
+  // on this route at build time, and the value is only ever a starting hint.
+  useEffect(() => {
+    const type = new URLSearchParams(window.location.search).get('type');
+    if (type) {
+      setRequestData((d) => ({ ...d, wasteType: type }));
+      setStep('second');
+    }
+  }, []);
+
+  const submit = () => {
+    setLoading(true);
     axiosService({
       url: API.NEW_REQUEST,
       method: 'post',
-      body: data,
-      token: Cookies.get('auth_token')
+      body: requestData,
+      token: Cookies.get('auth_token'),
     })
-      .then((res: any) => {
-        toast({
-          variant: 'success',
-          title: 'موفقیت',
-          description: 'با موفقیت وارد شدید',
-        });
-        setLoading(false)
+      .then(() => {
+        toast({ variant: 'success', title: 'ثبت شد', description: 'درخواست جمع‌آوری شما ثبت شد.' });
+        setLoading(false);
         setStep('success');
-      }).catch((err) => {
-        toast({
-          variant: 'destructive',
-          title: 'ناموفق',
-          description: 'متاسفانه انجام نشد مجدد تلاش کنید',
-        });
-        setLoading(false)
       })
-  }
-
-  const handleWasteTypeSelect = (wasteType: string) => {
-    setRequestData({ ...requestData, wasteType });
-    setStep('second');
+      .catch(() => {
+        toast({ variant: 'destructive', title: 'ناموفق', description: 'ثبت درخواست انجام نشد؛ دوباره تلاش کنید.' });
+        setLoading(false);
+      });
   };
 
-  const handleLocationSelect = (location: { lat: number; lng: number; address: string }) => {
-    setRequestData({ ...requestData, location });
-    setStep('third');
-  };
+  const meta = wasteMeta(requestData.wasteType);
+  const currentIndex = step === 'success' ? WIZARD_STEPS.length : ORDER.indexOf(step as any);
+  const accent = requestData.wasteType ? meta.color : C.green;
 
-  const handleTimeSlotSelect = (timeSlot: { date: string; time: string }) => {
-    setRequestData({ ...requestData, timeSlot });
-    newRequest({ ...requestData, timeSlot })
-  };
+  // The header and tab bar are rendered once by app/(user)/layout.tsx.
+  return (
+    <Screen>
+        <Hero
+          icon={<PackagePlus className="h-6 w-6" />}
+          title="درخواست جمع‌آوری"
+          sub={
+            step === 'success'
+              ? 'درخواست شما ثبت شد و وارد صف بررسی شده است.'
+              : 'در چهار قدم مشخص می‌کنید چه چیزی، کجا و چه زمانی تحویل داده می‌شود.'
+          }
+        />
 
-  const renderContent = (step: string) => {
-    switch (step) {
-      case 'first':
-        return <FirstStep onNext={handleWasteTypeSelect} />;
-      case 'second':
-        return (
+        {step !== 'success' && (
+          <Card style={{ marginBottom: S.s4 }}>
+            <div style={{ padding: `${S.s4}px` }}>
+              <StepRail steps={WIZARD_STEPS} current={currentIndex} color={accent} compact />
+            </div>
+          </Card>
+        )}
+
+        {step === 'first' && (
+          <FirstStep
+            selected={requestData.wasteType}
+            onNext={(wasteType: string) => {
+              setRequestData((d) => ({ ...d, wasteType }));
+              setStep('second');
+            }}
+          />
+        )}
+
+        {step === 'second' && (
           <SecondStep
-            onNext={handleLocationSelect}
+            onNext={(location: { lat: number; lng: number; address: string }) => {
+              setRequestData((d) => ({ ...d, location }));
+              setStep('third');
+            }}
             onBack={() => setStep('first')}
           />
-        );
-      case 'third':
-        return (
+        )}
+
+        {step === 'third' && (
           <ThirdStep
-            loading={loading}
-            onComplete={handleTimeSlotSelect}
+            loading={false}
+            onComplete={(timeSlot: { date: string; time: string }) => {
+              setRequestData((d) => ({ ...d, timeSlot }));
+              setStep('review');
+            }}
             onBack={() => setStep('second')}
           />
-        );
-      case 'success':
-        return (
-          <div className="max-w-4xl mx-auto text-center py-12">
-            <div className="bg-white p-8 rounded-lg shadow-md">
-              <h2 className="text-2xl font-bold text-green-600 mb-4">درخواست شما با موفقیت ثبت شد! 🎉</h2>
-              <p className="text-gray-600">
-                درخواست جمع‌آوری پسماند شما دریافت شد. ما پسماند {requestData.wasteType} شما را در تاریخ {requestData.timeSlot?.date} بین ساعت {requestData.timeSlot?.time} جمع‌آوری خواهیم کرد.
-              </p>
-              <button
-                onClick={() => {
-                  setStep('first');
-                  setRequestData({});
-                }}
-                className="mt-6 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                ثبت درخواست جدید
-              </button>
-            </div>
-          </div>
-        );
-      default:
-        return <div>مرحله نامشخص</div>;
-    }
-  };
+        )}
 
-  return (
-    <div dir="rtl" className="min-h-screen bg-gray-50 py-[120px]">
-      <div className="container mx-auto px-4">
-        <div className="mb-12">
-          <h1 className="text-3xl font-bold text-center text-gray-800 mb-4">
-            درخواست جمع‌آوری پسماند
-          </h1>
-          <div className="flex justify-center space-x-4 space-x-reverse">
-            {['first', 'second', 'third'].map((stepName, index) => (
-              <div
-                key={stepName}
-                className="flex items-center"
-              >
-                <div
-                  className={`w-8 h-8 rounded-full bg-[hsl(25,84%,48%)] flex items-center justify-center ${['first', 'second', 'third'].indexOf(step) >= index
-                    ? 'bg-[hsl(25,84%,48%)] text-white'
-                    : 'bg-[hsl(25,84%,48%)] text-white'
-                    }`}
-                >
-                  {index + 1}
-                </div>
-                {index < 2 && (
-                  <div
-                    className={`w-12 h-1 mx-2 ${['first', 'second', 'third'].indexOf(step) > index
-                      ? 'bg-[hsl(25,84%,48%)]'
-                      : 'bg-gray-200'
-                      }`}
-                  />
+        {step === 'review' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
+            <Card accent={accent}>
+              <div style={{ padding: `${S.s5}px ${S.s4}px` }}>
+                <p style={{ margin: `0 0 ${S.s4}px`, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>
+                  بازبینی درخواست
+                </p>
+
+                <Row
+                  icon={<meta.Icon className="h-4 w-4" />}
+                  color={meta.color}
+                  label="نوع پسماند"
+                  value={meta.name}
+                  onEdit={() => setStep('first')}
+                />
+                <Row
+                  icon={<MapPin className="h-4 w-4" />}
+                  color={C.statusInfo}
+                  label="محل جمع‌آوری"
+                  value={requestData.location?.address || '—'}
+                  onEdit={() => setStep('second')}
+                />
+                <Row
+                  icon={<CalendarClock className="h-4 w-4" />}
+                  color={C.amber}
+                  label="زمان مراجعه"
+                  value={`${requestData.timeSlot?.date || '—'} • ${requestData.timeSlot?.time || '—'}`}
+                  onEdit={() => setStep('third')}
+                  last
+                />
+
+                {selectedCity?.name && (
+                  <p
+                    style={{
+                      margin: `${S.s4}px 0 0`, padding: `${S.s3}px ${S.s3}px`, borderRadius: S.r1,
+                      background: alpha(C.amber, 10), border: `1px solid ${alpha(C.amber, 22)}`,
+                      color: C.text, fontSize: S.xs, lineHeight: 1.9,
+                    }}
+                  >
+                    این درخواست در شهر <strong>{selectedCity.name}</strong> بررسی می‌شود. اگر آدرس در شهر دیگری است،
+                    پیش از ثبت شهر را از منوی بالا تغییر دهید.
+                  </p>
                 )}
               </div>
-            ))}
+            </Card>
+
+            <div style={{ display: 'flex', gap: S.s3 }}>
+              <Btn variant="ghost" onClick={() => setStep('third')}>
+                <ChevronRight className="h-4 w-4" />
+                بازگشت
+              </Btn>
+              <Btn
+                onClick={submit}
+                disabled={loading || !requestData.wasteType || !requestData.location || !requestData.timeSlot}
+                color={accent}
+                full
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                {loading ? 'در حال ثبت…' : 'ثبت نهایی درخواست'}
+              </Btn>
+            </div>
           </div>
-        </div>
-        {renderContent(step)}
+        )}
+
+        {step === 'success' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
+            <Card accent={C.green}>
+              <div style={{ padding: `${S.s6}px ${S.s4}px`, display: 'grid', justifyItems: 'center', gap: S.s3, textAlign: 'center' }}>
+                <IconBadge color={C.green} size={58}><CheckCircle2 className="h-7 w-7" /></IconBadge>
+                <p style={{ margin: 0, fontSize: S.lg, fontWeight: 800, color: C.textStrong }}>درخواست شما ثبت شد</p>
+                <p style={{ margin: 0, fontSize: S.sm, color: C.muted, lineHeight: 1.9, maxWidth: '44ch' }}>
+                  پسماند «{meta.name}» در تاریخ {requestData.timeSlot?.date} و بازهٔ {requestData.timeSlot?.time} جمع‌آوری می‌شود.
+                </p>
+              </div>
+            </Card>
+
+            <Card>
+              <div style={{ padding: `${S.s5}px ${S.s4}px` }}>
+                <p style={{ margin: `0 0 ${S.s4}px`, fontSize: S.base, fontWeight: 800, color: C.textStrong }}>از این‌جا به بعد</p>
+                <StepRail steps={AFTER_STEPS} current={1} />
+              </div>
+            </Card>
+
+            <div style={{ display: 'flex', gap: S.s3 }}>
+              <Link href="/history" style={{ flex: 1, textDecoration: 'none' }}>
+                <span
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: S.s2,
+                    padding: '13px 20px', borderRadius: S.r2, background: C.green, color: C.onAccent,
+                    fontSize: S.base, fontWeight: 800, boxShadow: `0 8px 20px ${alpha(C.green, 26)}`,
+                  }}
+                >
+                  <FileClock className="h-4 w-4" />
+                  پیگیری درخواست
+                </span>
+              </Link>
+              <Btn
+                variant="soft"
+                onClick={() => {
+                  setRequestData({});
+                  setStep('first');
+                }}
+              >
+                درخواست جدید
+              </Btn>
+            </div>
+          </div>
+        )}
+    </Screen>
+  );
+}
+
+function Row({
+  icon,
+  color,
+  label,
+  value,
+  onEdit,
+  last,
+}: {
+  icon: React.ReactNode;
+  color: string;
+  label: string;
+  value: string;
+  onEdit: () => void;
+  last?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex', alignItems: 'center', gap: S.s3,
+        paddingBottom: last ? 0 : S.s3,
+        marginBottom: last ? 0 : S.s3,
+        borderBottom: last ? undefined : `1px dashed ${C.border}`,
+      }}
+    >
+      <IconBadge color={color} size={36}>{icon}</IconBadge>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ margin: 0, fontSize: S.xs, color: C.muted, fontWeight: 600 }}>{label}</p>
+        <p style={{ margin: '3px 0 0', fontSize: S.sm, fontWeight: 700, color: C.textStrong, lineHeight: 1.7, overflowWrap: 'anywhere' }}>
+          {value}
+        </p>
       </div>
+      <button
+        type="button"
+        onClick={onEdit}
+        style={{
+          flexShrink: 0, background: 'transparent', border: `1px solid ${C.border}`,
+          borderRadius: S.rPill, padding: '6px 13px', fontSize: S.xs, fontWeight: 700,
+          color: C.muted, cursor: 'pointer', fontFamily: 'inherit',
+        }}
+      >
+        ویرایش
+      </button>
     </div>
   );
 }

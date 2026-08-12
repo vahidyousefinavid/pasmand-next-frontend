@@ -1,358 +1,359 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { MapPin, Plus, X, Home, Building2, Briefcase } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import Cookies from 'js-cookie';
+import { MapPin, Plus, X, Home, Building2, Briefcase, Loader2, Trash2 } from 'lucide-react';
+
 import { axiosService } from '@/lib/axiosService';
 import { API } from '@/services/const';
-import Cookies from 'js-cookie';
 import { useToast } from '@/hooks/use-toast';
-import { Input } from '@/components/ui/input';
-// Dynamic import of Map component with no SSR
-const MapWithNoSSR = dynamic(
-  () => import('@/components/views/Components/map'),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="h-[300px] bg-gray-100 rounded-lg flex items-center justify-center">
-        در حال بارگذاری نقشه...
-      </div>
-    )
-  }
-);
+import { C, S, alpha } from '@/components/ui/tokens';
+import { Screen, Hero, Card, IconBadge, Btn, EmptyState, Modal, Field, Shimmer } from '@/components/ui/kit';
+
+const MapWithNoSSR = dynamic(() => import('@/components/views/Components/map'), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: '100%', display: 'grid', placeItems: 'center', background: 'var(--pm-surface-2)', color: 'var(--pm-muted)', fontSize: '0.85rem' }}>
+      در حال بارگذاری نقشه…
+    </div>
+  ),
+});
 
 interface Address {
   _id: string;
   title: string;
   type: 'home' | 'work' | 'other';
   address: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
+  location: { lat: number; lng: number };
 }
 
-const addressTypeIcons = {
-  home: <Home className="w-5 h-5" />,
-  work: <Briefcase className="w-5 h-5" />,
-  other: <Building2 className="w-5 h-5" />
-};
+const TYPES: { value: Address['type']; label: string; icon: React.ReactNode; color: string }[] = [
+  { value: 'home', label: 'خانه', icon: <Home className="h-4 w-4" />, color: C.green },
+  { value: 'work', label: 'محل کار', icon: <Briefcase className="h-4 w-4" />, color: C.statusInfo },
+  { value: 'other', label: 'سایر', icon: <Building2 className="h-4 w-4" />, color: C.violet },
+];
 
-const addressTypeLabels = {
-  home: 'خانه',
-  work: 'محل کار',
-  other: 'سایر'
-};
+const typeMeta = (t: Address['type']) => TYPES.find((x) => x.value === t) ?? TYPES[2];
 
 export default function AddressesPage() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [lookup, setLookup] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [newAddress, setNewAddress] = useState({
     title: '',
     type: 'home' as Address['type'],
     address: '',
-    location: null as { lat: number; lng: number } | null
+    location: null as { lat: number; lng: number } | null,
   });
   const [suggestions, setSuggestions] = useState<{ display_name: string; lat: string; lon: string }[]>([]);
-  const [loading, setLoading] = useState(false);
 
   const { toast } = useToast();
 
   const getAddresses = () => {
-    setLoading(true)
-    axiosService({
-      url: API.GET_PROFILE,
-      method: 'get',
-      token: Cookies.get('auth_token')
-    })
+    setLoading(true);
+    axiosService({ url: API.GET_PROFILE, method: 'get', token: Cookies.get('auth_token') })
       .then((res: any) => {
-        setAddresses(res?.data?.user?.addresses)
-        setLoading(false)
-      }).catch((err) => {
-        toast({
-          variant: 'destructive',
-          title: 'ناموفق',
-          description: 'متاسفانه انجام نشد صفحه را دوباره بارگزاری کنید',
-        });
-        setLoading(false)
+        setAddresses(res?.data?.user?.addresses || []);
+        setLoading(false);
       })
-  }
+      .catch(() => {
+        toast({ variant: 'destructive', title: 'ناموفق', description: 'دریافت آدرس‌ها انجام نشد.' });
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => { getAddresses(); }, []);
 
   const handleAddAddress = () => {
-    if (newAddress.title && newAddress.address && newAddress.location) {
-      try {
-        axiosService({
-          url: API.ADD_ADDRESS,
-          method: 'post',
-          token: Cookies.get('auth_token'),
-          body: {
-            title: newAddress.title,
-            type: newAddress.type,
-            address: newAddress.address,
-            location: newAddress.location
-          }
-        }).then((res) => {
-          setAddresses(res?.data?.addresses)
-          toast({
-            variant: 'success',
-            title: 'موفق',
-            description: 'آدرس جدید با موفقیت اضافه شد.',
-          });
-          setIsModalOpen(false);
-          setNewAddress({
-            title: '',
-            type: 'home',
-            address: '',
-            location: null
-          });
-        })
-      } catch (err) {
-        toast({
-          variant: 'destructive',
-          title: 'خطا',
-          description: 'افزودن آدرس با مشکل مواجه شد. لطفاً دوباره تلاش کنید.',
-        });
-      }
-    }
+    if (!newAddress.title || !newAddress.address || !newAddress.location) return;
+    setBusy(true);
+    axiosService({
+      url: API.ADD_ADDRESS,
+      method: 'post',
+      token: Cookies.get('auth_token'),
+      body: {
+        title: newAddress.title,
+        type: newAddress.type,
+        address: newAddress.address,
+        location: newAddress.location,
+      },
+    })
+      .then((res: any) => {
+        setAddresses(res?.data?.addresses || []);
+        toast({ variant: 'success', title: 'ثبت شد', description: 'آدرس جدید اضافه شد.' });
+        setIsModalOpen(false);
+        setNewAddress({ title: '', type: 'home', address: '', location: null });
+      })
+      .catch(() => {
+        toast({ variant: 'destructive', title: 'خطا', description: 'افزودن آدرس انجام نشد.' });
+      })
+      .finally(() => setBusy(false));
   };
 
   const handleDeleteAddress = (id: string) => {
-    try {
-      axiosService({
-        url: `${API.DELETE_ADDRESS}?addressId=${id}`,
-        method: 'delete',
-        token: Cookies.get('auth_token')
-      }).then((res) => {
-        setAddresses(res?.data?.addresses)
-        toast({
-          variant: 'success',
-          title: 'موفق',
-          description: 'آدرس با موفقیت حذف شد.',
-        });
-      });
-
-    } catch (err) {
-      toast({
-        variant: 'destructive',
-        title: 'خطا',
-        description: 'حذف آدرس با مشکل مواجه شد. لطفاً دوباره تلاش کنید.',
-      });
-    }
+    setDeletingId(id);
+    axiosService({ url: `${API.DELETE_ADDRESS}?addressId=${id}`, method: 'delete', token: Cookies.get('auth_token') })
+      .then((res: any) => {
+        setAddresses(res?.data?.addresses || []);
+        toast({ variant: 'success', title: 'حذف شد', description: 'آدرس حذف شد.' });
+      })
+      .catch(() => {
+        toast({ variant: 'destructive', title: 'خطا', description: 'حذف آدرس انجام نشد.' });
+      })
+      .finally(() => setDeletingId(null));
   };
 
   const handleLocationSelect = async (latlng: { lat: number; lng: number }) => {
-    setNewAddress(prev => ({ ...prev, location: latlng }));
-    setLoading(true);
+    setNewAddress((prev) => ({ ...prev, location: latlng }));
+    setLookup(true);
     try {
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json&accept-language=fa`
+        `https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json&accept-language=fa`,
       );
       const data = await response.json();
-      setNewAddress(prev => ({ ...prev, address: data.display_name || 'آدرس یافت نشد' }));
+      setNewAddress((prev) => ({ ...prev, address: data.display_name || 'آدرس یافت نشد' }));
     } catch {
-      setNewAddress(prev => ({ ...prev, address: 'خطا در دریافت آدرس' }));
+      setNewAddress((prev) => ({ ...prev, address: 'خطا در دریافت آدرس' }));
     } finally {
-      setLoading(false);
+      setLookup(false);
     }
   };
 
   const handleAddressChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setNewAddress(prev => ({ ...prev, address: value }));
-
+    setNewAddress((prev) => ({ ...prev, address: value }));
     if (value.length > 2) {
-      setLoading(true);
+      setLookup(true);
       try {
         const response = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&addressdetails=1&limit=5&countrycodes=ir&accept-language=fa`
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(value)}&format=json&addressdetails=1&limit=5&countrycodes=ir&accept-language=fa`,
         );
-        const data = await response.json();
-        setSuggestions(data);
+        setSuggestions(await response.json());
       } catch {
         setSuggestions([]);
       } finally {
-        setLoading(false);
+        setLookup(false);
       }
     } else {
       setSuggestions([]);
     }
   };
 
-  const handleSuggestionClick = (suggestion: { display_name: string; lat: string; lon: string }) => {
-    setNewAddress(prev => ({
+  const handleSuggestionClick = (s: { display_name: string; lat: string; lon: string }) => {
+    setNewAddress((prev) => ({
       ...prev,
-      location: { lat: parseFloat(suggestion.lat), lng: parseFloat(suggestion.lon) },
-      address: suggestion.display_name
+      location: { lat: parseFloat(s.lat), lng: parseFloat(s.lon) },
+      address: s.display_name,
     }));
     setSuggestions([]);
   };
 
-  useEffect(() => {
-    getAddresses()
-  }, [])
-
   return (
-    <div className="min-h-screen py-24 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">آدرس‌های من</h1>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-            افزودن آدرس جدید
-          </button>
-        </div>
+    <>
+      <Screen>
+        <Hero
+          icon={<MapPin className="h-6 w-6" />}
+          title="آدرس‌های من"
+          sub="آدرس‌های ذخیره‌شده، ثبت درخواست بعدی را کوتاه‌تر می‌کند."
+          aside={
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontFamily: 'inherit',
+                background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.3)',
+                color: C.onHero, padding: '11px 17px', borderRadius: S.rPill,
+                fontSize: S.sm, fontWeight: 800, whiteSpace: 'nowrap',
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              آدرس جدید
+            </button>
+          }
+        />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {addresses.map((address) => (
-            <div key={address._id} className="bg-white p-6 rounded-lg shadow-md">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 text-blue-600 rounded-full">
-                    {addressTypeIcons[address.type]}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">{address.title}</h3>
-                    <span className="text-sm text-gray-500">{addressTypeLabels[address.type]}</span>
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleDeleteAddress(address._id)}
-                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
+        {loading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: S.s2 }}>
+            {[0, 1].map((i) => <Shimmer key={i} height={104} />)}
+          </div>
+        ) : addresses.length === 0 ? (
+          <EmptyState
+            icon={<MapPin className="h-6 w-6" />}
+            title="هنوز آدرسی ثبت نکرده‌اید"
+            sub="یک آدرس ذخیره کنید تا در ثبت درخواست فقط انتخابش کنید."
+            action={
+              <div style={{ marginTop: S.s2 }}>
+                <Btn onClick={() => setIsModalOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  افزودن آدرس
+                </Btn>
               </div>
-              <div className="flex items-start gap-3 text-gray-600">
-                <MapPin className="w-5 h-5 mt-1 flex-shrink-0" />
-                <p>{address.address}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Modal for adding new address */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[1000000]">
-            <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold">افزودن آدرس جدید</h2>
-                  <button
-                    onClick={() => setIsModalOpen(false)}
-                    className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      عنوان آدرس
-                    </label>
-                    <Input
-                      type="text"
-                      value={newAddress.title}
-                      onChange={(e) => setNewAddress({ ...newAddress, title: e.target.value })}
-                      placeholder="مثال: خانه، محل کار"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      نوع آدرس
-                    </label>
-                    <div className="grid grid-cols-3 gap-4">
-                      {Object.entries(addressTypeLabels).map(([type, label]) => (
-                        <button
-                          key={type}
-                          onClick={() => setNewAddress({ ...newAddress, type: type as Address['type'] })}
-                          className={`p-3 rounded-lg border flex items-center justify-center gap-2
-                            ${newAddress.type === type
-                              ? 'border-blue-500 bg-blue-50 text-blue-600'
-                              : 'border-gray-200 hover:border-blue-500'
-                            }`}
-                        >
-                          {addressTypeIcons[type as Address['type']]}
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      موقعیت روی نقشه
-                    </label>
-                    <div className="h-[300px] rounded-lg overflow-hidden border-2 border-gray-200">
-                      <MapWithNoSSR
-                        center={{ lat: 35.6892, lng: 51.3890 }}
-                        onLocationSelect={handleLocationSelect}
-                        selectedLocation={newAddress.location}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      آدرس دقیق
-                    </label>
-                    <Input
-                      type="text"
-                      value={newAddress.address}
-                      onChange={handleAddressChange}
-                      placeholder="جستجوی آدرس..."
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                    />
-                    {loading && (
-                      <div className="absolute left-4 top-11">
-                        <div className="loader">
-                          <span></span>
-                          <span></span>
-                          <span></span>
+            }
+          />
+        ) : (
+          <div style={{ display: 'grid', gap: S.s3, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+            {addresses.map((address, i) => {
+              const meta = typeMeta(address.type);
+              return (
+                <div key={address._id} className="pm-fade-up" style={{ animationDelay: `${Math.min(i, 6) * 40}ms` }}>
+                  <Card accent={meta.color} style={{ height: '100%' }}>
+                    <div style={{ padding: `${S.s4}px` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: S.s3 }}>
+                        <IconBadge color={meta.color}>{meta.icon}</IconBadge>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ margin: 0, fontSize: S.base, fontWeight: 800, color: C.textStrong }}>{address.title}</p>
+                          <p style={{ margin: '4px 0 0', fontSize: S.xs, color: C.muted }}>{meta.label}</p>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteAddress(address._id)}
+                          aria-label="حذف آدرس"
+                          disabled={deletingId === address._id}
+                          style={{
+                            flexShrink: 0, cursor: 'pointer', background: 'transparent',
+                            border: `1px solid ${C.border}`, borderRadius: S.rPill, padding: 8,
+                            color: C.statusDanger, display: 'grid', placeItems: 'center',
+                          }}
+                        >
+                          {deletingId === address._id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                        </button>
                       </div>
-                    )}
-                    {suggestions.length > 0 && (
-                      <ul className="absolute z-10 bg-white border border-gray-300 rounded-lg w-full mt-1 max-h-40 overflow-y-auto text-right">
-                        {suggestions.map((suggestion, index) => (
-                          <li
-                            key={index}
-                            onClick={() => handleSuggestionClick(suggestion)}
-                            className="p-2 cursor-pointer hover:bg-gray-100"
-                          >
-                            {suggestion.display_name}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
 
-                  <div className="flex justify-end gap-4 pt-4">
-                    <button
-                      onClick={() => setIsModalOpen(false)}
-                      className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                      انصراف
-                    </button>
-                    <button
-                      onClick={handleAddAddress}
-                      disabled={!newAddress.title || !newAddress.address || !newAddress.location}
-                      className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                    >
-                      ثبت آدرس
-                    </button>
-                  </div>
+                      <p
+                        style={{
+                          margin: `${S.s3}px 0 0`, paddingTop: S.s3, borderTop: `1px dashed ${C.border}`,
+                          fontSize: S.xs, color: C.muted, lineHeight: 1.9, display: 'flex', gap: 6,
+                        }}
+                      >
+                        <MapPin className="h-3.5 w-3.5" style={{ flexShrink: 0, marginTop: 3 }} />
+                        <span style={{ overflowWrap: 'anywhere' }}>{address.address}</span>
+                      </p>
+                    </div>
+                  </Card>
                 </div>
-              </div>
-            </div>
+              );
+            })}
           </div>
         )}
-      </div>
-    </div>
+      </Screen>
+
+      {isModalOpen && (
+        <Modal wide onClose={() => setIsModalOpen(false)}>
+          <div style={{ padding: S.s5, display: 'flex', flexDirection: 'column', gap: S.s4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: S.s3 }}>
+              <p style={{ margin: 0, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>افزودن آدرس</p>
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                aria-label="بستن"
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: C.muted, padding: 4 }}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <Field label="عنوان آدرس">
+              <input
+                className="pm-field"
+                value={newAddress.title}
+                onChange={(e) => setNewAddress({ ...newAddress, title: e.target.value })}
+                placeholder="مثال: خانه، محل کار"
+              />
+            </Field>
+
+            <div>
+              <p style={{ margin: `0 0 ${S.s2}px`, fontSize: S.sm, fontWeight: 700, color: C.text }}>نوع آدرس</p>
+              <div style={{ display: 'grid', gap: S.s2, gridTemplateColumns: 'repeat(3, 1fr)' }}>
+                {TYPES.map((t) => {
+                  const on = newAddress.type === t.value;
+                  return (
+                    <button
+                      key={t.value}
+                      type="button"
+                      onClick={() => setNewAddress({ ...newAddress, type: t.value })}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                        padding: `${S.s3}px 6px`, borderRadius: S.r2, cursor: 'pointer', fontFamily: 'inherit',
+                        fontSize: S.xs, fontWeight: 800,
+                        background: on ? alpha(t.color, 12) : C.surface2,
+                        border: `1.5px solid ${on ? t.color : C.border}`,
+                        color: on ? t.color : C.text,
+                      }}
+                    >
+                      {t.icon}
+                      {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <p style={{ margin: `0 0 ${S.s2}px`, fontSize: S.sm, fontWeight: 700, color: C.text }}>موقعیت روی نقشه</p>
+              <div style={{ height: 250, borderRadius: S.r2, overflow: 'hidden', border: `1px solid ${C.border}` }}>
+                <MapWithNoSSR
+                  center={newAddress.location || { lat: 35.6892, lng: 51.389 }}
+                  onLocationSelect={handleLocationSelect}
+                  selectedLocation={newAddress.location}
+                />
+              </div>
+            </div>
+
+            <div style={{ position: 'relative' }}>
+              <Field label="آدرس دقیق">
+                <input
+                  className="pm-field"
+                  value={newAddress.address}
+                  onChange={handleAddressChange}
+                  placeholder="جستجوی آدرس…"
+                />
+              </Field>
+              {lookup && (
+                <span style={{ position: 'absolute', insetInlineStart: 14, bottom: 15 }}>
+                  <Loader2 className="h-4 w-4 animate-spin" style={{ color: C.green }} />
+                </span>
+              )}
+              {suggestions.length > 0 && (
+                <ul
+                  style={{
+                    position: 'absolute', zIndex: 20, insetInline: 0, marginTop: 6, listStyle: 'none', padding: 6,
+                    maxHeight: 170, overflowY: 'auto', background: C.surface,
+                    border: `1px solid ${C.border}`, borderRadius: S.r2, boxShadow: C.shadowLift,
+                  }}
+                >
+                  {suggestions.map((s, index) => (
+                    <li key={index}>
+                      <button
+                        type="button"
+                        onClick={() => handleSuggestionClick(s)}
+                        style={{
+                          display: 'block', width: '100%', textAlign: 'start', cursor: 'pointer',
+                          padding: `${S.s2}px ${S.s3}px`, borderRadius: S.r1, background: 'transparent',
+                          border: 'none', fontFamily: 'inherit', fontSize: S.xs, color: C.text, lineHeight: 1.8,
+                        }}
+                      >
+                        {s.display_name}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div style={{ display: 'flex', gap: S.s2 }}>
+              <Btn full onClick={handleAddAddress} disabled={busy || !newAddress.title || !newAddress.address || !newAddress.location}>
+                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                ثبت آدرس
+              </Btn>
+              <Btn variant="ghost" onClick={() => setIsModalOpen(false)}>انصراف</Btn>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </>
   );
 }

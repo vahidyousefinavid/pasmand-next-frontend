@@ -1,14 +1,14 @@
-import HistoryPage from "@/components/views/History/history";
-import NewRequestView from "@/components/views/NewRequest/new-request";
-import { Metadata } from "next";
+import HistoryPage from '@/components/views/History/history';
+import type { Metadata } from 'next';
 
+// Behind the auth gate and disallowed in robots.ts, so this title is for the
+// browser tab and the share sheet rather than for a search result.
 export const metadata: Metadata = {
-  title: 'سوابق درخواست ها',
-  description: ''
-}
+  title: 'پیگیری درخواست‌ها',
+  description: 'مسیر هر درخواست جمع‌آوری، از ثبت تا توزین و تسویه.',
+  robots: { index: false, follow: false },
+};
 
-export default function History() {
-  return (
-    <HistoryPage />
-  );
+export default function Page() {
+  return <HistoryPage />;
 }

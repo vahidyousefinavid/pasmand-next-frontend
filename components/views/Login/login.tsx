@@ -2,26 +2,32 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { Phone, Leaf, X, Building2, MapPin } from 'lucide-react';
-import axios from "axios";
-import { API } from '@/services/const';
+import axios from 'axios';
 import Cookies from 'js-cookie';
+import { Phone, Building2, ChevronRight, Loader2, ShieldCheck, Check } from 'lucide-react';
+
+import { useToast } from '@/hooks/use-toast';
+import { API } from '@/services/const';
 import { useAuth } from '@/context/auth-context';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cities } from '@/variables';
-import { Drawer } from '@/components/ui/drawer';
+import { useCity } from '@/context/data-context';
+import { C, S, alpha } from '@/components/ui/tokens';
+import { Card, Btn, StepRail, type Step } from '@/components/ui/kit';
+import EcoGlobe from '@/components/ui/EcoGlobe';
+
+/**
+ * Sign in.
+ *
+ * One column, three states — city, phone, code — on the same rail the rest of
+ * the app uses, so arriving at the wizard later is not a change of language.
+ * The bottom sheet the old screen used is gone: it hid the current step behind
+ * an extra tap and had two different chromes on one page.
+ */
+
+const STEPS: Step[] = [
+  { key: 'city', title: 'انتخاب شهر' },
+  { key: 'phone', title: 'شمارهٔ همراه' },
+  { key: 'code', title: 'کد تأیید' },
+];
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -32,56 +38,34 @@ export default function LoginPage() {
   const [timer, setTimer] = useState(90);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [phoneError, setPhoneError] = useState('');
-  const [codeError, setCodeError] = useState('');
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState('');
   const [showCitySelect, setShowCitySelect] = useState(true);
-  const [welcomeMessage, setWelcomeMessage] = useState('');
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
   const { toast } = useToast();
   const { login } = useAuth();
-
-  const checkLocalStorage = async () => {
-    const savedCity = localStorage.getItem('selectedCity');
-    const savedPhone = localStorage.getItem('userPhone');
-
-    if (savedCity && cities.find(city => city.id === savedCity)) {
-      setSelectedCity(savedCity);
-      setShowCitySelect(false);
-      const cityData = cities.find(city => city.id === savedCity);
-      if (cityData) {
-        setWelcomeMessage(`به سامانه مدیریت پسماند ${cityData.name} خوش آمدید`);
-      }
-
-    }
-    if (savedPhone) {
-      setPhone(savedPhone);
-      setWelcomeMessage(prev =>
-        prev ? `${prev}\nشماره همراه شما: ${savedPhone}` : `شماره همراه شما: ${savedPhone}`
-      );
-    }
-    if (!isDrawerOpen) {
-      setIsDrawerOpen(true)
-    }
-  };
+  // Cities are whatever the panel currently offers, not a compiled-in list.
+  const { cities } = useCity();
 
   useEffect(() => {
-    checkLocalStorage();
-
-  }, []);
+    const savedCity = localStorage.getItem('selectedCity');
+    const savedPhone = localStorage.getItem('userPhone');
+    if (savedCity && cities.find((c) => c.id === savedCity)) {
+      setSelectedCity(savedCity);
+      setShowCitySelect(false);
+    }
+    if (savedPhone) setPhone(savedPhone);
+    // Depends on `cities`: the list arrives from the API after first paint, and
+    // a saved city that is not in the list yet must not skip the picker.
+  }, [cities]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
-
     if (isTimerRunning && timer > 0) {
-      interval = setInterval(() => {
-        setTimer((prev) => prev - 1);
-      }, 1000);
+      interval = setInterval(() => setTimer((prev) => prev - 1), 1000);
     } else if (timer === 0) {
       setIsTimerRunning(false);
     }
-
     return () => {
       if (interval) clearInterval(interval);
     };
@@ -92,9 +76,9 @@ export default function LoginPage() {
   }
 
   function formatTimer(seconds: number): string {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`.replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
   }
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,12 +86,7 @@ export default function LoginPage() {
     setPhone(value);
     setVerifyCodeStatus(false);
     setEnteredCode(['', '', '', '']);
-
-    if (/^09\d{9}$/.test(value) || value === '') {
-      setPhoneError('');
-    } else {
-      setPhoneError('شماره موبایل معتبر نیست');
-    }
+    setPhoneError(/^09\d{9}$/.test(value) || value === '' ? '' : 'شماره موبایل معتبر نیست');
   };
 
   const handleCodeChange = (value: string, index: number) => {
@@ -115,319 +94,264 @@ export default function LoginPage() {
       const newCode = [...enteredCode];
       newCode[index] = value;
       setEnteredCode(newCode);
-
-      if (value !== '' && index < 3) {
-        inputRefs.current[index + 1]?.focus();
-      }
+      if (value !== '' && index < 3) inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
-    if (e.key === 'Backspace' && !enteredCode[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
+    if (e.key === 'Backspace' && !enteredCode[index] && index > 0) inputRefs.current[index - 1]?.focus();
   };
 
-  const handleCitySelect = (value: string) => {
-    setSelectedCity(value);
-    localStorage.setItem('selectedCity', value);
+  const handleCitySelect = (id: string) => {
+    setSelectedCity(id);
+    localStorage.setItem('selectedCity', id);
     setShowCitySelect(false);
   };
 
   const handleSendCode = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    let code = generateFourDigitCode();
+    const fresh = generateFourDigitCode();
 
-    var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Accept", "text/plain");
-    myHeaders.append("x-api-key", "OCk4VJJRyhujJ6CDiKPVIAap1WqJdiMehj5W5Lj27Vv8vK8H");
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    headers.append('Accept', 'text/plain');
+    headers.append('x-api-key', 'OCk4VJJRyhujJ6CDiKPVIAap1WqJdiMehj5W5Lj27Vv8vK8H');
 
-    var raw = JSON.stringify({
-      "mobile": phone,
-      "templateId": "256420",
-      "parameters": [
-        { name: 'code', value: code },
-      ],
-    });
-
-    var requestOptions: any = {
+    fetch('https://api.sms.ir/v1/send/verify', {
       method: 'POST',
-      headers: myHeaders,
-      body: raw,
-      redirect: 'follow'
-    };
-
-    fetch("https://api.sms.ir/v1/send/verify", requestOptions)
-      .then(response => response.text())
-      .then(result => {
+      headers,
+      redirect: 'follow',
+      body: JSON.stringify({
+        mobile: phone,
+        templateId: '256420',
+        parameters: [{ name: 'code', value: fresh }],
+      }),
+    })
+      .then((r) => r.text())
+      .then(() => {
         setLoading(false);
-        setCode(code);
+        setCode(fresh);
         setVerifyCodeStatus(true);
         setIsTimerRunning(true);
         setTimer(90);
-        toast({
-          variant: 'success',
-          title: 'کد تایید ارسال شد',
-          description: 'لطفاً کد تایید را وارد کنید',
-        });
+        toast({ variant: 'success', title: 'کد تأیید ارسال شد', description: 'کد چهاررقمی را وارد کنید.' });
       })
-      .catch(error => {
+      .catch(() => {
         setLoading(false);
-        toast({
-          variant: 'destructive',
-          title: 'متاسفانه انجام نشد',
-          description: 'ارسال کد تایید ناموفق بود، دوباره تلاش کنید',
-        });
+        toast({ variant: 'destructive', title: 'ارسال نشد', description: 'ارسال کد تأیید ناموفق بود؛ دوباره تلاش کنید.' });
       });
   };
 
   const handleVerifyCode = (e: React.FormEvent) => {
     e.preventDefault();
-    const combinedCode = enteredCode.join('');
+    const combined = enteredCode.join('');
     setLoading(true);
 
-    if (combinedCode.length !== 4 || combinedCode !== code?.toString()) {
+    if (combined.length !== 4 || combined !== code?.toString()) {
       setLoading(false);
-      toast({
-        variant: 'destructive',
-        title: 'خطا',
-        description: 'کد تایید اشتباه است',
-      });
+      toast({ variant: 'destructive', title: 'خطا', description: 'کد تأیید اشتباه است.' });
       return;
     }
 
-    if (combinedCode === code?.toString()) {
-      axios.post(API.SIGN_UP, { phone: `${phone}`, city: selectedCity })
-        .then((res: any) => {
-          setLoading(false);
-          const token = res.data.token;
-          Cookies.set('auth_token', token, { expires: 1 });
-          localStorage.setItem('userPhone', phone);
-          login({ id: res.data.id || '1', phone: phone, token });
-          toast({
-            variant: 'success',
-            title: 'موفقیت',
-            description: 'با موفقیت وارد شدید',
-          });
-          router.push('/');
-        }).catch((err) => {
-          setLoading(false);
-          toast({
-            variant: 'destructive',
-            title: 'ناموفق',
-            description: 'متاسفانه انجام نشد مجدد تلاش کنید',
-          });
-        });
-    }
+    axios
+      .post(API.SIGN_UP, { phone: `${phone}`, city: selectedCity })
+      .then((res: any) => {
+        setLoading(false);
+        const token = res.data.token;
+        Cookies.set('auth_token', token, { expires: 1 });
+        localStorage.setItem('userPhone', phone);
+        login({ id: res.data.id || '1', phone, token });
+        toast({ variant: 'success', title: 'خوش آمدید', description: 'با موفقیت وارد شدید.' });
+        router.push('/');
+      })
+      .catch(() => {
+        setLoading(false);
+        toast({ variant: 'destructive', title: 'ناموفق', description: 'ورود انجام نشد؛ دوباره تلاش کنید.' });
+      });
   };
 
-  const selectedCityData = cities.find(city => city.id === selectedCity);
+  const cityData = cities.find((c) => c.id === selectedCity);
+  const step = showCitySelect ? 0 : verifyCodeStatus ? 2 : 1;
 
   return (
     <div
-      className="min-h-screen w-full relative overflow-hidden bg-cover bg-center bg-no-repeat"
+      dir="rtl"
       style={{
-        backgroundImage: `url('img/back.webp')`
+        minHeight: '100vh',
+        background: `radial-gradient(120% 80% at 50% 0%, ${alpha(C.green, 12)}, ${C.bg} 60%)`,
+        color: C.text,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        padding: `calc(${S.s6}px + env(safe-area-inset-top)) ${S.s4}px calc(${S.s6}px + env(safe-area-inset-bottom))`,
       }}
     >
-      <div className="absolute inset-0 bg-black/40" style={{ backdropFilter: 'blur(4px)' }} />
-      <div className="relative z-10 w-full h-full min-h-screen flex flex-col items-center justify-between p-6">
-        <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="bg-white/10 backdrop-blur-md p-3 rounded-full">
-              <Leaf className="w-8 h-8 text-green-400" />
-            </div>
-            {selectedCityData && (
-              <div className="bg-white/10 backdrop-blur-md p-3 rounded-full">
-                <img
-                  src={selectedCityData.icon}
-                  alt={selectedCityData.name}
-                  className="w-8 h-8 rounded-full object-cover"
-                />
-              </div>
-            )}
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white">شهروند سبز</h1>
-              <p className="text-green-200 text-sm md:text-base">
-                {selectedCityData ? `شهرداری ${selectedCityData.name}` : 'مدیریت هوشمند پسماند'}
-              </p>
-            </div>
+      <div style={{ width: '100%', maxWidth: 460, display: 'flex', flexDirection: 'column', gap: S.s4 }}>
+        {/* ── the mark ── */}
+        <div style={{ display: 'grid', justifyItems: 'center', gap: S.s3 }}>
+          <EcoGlobe size={210} />
+          <h1 style={{ margin: 0, fontSize: S.xxl, fontWeight: 800, color: C.textStrong, letterSpacing: '-0.02em' }}>
+            شهروند سبز
+          </h1>
+          <p style={{ margin: 0, fontSize: S.sm, color: C.muted, textAlign: 'center', lineHeight: 1.9, maxWidth: '34ch' }}>
+            {cityData ? `سامانهٔ خدمات شهری ${cityData.name}` : 'خدمات شهری، از تلفن همراه تا درِ خانه.'}
+          </p>
+        </div>
+
+        <Card>
+          <div style={{ padding: `${S.s4}px` }}>
+            <StepRail steps={STEPS} current={step} compact />
           </div>
-        </div>
+        </Card>
 
-        <div className="flex flex-col items-center gap-8 my-auto">
-          <div className="text-center space-y-4">
-            <h2 className="text-4xl md:text-5xl font-bold text-white">
-              برای زمینی پاک‌تر
-            </h2>
-            <p className="text-lg md:text-xl text-green-100">
-              با مدیریت هوشمند پسماند، به حفظ محیط زیست کمک کنید
-            </p>
-          </div>
-          <Button
-            onClick={() => setIsDrawerOpen(true)}
-            className="bg-secondary/100 hover:bg-secondary/200 text-white px-8 py-6 text-lg rounded-full transition-all duration-300 hover:scale-105"
-          >
-            شروع کنید
-          </Button>
-        </div>
-
-        <div className="w-full max-w-7xl mx-auto text-center">
-          {/* <p className="text-white/60">با همکاری سازمان مدیریت پسماند شهرداری</p> */}
-        </div>
-      </div>
-
-      <Drawer open={isDrawerOpen}>
-        <div
-          dir="rtl"
-          className={`
-      fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-[2rem] shadow-2xl
-      transition-transform duration-300
-      ${isDrawerOpen ? 'translate-y-0' : 'translate-y-full'}
-    `}
-        >
-          <div className="relative w-full max-w-2xl mx-auto p-6">
-            <button
-              onClick={() => setIsDrawerOpen(false)}
-              className="absolute top-6 left-6 p-2 rounded-full hover:bg-gray-100 transition-colors"
-            >
-              <X className="w-6 h-6 text-gray-500" />
-            </button>
-
-            <div className="space-y-6">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold text-gray-900">
-                  {showCitySelect
-                    ? 'انتخاب شهر'
-                    : verifyCodeStatus
-                      ? 'تایید شماره همراه'
-                      : 'ورود به حساب کاربری'}
-                </h3>
-                <p className="mt-2 text-gray-600">
-                  {showCitySelect
-                    ? 'لطفا شهر خود را انتخاب کنید'
-                    : verifyCodeStatus
-                      ? 'کد تایید ارسال شده را وارد کنید'
-                      : 'لطفا شماره همراه خود را وارد کنید'}
+        <Card accent={C.green}>
+          <div style={{ padding: `${S.s5}px ${S.s4}px` }}>
+            {/* ── city ── */}
+            {showCitySelect ? (
+              <div className="pm-fade-up">
+                <p style={{ margin: `0 0 ${S.s2}px`, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>شهر خود را انتخاب کنید</p>
+                <p style={{ margin: `0 0 ${S.s4}px`, fontSize: S.xs, color: C.muted, lineHeight: 1.8 }}>
+                  درخواست‌های شما فقط در همین شهر بررسی می‌شود. بعداً هم می‌توانید تغییرش دهید.
                 </p>
-              </div>
 
-              <form className="space-y-4">
-                {showCitySelect ? (
-                  <div className="space-y-4">
-                    <Label htmlFor="city" className="text-gray-700">شهر</Label>
-                    <Select onValueChange={handleCitySelect}>
-                      <SelectTrigger className="w-full h-14 text-lg" dir="rtl">
-                        <SelectValue placeholder="شهر خود را انتخاب کنید" />
-                      </SelectTrigger>
-                      <SelectContent dir="rtl">
-                        {cities.map((city) => (
-                          <SelectItem key={city.id} value={city.id}>
-                            <div className="flex items-center gap-2">
-                              <Building2 className="w-4 h-4" />
-                              <span>{city.name}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ) : !verifyCodeStatus ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-gray-700">شماره همراه</Label>
-                    <div className="relative">
-                      <Input
-                        dir='rtl'
-                        id="phone"
-                        placeholder="شماره همراه خود را وارد کنید"
-                        type="tel"
-                        value={phone}
-                        disabled={loading || verifyCodeStatus}
-                        onChange={handlePhoneChange}
-                        className="pl-10 py-6 text-lg rounded-xl border-gray-200"
-                        required
-                      />
-                      <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    </div>
-                    {phoneError && <p className="text-red-500 text-sm">{phoneError}</p>}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <Label htmlFor="code" className="text-gray-700">کد تایید</Label>
-                    <div className="flex justify-center gap-2">
-                      {[3, 2, 1, 0].map((index) => (
-                        <Input
-                          key={index}
-                          ref={el => inputRefs.current[index] = el}
-                          type="tel"
-                          inputMode="numeric" 
-                          pattern="\d*"       
-                          maxLength={1}
-                          value={enteredCode[index]}
-                          onChange={(e) => handleCodeChange(e.target.value, index)}
-                          onKeyDown={(e) => handleKeyDown(e, index)}
-                          className="w-14 h-14 text-center text-2xl rounded-xl border-gray-200"
-                          disabled={loading}
-                        />
-                      ))}
-                    </div>
-                    {timer > 0 && (
-                      <div className="text-sm text-gray-500 text-center mt-4">
-                        {formatTimer(timer)} دقیقه دیگر کد را مجدد دریافت کنید
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {!showCitySelect && !verifyCodeStatus && (
-                  <>
-                    <Button
-                      disabled={loading || phone.length !== 11 || !!phoneError}
-                      onClick={handleSendCode}
-                      className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
-                    >
-                      {loading ? <LoadingSpinner className="text-white" /> : "ارسال کد تایید"}
-                    </Button>
-                    <Button
-                      variant='ghost'
-                      onClick={() => {
-                        setSelectedCity('')
-                        localStorage.removeItem('selectedCity')
-                        setShowCitySelect(true)
+                <div style={{ display: 'flex', flexDirection: 'column', gap: S.s2 }}>
+                  {cities.map((city) => (
+                    <button
+                      key={city.id}
+                      type="button"
+                      onClick={() => handleCitySelect(city.id)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: S.s3, textAlign: 'start', cursor: 'pointer',
+                        padding: `${S.s3}px`, borderRadius: S.r2, fontFamily: 'inherit',
+                        background: C.surface2, border: `1.5px solid ${C.border}`, color: C.text,
                       }}
-                      className="w-full py-1 text-md rounded-xl"
                     >
-                      اصلاح شهر
-                    </Button>
-                  </>
-                )}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={city.icon}
+                        alt=""
+                        width={40}
+                        height={40}
+                        style={{ width: 40, height: 40, borderRadius: 12, objectFit: 'cover', flexShrink: 0, background: C.bgSubtle }}
+                      />
+                      <span style={{ flex: 1, minWidth: 0, fontSize: S.base, fontWeight: 800, color: C.textStrong }}>{city.name}</span>
+                      <Building2 className="h-4 w-4" style={{ color: C.subtle }} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : !verifyCodeStatus ? (
+              /* ── phone ── */
+              <form className="pm-fade-up" onSubmit={handleSendCode}>
+                <p style={{ margin: `0 0 ${S.s2}px`, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>شمارهٔ همراه</p>
+                <p style={{ margin: `0 0 ${S.s4}px`, fontSize: S.xs, color: C.muted, lineHeight: 1.8 }}>
+                  کد تأیید چهاررقمی به همین شماره پیامک می‌شود.
+                </p>
 
-                {verifyCodeStatus && timer === 0 && (
-                  <Button
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="phone"
+                    className="pm-field tnum"
+                    type="tel"
+                    inputMode="numeric"
+                    dir="ltr"
+                    placeholder="09xxxxxxxxx"
+                    value={phone}
                     disabled={loading}
-                    onClick={handleSendCode}
-                    className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
-                  >
-                    {loading ? <LoadingSpinner className="text-white" /> : "ارسال مجدد کد تایید"}
-                  </Button>
+                    onChange={handlePhoneChange}
+                    style={{ paddingInlineEnd: 44, textAlign: 'left' }}
+                    required
+                  />
+                  <Phone className="h-4 w-4" style={{ position: 'absolute', insetInlineEnd: 14, top: 16, color: C.subtle }} />
+                </div>
+                {phoneError && (
+                  <p style={{ margin: `${S.s2}px 0 0`, fontSize: S.xs, color: C.statusDanger }}>{phoneError}</p>
                 )}
 
-                {verifyCodeStatus && (
-                  <Button
-                    disabled={loading || !Array.isArray(enteredCode) || enteredCode.some(digit => !digit)}
-                    onClick={handleVerifyCode}
-                    className="w-full bg-secondary/100 hover:bg-secondary/200 text-white py-6 text-lg rounded-xl"
+                <div style={{ display: 'flex', flexDirection: 'column', gap: S.s2, marginTop: S.s4 }}>
+                  <Btn type="submit" full disabled={loading || phone.length !== 11 || !!phoneError}>
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                    ارسال کد تأیید
+                  </Btn>
+                  <Btn
+                    variant="ghost"
+                    full
+                    onClick={() => {
+                      setSelectedCity('');
+                      localStorage.removeItem('selectedCity');
+                      setShowCitySelect(true);
+                    }}
                   >
-                    {loading ? <LoadingSpinner className="text-white" /> : "تایید و ورود"}
-                  </Button>
-                )}
+                    <ChevronRight className="h-4 w-4" />
+                    تغییر شهر {cityData ? `(${cityData.name})` : ''}
+                  </Btn>
+                </div>
               </form>
-            </div>
+            ) : (
+              /* ── code ── */
+              <form className="pm-fade-up" onSubmit={handleVerifyCode}>
+                <p style={{ margin: `0 0 ${S.s2}px`, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>کد تأیید</p>
+                <p style={{ margin: `0 0 ${S.s4}px`, fontSize: S.xs, color: C.muted, lineHeight: 1.8 }}>
+                  کد پیامک‌شده به <span className="tnum" dir="ltr">{phone}</span> را وارد کنید.
+                </p>
+
+                {/* Rendered right-to-left so the first box a Persian reader
+                    reaches is digit one. */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: S.s2 }}>
+                  {[3, 2, 1, 0].map((index) => (
+                    <input
+                      key={index}
+                      ref={(el) => { inputRefs.current[index] = el; }}
+                      className="pm-field tnum"
+                      type="tel"
+                      inputMode="numeric"
+                      pattern="\d*"
+                      maxLength={1}
+                      value={enteredCode[index]}
+                      onChange={(e) => handleCodeChange(e.target.value, index)}
+                      onKeyDown={(e) => handleKeyDown(e, index)}
+                      disabled={loading}
+                      style={{ width: 58, height: 62, textAlign: 'center', fontSize: '1.4rem', fontWeight: 800, padding: 0 }}
+                    />
+                  ))}
+                </div>
+
+                {timer > 0 && (
+                  <p className="tnum" style={{ margin: `${S.s3}px 0 0`, fontSize: S.xs, color: C.muted, textAlign: 'center' }}>
+                    {formatTimer(timer)} تا دریافت دوبارهٔ کد
+                  </p>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: S.s2, marginTop: S.s4 }}>
+                  <Btn type="submit" full disabled={loading || enteredCode.some((d) => !d)}>
+                    {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                    تأیید و ورود
+                  </Btn>
+                  {timer === 0 && (
+                    <Btn variant="soft" full disabled={loading} onClick={() => handleSendCode(new Event('submit') as any)}>
+                      ارسال دوبارهٔ کد
+                    </Btn>
+                  )}
+                  <Btn
+                    variant="ghost"
+                    full
+                    onClick={() => {
+                      setVerifyCodeStatus(false);
+                      setEnteredCode(['', '', '', '']);
+                    }}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                    اصلاح شماره
+                  </Btn>
+                </div>
+              </form>
+            )}
           </div>
-        </div>
-      </Drawer>
+        </Card>
+
+        <p style={{ margin: 0, fontSize: S.xs, color: C.subtle, textAlign: 'center', lineHeight: 1.9 }}>
+          با ورود، شرایط استفاده از سامانهٔ خدمات شهری شهرشهر را می‌پذیرید.
+        </p>
+      </div>
     </div>
   );
 }

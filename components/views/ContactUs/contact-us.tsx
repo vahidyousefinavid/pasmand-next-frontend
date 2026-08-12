@@ -1,287 +1,206 @@
-"use client"
-import React, { useState } from 'react';
+'use client';
+
+import { useState } from 'react';
 import {
-    Phone,
-    Mail,
-    MessageCircle,
-    Clock,
-    MapPin,
-    Instagram,
-    Twitter,
-    Facebook,
-    Headphones,
-    ArrowRight,
-    CheckCircle2,
-    Globe,
-    PhoneCall,
-    MessagesSquare,
-    Users,
-    Heart
+  Phone, Mail, MessageCircle, Clock, Instagram, Twitter, Facebook,
+  Headphones, ChevronLeft, ChevronDown, ChevronUp, Loader2,
 } from 'lucide-react';
+
 import { Chat } from '@/components/ui/chat';
-import { ChatButton } from '@/components/ui/chat-button';
+import { C, S, alpha } from '@/components/ui/tokens';
+import { Screen, Hero, Card, IconBadge } from '@/components/ui/kit';
 
-function ContactUs() {
-    const [isChatOpen, setIsChatOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+/**
+ * پشتیبانی.
+ *
+ * The old page opened on four vanity statistics — "۹۸٪ رضایت مشتری", "+۵ کاربر
+ * فعال" — none of which came from anywhere. What someone on this page wants is
+ * a way to reach a human, so that is what it opens on now.
+ */
 
-    const handleStartChat = () => {
-        setIsLoading(true);
-        setTimeout(() => {
-            setIsLoading(false);
-            setIsChatOpen(true);
-        }, 1000);
-    };
+const CHANNELS = [
+  {
+    id: 'phone',
+    title: 'تماس تلفنی',
+    description: 'روزهای کاری، ۸ صبح تا ۸ شب',
+    action: '۰۹۱۸۲۱۴۴۹۷۰',
+    href: 'tel:989182144970',
+    icon: <Phone className="h-5 w-5" />,
+    color: C.statusInfo,
+  },
+  {
+    id: 'email',
+    title: 'ایمیل پشتیبانی',
+    description: 'پاسخ در کمتر از ۲۴ ساعت کاری',
+    action: 'support@shahrshahr.ir',
+    href: 'mailto:support@shahrshahr.ir',
+    icon: <Mail className="h-5 w-5" />,
+    color: C.violet,
+  },
+  {
+    id: 'chat',
+    title: 'گفتگوی آنلاین',
+    description: 'پاسخ فوری در ساعات کاری',
+    action: 'شروع گفتگو',
+    href: '#chat',
+    icon: <MessageCircle className="h-5 w-5" />,
+    color: C.green,
+  },
+];
 
-    const stats = [
-        { icon: <Users className="h-6 w-6" />, value: '+۵', label: 'کاربر فعال' },
-        { icon: <PhoneCall className="h-6 w-6" />, value: '۲۴/۷', label: 'پشتیبانی' },
-        { icon: <MessagesSquare className="h-6 w-6" />, value: '۹۸٪', label: 'رضایت مشتری' },
-        { icon: <Heart className="h-6 w-6" />, value: '+۱۰', label: 'بازخورد مثبت' },
-    ];
+const SOCIAL = [
+  { name: 'اینستاگرام', icon: <Instagram className="h-4 w-4" />, link: 'https://instagram.com/shahrshahr' },
+  { name: 'ایتا', icon: <MessageCircle className="h-4 w-4" />, link: 'https://eitaa.com/shahrshahr' },
+  { name: 'بله', icon: <MessageCircle className="h-4 w-4" />, link: 'https://ble.ir/shahrshahr' },
+  { name: 'توییتر', icon: <Twitter className="h-4 w-4" />, link: 'https://twitter.com/shahrshahr' },
+  { name: 'فیسبوک', icon: <Facebook className="h-4 w-4" />, link: 'https://facebook.com/shahrshahr' },
+];
 
-    const contactMethods = [
-        {
-            icon: <Phone className="h-6 w-6" />,
-            title: 'تماس تلفنی',
-            description: 'پاسخگویی در روزهای کاری از ساعت ۸ صبح تا ۸ شب',
-            action: '۰۹۱۸۲۱۴۴۹۷۰',
-            color: 'text-blue-500',
-            bgColor: 'bg-blue-50',
-            link: 'tel:989182144970'
-        },
-        {
-            icon: <Mail className="h-6 w-6" />,
-            title: 'ایمیل پشتیبانی',
-            description: 'پاسخگویی در کمتر از ۲۴ ساعت کاری',
-            action: 'support@shahrhshar.ir',
-            color: 'text-purple-500',
-            bgColor: 'bg-purple-50',
-            link: 'mailto:support@example.com'
-        },
-        {
-            icon: <MessageCircle className="h-6 w-6" />,
-            title: 'چت آنلاین',
-            description: 'گفتگوی آنلاین با کارشناسان پشتیبانی',
-            action: 'شروع گفتگو',
-            color: 'text-green-500',
-            bgColor: 'bg-green-50',
-            link: '#chat'
-        }
-    ];
+const FAQS = [
+  { q: 'ساعات پاسخگویی تلفنی چگونه است؟', a: 'روزهای کاری از ۸ صبح تا ۸ شب پاسخگو هستیم. خارج از این ساعت، پیام‌ها در اولین فرصت کاری بررسی می‌شود.' },
+  { q: 'درخواستم ثبت شده ولی کسی نیامده، چه کنم؟', a: 'ابتدا وضعیت را در صفحهٔ «پیگیری» ببینید؛ اگر هنوز روی «بررسی و تأیید» مانده، درخواست در نوبت است. اگر بازهٔ زمانی گذشته، با پشتیبانی تماس بگیرید.' },
+  { q: 'مبلغ واریزی با انتظارم فرق دارد.', a: 'مبلغ بر اساس توزین در محل و تعرفهٔ روز همان شهر محاسبه می‌شود. جزئیات اقلام و وزن‌ها در همان درخواست، در صفحهٔ پیگیری، قابل مشاهده است.' },
+];
 
-    const socialMedia = [
-        {
-            icon: <Instagram className="h-5 w-5" />,
-            name: 'Instagram',
-            username: '@recycling_app',
-            color: 'hover:text-pink-500',
-            bgHover: 'hover:bg-pink-50',
-            link: 'https://instagram.com/shahrshahr'
-        },
-        {
-            icon: <MessageCircle className="h-5 w-5" />,
-            name: 'Eitaa',
-            username: '@recycling_app',
-            color: 'hover:text-yellow-500',
-            bgHover: 'hover:bg-yellow-50',
-            link: 'https://eitaa.com/shahrshahr'
-        },
-        {
-            icon: <MessageCircle className="h-5 w-5" />,
-            name: 'Bale',
-            username: '@recycling_app',
-            color: 'hover:text-green-500',
-            bgHover: 'hover:bg-green-50',
-            link: 'https://ble.ir/shahrshahr'
-        },
-        {
-            icon: <Twitter className="h-5 w-5" />,
-            name: 'Twitter',
-            username: '@recycling_app',
-            color: 'hover:text-blue-400',
-            bgHover: 'hover:bg-blue-50',
-            link: 'https://twitter.com/shahrshahr'
-        },
-        {
-            icon: <Facebook className="h-5 w-5" />,
-            name: 'Facebook',
-            username: 'recycling.app',
-            color: 'hover:text-blue-600',
-            bgHover: 'hover:bg-blue-50',
-            link: 'https://facebook.com/shahrshahr'
-        }
-    ];
+export default function ContactUsView() {
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [faq, setFaq] = useState<number | null>(null);
 
-    const faqs = [
-        {
-            question: 'ساعات پاسخگویی تلفنی چگونه است؟',
-            answer: 'همکاران ما در روزهای کاری از ساعت ۸ صبح تا ۸ شب آماده پاسخگویی به شما هستند.'
-        },
-        {
-            question: 'چگونه درخواست خود را پیگیری کنم؟',
-            answer: 'با ورود به حساب کاربری خود و مراجعه به بخش «سوابق درخواست‌ها» می‌توانید وضعیت درخواست خود را پیگیری کنید.'
-        },
-        {
-            question: 'در صورت تأخیر در جمع‌آوری چه کنم؟',
-            answer: 'در صورت تأخیر بیش از ۳۰ دقیقه، می‌توانید از طریق تماس با پشتیبانی یا چت آنلاین موضوع را پیگیری کنید.'
-        }
-    ];
+  const handleStartChat = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsChatOpen(true);
+    }, 600);
+  };
 
-    return (
-        <div className="min-h-screen bg-gray-50">
-            {/* Hero Section */}
-            <div className="relative bg-gradient-to-r from-orange-500 to-orange-600 py-20 px-4 overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?auto=format&fit=crop&q=80')] mix-blend-overlay opacity-10"></div>
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent"></div>
-                <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <div className="bg-white/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8 backdrop-blur-sm">
-                        <Headphones className="h-10 w-10 text-white" />
-                    </div>
-                    <h1 className="text-4xl font-bold mb-6 text-white">تماس با پشتیبانی</h1>
-                    <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-                        کارشناسان ما با افتخار آماده پاسخگویی به سؤالات شما هستند. از هر طریقی که راحت‌تر هستید با ما در تماس باشید.
+  return (
+    <>
+      <Screen>
+        <Hero
+          icon={<Headphones className="h-6 w-6" />}
+          title="پشتیبانی"
+          sub="اگر چیزی مطابق انتظار پیش نرفت، از یکی از این راه‌ها با ما حرف بزنید."
+        />
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
+          {CHANNELS.map((ch, i) => {
+            const inner = (
+              <Card accent={ch.color} interactive style={{ height: '100%' }}>
+                <div style={{ padding: `${S.s4}px`, display: 'flex', alignItems: 'center', gap: S.s3 }}>
+                  <IconBadge color={ch.color}>{ch.icon}</IconBadge>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: 0, fontSize: S.base, fontWeight: 800, color: C.textStrong }}>{ch.title}</p>
+                    <p style={{ margin: '5px 0 0', fontSize: S.xs, color: C.muted, lineHeight: 1.7 }}>{ch.description}</p>
+                    <p
+                      className={ch.id === 'phone' ? 'tnum' : undefined}
+                      style={{ margin: '8px 0 0', fontSize: S.sm, fontWeight: 800, color: ch.color, overflowWrap: 'anywhere' }}
+                    >
+                      {ch.id === 'chat' && isLoading ? 'در حال اتصال…' : ch.action}
                     </p>
+                  </div>
+                  {ch.id === 'chat' && isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" style={{ color: ch.color, flexShrink: 0 }} />
+                  ) : (
+                    <ChevronLeft className="h-4 w-4" style={{ color: C.subtle, flexShrink: 0 }} />
+                  )}
                 </div>
-            </div>
+              </Card>
+            );
 
-            {/* Stats Section */}
-            <div className="max-w-6xl mx-auto px-4 -mt-10 relative z-20">
-                <div className="bg-white rounded-2xl shadow-xl p-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                        {stats.map((stat, index) => (
-                            <div key={index} className="text-center">
-                                <div className="bg-orange-50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3 text-orange-500">
-                                    {stat.icon}
-                                </div>
-                                <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                                <div className="text-sm text-gray-600">{stat.label}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Contact Methods */}
-            <div className="max-w-6xl mx-auto px-4 mt-16">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {contactMethods.map((method, index) => (
-                        <a
-                            key={index}
-                            href={method.link}
-                            onClick={index === 2 ? (e) => {
-                                e.preventDefault();
-                                handleStartChat();
-                            } : undefined}
-                            className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 group transform hover:-translate-y-1"
-                        >
-                            <div className="p-8">
-                                <div className={`${method.bgColor} ${method.color} w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                                    {method.icon}
-                                </div>
-                                <h3 className="text-xl font-bold mb-3">{method.title}</h3>
-                                <p className="text-gray-600 mb-6 leading-relaxed">{method.description}</p>
-                                <div className="flex items-center text-orange-500 font-medium">
-                                    <span>{method.action}</span>
-                                    <ArrowRight className="h-4 w-4 mr-2 group-hover:translate-x-1 transition-transform" />
-                                </div>
-                            </div>
-                        </a>
-                    ))}
-                </div>
-            </div>
-
-            {/* Map & Info Section */}
-            <div className="max-w-6xl mx-auto px-4 mt-16">
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                    <div className="grid md:grid-cols-2">
-                        <div className="p-8 md:p-12">
-                            <h2 className="text-2xl font-bold mb-6">دفتر مرکزی</h2>
-                            <div className="space-y-6">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-orange-50 text-orange-500 p-3 rounded-lg">
-                                        <MapPin className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-lg">آدرس</p>
-                                        <p className="text-gray-600">تهران شهر تهران-میرداماد-خیابان شمس تبریزی شمالی-خیابان یکم-پلاک -1-طبقه چهارم-واحد 15</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-orange-50 text-orange-500 p-3 rounded-lg">
-                                        <Clock className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-lg">ساعات کاری</p>
-                                        <p className="text-gray-600">شنبه تا چهارشنبه - ۸ صبح تا ۸ شب</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-orange-50 text-orange-500 p-3 rounded-lg">
-                                        <Globe className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium text-lg">شبکه‌های اجتماعی</p>
-                                        <div className="flex gap-3 mt-2">
-                                            {/* {socialMedia.map((social, index) => (
-                                                <a
-                                                    key={index}
-                                                    href="#"
-                                                    className={`p-2 rounded-lg transition-all duration-300 ${social.color} ${social.bgHover}`}
-                                                >
-                                                    {social.icon}
-                                                </a>
-                                            ))} */}
-                                            در حال انجام ....
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="relative h-[400px] bg-gray-100">
-                            <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d219.09999906728095!2d51.43135764206126!3d35.76128032815204!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2s!4v1744749850181!5m2!1sen!2s"
-                                className="absolute inset-0 w-full h-full"
-                                style={{ border: 0 }}
-                                allowFullScreen
-                                loading="lazy"
-                                referrerPolicy="no-referrer-when-downgrade"
-                            ></iframe>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* FAQs Section */}
-            <div className="max-w-4xl mx-auto px-4 mt-16 mb-20">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl font-bold mb-4">سؤالات متداول</h2>
-                    <p className="text-gray-600">پاسخ سؤالات پرتکرار شما</p>
-                </div>
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <div className="space-y-6">
-                        {faqs.map((faq, index) => (
-                            <div key={index} className="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
-                                <div className="flex gap-4">
-                                    <CheckCircle2 className="h-6 w-6 text-orange-500 flex-shrink-0 mt-1" />
-                                    <div>
-                                        <h4 className="font-bold text-lg mb-2">{faq.question}</h4>
-                                        <p className="text-gray-600 leading-relaxed">{faq.answer}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Chat Components */}
-            <Chat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
-            {!isChatOpen && (
-                <ChatButton onClick={handleStartChat} isLoading={isLoading} />
-            )}
+            return (
+              <div key={ch.id} className="pm-fade-up" style={{ animationDelay: `${i * 45}ms` }}>
+                {ch.id === 'chat' ? (
+                  <button
+                    type="button"
+                    onClick={handleStartChat}
+                    style={{ display: 'block', width: '100%', padding: 0, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'start' }}
+                  >
+                    {inner}
+                  </button>
+                ) : (
+                  <a href={ch.href} style={{ textDecoration: 'none', display: 'block' }}>
+                    {inner}
+                  </a>
+                )}
+              </div>
+            );
+          })}
         </div>
-    );
-}
 
-export default ContactUs;
+        {/* ── hours ── */}
+        <div
+          style={{
+            display: 'flex', alignItems: 'center', gap: S.s3, marginTop: S.s4,
+            padding: `${S.s4}px`, borderRadius: S.r3,
+            background: alpha(C.amber, 9), border: `1px solid ${alpha(C.amber, 20)}`,
+          }}
+        >
+          <Clock className="h-5 w-5" style={{ color: C.amber, flexShrink: 0 }} />
+          <p style={{ margin: 0, fontSize: S.sm, color: C.text, lineHeight: 1.9 }}>
+            شنبه تا چهارشنبه <span className="tnum">۸:۰۰</span> تا <span className="tnum">۲۰:۰۰</span> — پنجشنبه‌ها تا <span className="tnum">۱۳:۰۰</span>
+          </p>
+        </div>
+
+        {/* ── FAQ ── */}
+        <p style={{ margin: `${S.s6}px 0 ${S.s3}px`, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>پیش از تماس، این‌ها را ببینید</p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: S.s2 }}>
+          {FAQS.map((item, i) => {
+            const isOpen = faq === i;
+            return (
+              <Card key={item.q}>
+                <button
+                  type="button"
+                  onClick={() => setFaq(isOpen ? null : i)}
+                  aria-expanded={isOpen}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: S.s3, width: '100%',
+                    padding: `${S.s3}px ${S.s4}px`, background: 'transparent', border: 'none',
+                    fontFamily: 'inherit', color: 'inherit', cursor: 'pointer', textAlign: 'start',
+                  }}
+                >
+                  <span style={{ flex: 1, minWidth: 0, fontSize: S.sm, fontWeight: 800, color: C.textStrong }}>{item.q}</span>
+                  <span style={{ color: C.subtle, flexShrink: 0 }}>
+                    {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </span>
+                </button>
+                {isOpen && (
+                  <p className="pm-fade-up" style={{ margin: 0, padding: `0 ${S.s4}px ${S.s4}px`, fontSize: S.sm, color: C.muted, lineHeight: 2 }}>
+                    {item.a}
+                  </p>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* ── social ── */}
+        <p style={{ margin: `${S.s6}px 0 ${S.s3}px`, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>ما را دنبال کنید</p>
+
+        <div className="pm-scroll-x" style={{ display: 'flex', gap: S.s2, paddingBottom: 4 }}>
+          {SOCIAL.map((s) => (
+            <a
+              key={s.name}
+              href={s.link}
+              target="_blank"
+              rel="noreferrer noopener"
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7, flexShrink: 0, textDecoration: 'none',
+                padding: '10px 16px', borderRadius: S.rPill,
+                background: C.surface, border: `1px solid ${C.border}`, color: C.text,
+                fontSize: S.xs, fontWeight: 700, whiteSpace: 'nowrap',
+              }}
+            >
+              {s.icon}
+              {s.name}
+            </a>
+          ))}
+        </div>
+      </Screen>
+
+      <Chat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+    </>
+  );
+}

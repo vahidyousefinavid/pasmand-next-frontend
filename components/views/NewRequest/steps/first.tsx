@@ -1,73 +1,65 @@
-import { Trash2, Recycle, Box, Battery, Car, Construction } from 'lucide-react';
+'use client';
 
-interface WasteType {
-  id: string;
-  name: string;
-  icon: React.ReactNode;
-  description: string;
-}
-
-const wasteTypes: WasteType[] = [
-  {
-    id: 'household',
-    name: 'پسماند خانگی',
-    icon: <Trash2 className="w-8 h-8" />,
-    description: 'زباله‌ها و پسماندهای معمولی خانگی'
-  },
-  {
-    id: 'recyclable',
-    name: 'قابل بازیافت',
-    icon: <Recycle className="w-8 h-8" />,
-    description: 'کاغذ، پلاستیک، شیشه و فلزات'
-  },
-  {
-    id: 'electronic',
-    name: 'الکترونیکی',
-    icon: <Battery className="w-8 h-8" />,
-    description: 'وسایل الکترونیکی و باتری‌ها'
-  },
-  {
-    id: 'bulky',
-    name: 'اقلام حجیم',
-    icon: <Box className="w-8 h-8" />,
-    description: 'مبلمان و وسایل بزرگ'
-  },
-  {
-    id: 'automotive',
-    name: 'خودرو',
-    icon: <Car className="w-8 h-8" />,
-    description: 'قطعات و مایعات خودرو'
-  },
-  {
-    id: 'construction',
-    name: 'ساختمانی',
-    icon: <Construction className="w-8 h-8" />,
-    description: 'مصالح ساختمانی و نخاله‌ها'
-  }
-];
+import { Check } from 'lucide-react';
+import { WASTE_TYPES } from '@/lib/wasteTypes';
+import { C, S, alpha } from '@/components/ui/tokens';
+import { Card, IconBadge } from '@/components/ui/kit';
 
 interface FirstStepProps {
   onNext: (wasteType: string) => void;
+  selected?: string;
 }
 
-export default function FirstStep({ onNext }: FirstStepProps) {
+/**
+ * Step one — what is being handed over.
+ *
+ * Picking a category advances immediately; there is no "next" button, because
+ * the choice *is* the step. The current selection stays marked so coming back
+ * from step two shows what was chosen rather than an empty grid.
+ */
+export default function FirstStep({ onNext, selected }: FirstStepProps) {
   return (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-8">نوع پسماند را انتخاب کنید</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {wasteTypes.map((type) => (
-          <button
-            key={type.id}
-            onClick={() => onNext(type.id)}
-            className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col items-center space-y-3 border border-gray-200 hover:border-blue-500"
-          >
-            <div className="p-3 bg-blue-50 rounded-full">
-              {type.icon}
+    <div>
+      <p style={{ margin: `0 0 ${S.s3}px`, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>
+        چه چیزی تحویل می‌دهید؟
+      </p>
+
+      <div style={{ display: 'grid', gap: S.s3, gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))' }}>
+        {WASTE_TYPES.map((w, i) => {
+          const isOn = selected === w.id;
+          const { Icon } = w;
+          return (
+            <div key={w.id} className="pm-fade-up" style={{ animationDelay: `${i * 40}ms` }}>
+              <Card
+                accent={isOn ? w.color : undefined}
+                onClick={() => onNext(w.id)}
+                style={{
+                  borderColor: isOn ? alpha(w.color, 40) : C.border,
+                  boxShadow: isOn ? C.shadowLift : C.shadowCard,
+                  height: '100%',
+                }}
+              >
+                <div style={{ padding: `${S.s4}px`, display: 'flex', alignItems: 'center', gap: S.s3 }}>
+                  <IconBadge color={w.color}><Icon className="h-5 w-5" /></IconBadge>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ margin: 0, fontSize: S.base, fontWeight: 800, color: C.textStrong }}>{w.name}</p>
+                    <p style={{ margin: '5px 0 0', fontSize: S.xs, color: C.muted, lineHeight: 1.7 }}>{w.short}</p>
+                  </div>
+                  {isOn && (
+                    <span
+                      style={{
+                        width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
+                        display: 'grid', placeItems: 'center', background: w.color, color: C.onAccent,
+                      }}
+                    >
+                      <Check size={13} strokeWidth={3} />
+                    </span>
+                  )}
+                </div>
+              </Card>
             </div>
-            <h3 className="font-semibold text-lg">{type.name}</h3>
-            <p className="text-gray-600 text-sm text-center">{type.description}</p>
-          </button>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

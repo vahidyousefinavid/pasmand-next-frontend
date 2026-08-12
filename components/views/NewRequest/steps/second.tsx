@@ -206,14 +206,21 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import 'leaflet/dist/leaflet.css';
-import { Input } from '@/components/ui/input';
+import { ChevronLeft, ChevronRight, Loader2, LocateFixed, MapPin } from 'lucide-react';
 import { useCity } from '@/context/data-context';
+import { C, S, alpha } from '@/components/ui/tokens';
+import { Card, Btn } from '@/components/ui/kit';
 
 const MapWithNoSSR = dynamic(() => import('./map-component'), {
   ssr: false,
   loading: () => (
-    <div className="h-[400px] bg-gray-100 rounded-lg flex items-center justify-center">
-      در حال بارگذاری نقشه...
+    <div
+      style={{
+        height: '100%', display: 'grid', placeItems: 'center',
+        background: 'var(--pm-surface-2)', color: 'var(--pm-muted)', fontSize: '0.85rem',
+      }}
+    >
+      در حال بارگذاری نقشه…
     </div>
   ),
 });
@@ -374,83 +381,117 @@ export default function SecondStep({ onNext, onBack }: SecondStepProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-8">موقعیت مکانی را انتخاب کنید</h2>
-      <div className="bg-white p-6 rounded-lg shadow-lg">
-        <div className="relative h-[400px] rounded-lg mb-6 overflow-hidden border-2 border-gray-200">
-          <MapWithNoSSR
-            center={defaultCenter}
-            onLocationSelect={handleLocationSelect}
-            selectedLocation={selectedLocation}
-          />
-          <button
-            onClick={getCurrentLocation}
-            className="absolute top-4 left-4 px-4 py-2 bg-white text-blue-600 rounded-lg shadow-md hover:bg-blue-50 transition-colors z-[1000] flex items-center gap-2"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-            </svg>
-            موقعیت فعلی
-          </button>
-        </div>
-        <div className="space-y-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
+      <p style={{ margin: 0, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>کجا مراجعه کنیم؟</p>
+
+      <Card>
+        <div style={{ padding: `${S.s4}px`, display: 'flex', flexDirection: 'column', gap: S.s4 }}>
+          <div style={{ position: 'relative', height: 340, borderRadius: S.r2, overflow: 'hidden', border: `1px solid ${C.border}` }}>
+            <MapWithNoSSR
+              center={defaultCenter}
+              onLocationSelect={handleLocationSelect}
+              selectedLocation={selectedLocation}
+            />
+            <button
+              type="button"
+              onClick={getCurrentLocation}
+              style={{
+                position: 'absolute', top: 12, insetInlineStart: 12, zIndex: 1000,
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '9px 14px', borderRadius: S.rPill,
+                background: C.surface, color: C.green,
+                border: `1px solid ${alpha(C.green, 26)}`, boxShadow: C.shadowCard,
+                fontSize: S.xs, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer',
+              }}
+            >
+              <LocateFixed className="h-4 w-4" />
+              موقعیت فعلی
+            </button>
+          </div>
+
           {geoLocationError && (
-            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-right">
+            <p
+              style={{
+                margin: 0, padding: `${S.s3}px`, borderRadius: S.r1, fontSize: S.xs, lineHeight: 1.8,
+                background: alpha(C.statusDanger, 10), color: C.statusDanger,
+                border: `1px solid ${alpha(C.statusDanger, 22)}`,
+              }}
+            >
               {geoLocationError}
-            </div>
+            </p>
           )}
-          <div className="relative">
-            <Input
+
+          <div style={{ position: 'relative' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: S.sm, fontWeight: 700, color: C.text, marginBottom: S.s2 }}>
+              <MapPin className="h-4 w-4" style={{ color: C.green }} />
+              آدرس دقیق
+            </label>
+            <input
               type="text"
               value={address}
               onChange={handleAddressChange}
-              placeholder="جستجوی آدرس..."
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
+              placeholder="جستجوی آدرس یا انتخاب روی نقشه…"
+              className="pm-field"
+              style={{ fontWeight: 600 }}
             />
             {loading && (
-              <div className="absolute left-4 top-5">
-                <div className="loader">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </div>
+              <span style={{ position: 'absolute', insetInlineStart: 14, bottom: 15 }}>
+                <Loader2 className="h-4 w-4 animate-spin" style={{ color: C.green }} />
+              </span>
             )}
             {suggestions.length > 0 && (
-              <ul className="absolute z-10 bg-white border border-gray-300 rounded-lg w-full mt-1 max-h-40 overflow-y-auto text-right">
+              <ul
+                style={{
+                  position: 'absolute', zIndex: 20, insetInline: 0, marginTop: 6,
+                  listStyle: 'none', padding: 6, maxHeight: 190, overflowY: 'auto',
+                  background: C.surface, border: `1px solid ${C.border}`, borderRadius: S.r2,
+                  boxShadow: C.shadowLift,
+                }}
+              >
                 {suggestions.map((suggestion, index) => (
-                  <li
-                    key={index}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    className="p-2 cursor-pointer hover:bg-gray-100"
-                  >
-                    {suggestion.title} - {suggestion.address}
+                  <li key={index}>
+                    <button
+                      type="button"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      style={{
+                        display: 'block', width: '100%', textAlign: 'start', cursor: 'pointer',
+                        padding: `${S.s2}px ${S.s3}px`, borderRadius: S.r1,
+                        background: 'transparent', border: 'none', fontFamily: 'inherit',
+                        fontSize: S.xs, color: C.text, lineHeight: 1.8,
+                      }}
+                    >
+                      <strong style={{ fontWeight: 800 }}>{suggestion.title}</strong>
+                      <span style={{ color: C.muted }}> — {suggestion.address}</span>
+                    </button>
                   </li>
                 ))}
               </ul>
             )}
           </div>
-          <div className="flex justify-between">
-            <button
-              onClick={() =>
-                onNext({
-                  lat: selectedLocation?.lat || 0,
-                  lng: selectedLocation?.lng || 0,
-                  address,
-                })
-              }
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              مرحله بعد
-            </button>
-            <button
-              onClick={onBack}
-              className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-            >
-              بازگشت
-            </button>
-          </div>
         </div>
+      </Card>
+
+      <div style={{ display: 'flex', gap: S.s3 }}>
+        <Btn variant="ghost" onClick={onBack}>
+          <ChevronRight className="h-4 w-4" />
+          بازگشت
+        </Btn>
+        <Btn
+          full
+          // A request pinned at lat 0 / lng 0 is a request in the Gulf of
+          // Guinea; the old screen let that through whenever nothing was picked.
+          disabled={!selectedLocation || !address}
+          onClick={() =>
+            onNext({
+              lat: selectedLocation?.lat || 0,
+              lng: selectedLocation?.lng || 0,
+              address,
+            })
+          }
+        >
+          <ChevronLeft className="h-4 w-4" />
+          ادامه
+        </Btn>
       </div>
     </div>
   );

@@ -1,64 +1,100 @@
 'use client';
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Button } from "../ui/button";
-import { Banknote, Cross, FileClock, Home, LogOut, Wallet } from "lucide-react";
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { FileClock, Home, PackagePlus, Wallet, User } from 'lucide-react';
+import { C, S, alpha } from '@/components/ui/tokens';
+
+/**
+ * The tab bar.
+ *
+ * Five destinations with the primary action raised out of the row — on a phone
+ * the thing a citizen opens this app to do should not be one of five identical
+ * grey glyphs. Labels stay visible: icon-only bars are guessing games in any
+ * language, and more so in one the icon set was not drawn for.
+ */
+const TABS = [
+  { href: '/', label: 'خانه', Icon: Home },
+  { href: '/history', label: 'پیگیری', Icon: FileClock },
+  { href: '/new-request', label: 'درخواست', Icon: PackagePlus, primary: true },
+  { href: '/wallet', label: 'کیف پول', Icon: Wallet },
+  { href: '/profile', label: 'پروفایل', Icon: User },
+];
 
 export function Navigation() {
-    const pathname = usePathname(); // Get the current path
+  const pathname = usePathname();
 
-    const isActive = (link: string) => pathname === link; // Check if the link matches the current URL
+  return (
+    <nav
+      dir="rtl"
+      style={{
+        position: 'fixed', insetInline: 0, bottom: 0, zIndex: 100000,
+        display: 'flex', justifyContent: 'center',
+        padding: `0 ${S.s3}px calc(${S.s3}px + env(safe-area-inset-bottom))`,
+        pointerEvents: 'none',
+      }}
+    >
+      <div
+        style={{
+          pointerEvents: 'auto',
+          width: '100%', maxWidth: 470,
+          display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', alignItems: 'end',
+          background: C.surface,
+          border: `1px solid ${C.border}`,
+          borderRadius: 26,
+          padding: `${S.s2}px ${S.s2}px`,
+          boxShadow: C.shadowLift,
+        }}
+      >
+        {TABS.map(({ href, label, Icon, primary }) => {
+          const active = pathname === href;
 
-    return (
-        <div className="fixed bottom-3 right-0 left-0 pointer-events-none z-[100000]">
-            <div className="flex justify-center">
-                <div className="pointer-events-auto relative  flex items-center justify-around p-4 shadow-custom-elevated rounded-[230px] w-[90%] max-w-[450px] bg-secondary/100 backdrop-blur supports-[backdrop-filter]:bg-secondary/100">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`text-background hover:text-secondary-foreground ${isActive("/") ? "bg-white text-black" : ""
-                            }`}
-                        asChild
-                    >
-                        <Link href="/">
-                            <Home className="h-6 w-6" />
-                        </Link>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        className={`text-background hover:text-secondary-foreground ${isActive("/new-request") ? "bg-white text-black" : ""
-                            }`}
-                        size="icon"
-                    >
-                        <Link href="/new-request">
-                            <Cross className="h-6 w-6" />
-                        </Link>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`text-background hover:text-secondary-foreground ${isActive("/history") ? "bg-white text-black" : ""
-                            }`}
-                        asChild
-                    >
-                        <Link href="/history">
-                            <FileClock className="h-6 w-6" />
-                        </Link>
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`text-background hover:text-secondary-foreground ${isActive("/tariff") ? "bg-white text-black" : ""
-                            }`}
-                        asChild
-                    >
-                        <Link href="/wallet">
-                            <Wallet className="h-6 w-6" />
-                        </Link>
-                    </Button>
-                </div>
-            </div>
-        </div>
-    );
+          if (primary) {
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={active ? 'page' : undefined}
+                style={{
+                  display: 'grid', justifyItems: 'center', gap: 5, textDecoration: 'none',
+                  marginTop: -26,
+                }}
+              >
+                <span
+                  style={{
+                    width: 52, height: 52, borderRadius: 20, display: 'grid', placeItems: 'center',
+                    background: `linear-gradient(140deg, ${C.heroStart}, ${C.heroEnd})`,
+                    color: C.onHero,
+                    border: `3px solid ${C.surface}`,
+                    boxShadow: `0 10px 22px ${alpha(C.green, 34)}`,
+                  }}
+                >
+                  <Icon className="h-5 w-5" />
+                </span>
+                <span style={{ fontSize: 10, fontWeight: 800, color: active ? C.green : C.muted }}>{label}</span>
+              </Link>
+            );
+          }
+
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-current={active ? 'page' : undefined}
+              style={{
+                display: 'grid', justifyItems: 'center', gap: 4, textDecoration: 'none',
+                padding: `${S.s2}px 0 6px`, borderRadius: 16,
+                background: active ? alpha(C.green, 10) : 'transparent',
+                color: active ? C.green : C.muted,
+                transition: 'background .2s ease, color .2s ease',
+              }}
+            >
+              <Icon className="h-5 w-5" />
+              <span style={{ fontSize: 10, fontWeight: active ? 800 : 600 }}>{label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
 }

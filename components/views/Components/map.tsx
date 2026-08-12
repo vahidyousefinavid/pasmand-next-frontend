@@ -5,15 +5,18 @@ import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-lea
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Fix for default marker icons
+/**
+ * Leaflet's default marker images used to be fetched from unpkg.com, so the pin
+ * on this map simply did not appear whenever that CDN was unreachable — and on
+ * an Iranian connection it often is. This is the same local marker the request
+ * wizard's map already uses, served from /public.
+ */
 const icon = L.icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+  iconUrl: '/markers/blue.svg',
+  // The SVG's own viewBox, so the pin's tip lands exactly on the coordinate.
+  iconSize: [27, 41],
+  iconAnchor: [13, 41],
+  popupAnchor: [0, -36],
 });
 
 interface MapComponentProps {

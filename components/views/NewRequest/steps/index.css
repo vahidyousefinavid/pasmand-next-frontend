@@ -1,24 +1,39 @@
-.react-date-picker {
-    border: 1px solid #e5e7eb; /* Gray border similar to your other form elements */
-    border-radius: 0.375rem; /* Rounded corners */
-    padding: 0.75rem;
-    font-family: 'Vazir', sans-serif; /* Persian font family for better compatibility */
-  }
-  
-  .react-date-picker .react-date-picker__calendar {
-    border-radius: 0.375rem; /* Match rounded corners */
-  }
-  
-  .react-date-picker .react-date-picker__button {
-    background-color: #6366f1; /* Blue button color */
-    color: white;
-  }
-  
-  .react-date-picker .react-date-picker__calendar .react-date-picker__day:hover {
-    background-color: #3b82f6; /* Blue hover color */
-  }
-  
-  .react-date-picker .react-date-picker__calendar .react-date-picker__day--selected {
-    background-color: #3b82f6; /* Selected day background */
-    color: white;
-  }
+/* Only the Jalali calendar popup lives here — the input itself is styled by
+   `.pm-date-input` in globals.css, because other pages use that class without
+   importing this file. */
+
+/* The calendar opens over the map on the previous step and over the tab bar at
+   the bottom of the page; both sit above the default stacking context. */
+.rmdp-container .rmdp-wrapper {
+  z-index: 100001;
+}
+
+.rmdp-wrapper {
+  border-radius: 18px;
+  border: 1px solid var(--pm-border);
+  box-shadow: var(--pm-shadow-lift);
+  font-family: inherit;
+}
+
+.rmdp-day.rmdp-selected span:not(.highlight) {
+  background-color: var(--pm-green);
+  box-shadow: none;
+}
+
+.rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden) span:hover {
+  background-color: color-mix(in srgb, var(--pm-green) 18%, transparent);
+  color: var(--pm-text-strong);
+}
+
+.rmdp-day.rmdp-today span {
+  background-color: color-mix(in srgb, var(--pm-green) 14%, transparent);
+  color: var(--pm-green);
+}
+
+.rmdp-arrow {
+  border-color: var(--pm-green);
+}
+
+.rmdp-arrow-container:hover {
+  background-color: var(--pm-green);
+}

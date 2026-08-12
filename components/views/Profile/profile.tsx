@@ -1,310 +1,244 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { User, Phone, Mail, Edit2, Camera, Package2, MapPin, Bell, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import Cookies from 'js-cookie';
+import { User, Phone, Mail, Edit2, Package2, MapPin, LogOut, ChevronLeft, Loader2, Check } from 'lucide-react';
+
 import { axiosService } from '@/lib/axiosService';
 import { API } from '@/services/const';
-import Cookies from 'js-cookie';
 import { useToast } from '@/hooks/use-toast';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/context/auth-context';
+import { C, S, alpha, fa } from '@/components/ui/tokens';
+import { Screen, Hero, Card, IconBadge, Btn, Field, Shimmer } from '@/components/ui/kit';
 
 interface UserProfile {
-  first_name: string
-  last_name: string
-  phone: string
-  email: string
-  description: string
-  has_password: boolean
-  accessible: boolean
-  personalPicture: string
-  addresses: any[]
-  pasmandRequests: any[]
-}
-
-interface NotificationSetting {
-  id: string;
-  title: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  email: string;
   description: string;
-  enabled: boolean;
+  has_password: boolean;
+  accessible: boolean;
+  personalPicture: string;
+  addresses: any[];
+  pasmandRequests: any[];
 }
 
-const mockProfile: UserProfile = {
-  first_name: 'کاربر جدید',
-  last_name: '',
-  phone: '',
-  email: '',
-  description: '',
-  has_password: false,
-  accessible: false,
-  personalPicture: '',
-  addresses: [],
-  pasmandRequests: []
+const EMPTY: UserProfile = {
+  first_name: '', last_name: '', phone: '', email: '', description: '',
+  has_password: false, accessible: false, personalPicture: '', addresses: [], pasmandRequests: [],
 };
 
-const mockNotificationSettings: NotificationSetting[] = [
-  {
-    id: 'new_price',
-    title: 'تغییرات قیمت',
-    description: 'اطلاع‌رسانی در مورد تغییرات قیمت اقلام بازیافتی',
-    enabled: true,
-  },
-  {
-    id: 'collection_reminder',
-    title: 'یادآوری جمع‌آوری',
-    description: 'یادآوری زمان مراجعه برای جمع‌آوری پسماند',
-    enabled: true,
-  },
-  {
-    id: 'special_offers',
-    title: 'پیشنهادات ویژه',
-    description: 'دریافت پیشنهادات و تخفیف‌های ویژه',
-    enabled: false,
-  },
-];
-
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<UserProfile>(mockProfile);
+  const [profile, setProfile] = useState<UserProfile>(EMPTY);
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [editedProfile, setEditedProfile] = useState<UserProfile>(mockProfile);
-  const [notifications, setNotifications] = useState<NotificationSetting[]>(mockNotificationSettings);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [editedProfile, setEditedProfile] = useState<UserProfile>(EMPTY);
 
-  const { logout } = useAuth()
+  const { logout } = useAuth();
   const { toast } = useToast();
 
-  const handleSaveProfile = () => {
-    updateProfile()
-    setIsEditing(false);
-  };
-
-  const toggleNotification = (id: string) => {
-    setNotifications(notifications.map(notification =>
-      notification.id === id
-        ? { ...notification, enabled: !notification.enabled }
-        : notification
-    ));
-  };
-
   const getProfile = () => {
-    setLoading(true)
-    axiosService({
-      url: API.GET_PROFILE,
-      method: 'get',
-      token: Cookies.get('auth_token')
-    })
+    setLoading(true);
+    axiosService({ url: API.GET_PROFILE, method: 'get', token: Cookies.get('auth_token') })
       .then((res: any) => {
-        setProfile(res?.data?.user)
-        setLoading(false)
-      }).catch((err) => {
-        toast({
-          variant: 'destructive',
-          title: 'ناموفق',
-          description: 'متاسفانه انجام نشد صفحه را دوباره بارگزاری کنید',
-        });
-        setLoading(false)
+        setProfile(res?.data?.user || EMPTY);
+        setLoading(false);
       })
-  }
+      .catch(() => {
+        toast({ variant: 'destructive', title: 'ناموفق', description: 'دریافت پروفایل انجام نشد.' });
+        setLoading(false);
+      });
+  };
 
   const updateProfile = () => {
-    setLoading(true)
-    axiosService({
-      url: API.UPDATE_PROFILE,
-      method: 'put',
-      body: editedProfile,
-      token: Cookies.get('auth_token')
-    })
+    setSaving(true);
+    axiosService({ url: API.UPDATE_PROFILE, method: 'put', body: editedProfile, token: Cookies.get('auth_token') })
       .then((res: any) => {
-        setProfile(res?.data?.user)
-        setLoading(false)
-      }).catch((err) => {
-        toast({
-          variant: 'destructive',
-          title: 'ناموفق',
-          description: 'متاسفانه انجام نشد صفحه را دوباره بارگزاری کنید',
-        });
-        setLoading(false)
+        setProfile(res?.data?.user || editedProfile);
+        setIsEditing(false);
+        setSaving(false);
+        toast({ variant: 'success', title: 'ذخیره شد', description: 'اطلاعات شما به‌روز شد.' });
       })
-  }
+      .catch(() => {
+        toast({ variant: 'destructive', title: 'ناموفق', description: 'ذخیرهٔ تغییرات انجام نشد.' });
+        setSaving(false);
+      });
+  };
 
-  useEffect(() => {
-    getProfile()
-  }, [])
+  useEffect(() => { getProfile(); }, []);
+
+  const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+  const initials = (profile.first_name?.[0] || '') + (profile.last_name?.[0] || '');
 
   return (
-    <div className="min-h-screen py-24 px-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-12">پروفایل کاربری</h1>
+    <Screen>
+      {/* No `icon` here: the avatar in `aside` is already the picture of the
+          account, and two person glyphs in one header read as a bug. */}
+      <Hero
+        title={fullName || 'حساب کاربری'}
+        sub={profile.phone ? `شمارهٔ همراه: ${profile.phone}` : 'اطلاعات شما برای هماهنگی جمع‌آوری استفاده می‌شود.'}
+        aside={
+          <span
+            style={{
+              width: 58, height: 58, borderRadius: 20, flexShrink: 0, display: 'grid', placeItems: 'center',
+              background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.26)',
+              fontSize: S.lg, fontWeight: 800, color: C.onHero, overflow: 'hidden',
+            }}
+          >
+            {profile.personalPicture ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={profile.personalPicture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : initials ? (
+              initials
+            ) : (
+              <User className="h-6 w-6" />
+            )}
+          </span>
+        }
+      />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* ستون اصلی */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* کارت اطلاعات شخصی */}
-            <div className="bg-white p-6 rounded-lg shadow-md">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold">اطلاعات شخصی</h2>
-                <button
-                  onClick={() => {
-                    setIsEditing(!isEditing)
-                    setEditedProfile(profile)
-                  }}
-                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <Edit2 className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
+      {/* ── details ── */}
+      <Card>
+        <div style={{ padding: `${S.s4}px` }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: S.s3, marginBottom: S.s4 }}>
+            <p style={{ margin: 0, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>اطلاعات شخصی</p>
+            {!isEditing && (
+              <button
+                type="button"
+                onClick={() => { setEditedProfile(profile); setIsEditing(true); }}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontFamily: 'inherit',
+                  padding: '7px 14px', borderRadius: S.rPill, fontSize: S.xs, fontWeight: 800,
+                  background: alpha(C.green, 10), color: C.green, border: `1px solid ${alpha(C.green, 22)}`,
+                }}
+              >
+                <Edit2 className="h-3.5 w-3.5" />
+                ویرایش
+              </button>
+            )}
+          </div>
 
-              {isEditing ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">نام </label>
-                    <Input
-                      type="text"
-                      value={editedProfile.first_name}
-                      onChange={(e) => setEditedProfile({ ...editedProfile, first_name: e.target.value })}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">نام خانوادگی </label>
-                    <Input
-                      type="text"
-                      value={editedProfile.last_name}
-                      onChange={(e) => setEditedProfile({ ...editedProfile, last_name: e.target.value })}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">شماره موبایل</label>
-                    <Input
-                      type="tel"
-                      disabled
-                      value={editedProfile.phone}
-                      onChange={(e) => setEditedProfile({ ...editedProfile, phone: e.target.value })}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                      dir="ltr"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">ایمیل</label>
-                    <Input
-                      type="email"
-                      value={editedProfile.email}
-                      onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right"
-                      dir="ltr"
-                    />
-                  </div>
-                  <div className="flex justify-end gap-4 pt-4">
-                    <button
-                      onClick={() => setIsEditing(false)}
-                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                      انصراف
-                    </button>
-                    <button
-                      onClick={handleSaveProfile}
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                    >
-                      ذخیره تغییرات
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <User className="w-5 h-5 text-gray-500" />
-                    <span>{(profile.first_name || '') + ' ' + (profile?.last_name || '')}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="w-5 h-5 text-gray-500" />
-                    <span dir="ltr">{profile.phone}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-gray-500" />
-                    <span dir="ltr">{profile.email}</span>
-                  </div>
-                </div>
-              )}
+          {loading ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: S.s2 }}>
+              {[0, 1, 2].map((i) => <Shimmer key={i} height={52} radius={14} />)}
             </div>
+          ) : isEditing ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
+              <Field label="نام">
+                <input
+                  className="pm-field"
+                  value={editedProfile.first_name || ''}
+                  onChange={(e) => setEditedProfile({ ...editedProfile, first_name: e.target.value })}
+                />
+              </Field>
+              <Field label="نام خانوادگی">
+                <input
+                  className="pm-field"
+                  value={editedProfile.last_name || ''}
+                  onChange={(e) => setEditedProfile({ ...editedProfile, last_name: e.target.value })}
+                />
+              </Field>
+              <Field label="شمارهٔ همراه" hint="شمارهٔ ورود به سامانه است و تغییر نمی‌کند.">
+                <input className="pm-field tnum" dir="ltr" value={editedProfile.phone || ''} disabled />
+              </Field>
+              <Field label="ایمیل">
+                <input
+                  className="pm-field"
+                  dir="ltr"
+                  type="email"
+                  value={editedProfile.email || ''}
+                  onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
+                />
+              </Field>
 
-            {/* تنظیمات اعلان‌ها */}
-            {/* <div className="bg-white p-6 rounded-lg shadow-md">
-              <h2 className="text-xl font-bold mb-6">تنظیمات اعلان‌ها</h2>
-              <div className="space-y-6">
-                {notifications.map((notification) => (
-                  <div key={notification.id} className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">{notification.title}</h3>
-                      <p className="text-sm text-gray-500">{notification.description}</p>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <Input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={notification.enabled}
-                        onChange={() => toggleNotification(notification.id)}
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-                ))}
+              <div style={{ display: 'flex', gap: S.s2, marginTop: S.s2 }}>
+                <Btn full onClick={updateProfile} disabled={saving}>
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  ذخیرهٔ تغییرات
+                </Btn>
+                <Btn variant="ghost" onClick={() => setIsEditing(false)}>انصراف</Btn>
               </div>
-            </div> */}
-          </div>
-
-          {/* ستون کناری */}
-          <div className="space-y-6">
-            {/* کارت آواتار */}
-            <div className="bg-white p-6 rounded-lg shadow-md text-center">
-              <div className="relative inline-block">
-                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-4">
-                  {profile.personalPicture ? (
-                    <img
-                      src={profile.personalPicture}
-                      alt={(profile.first_name || '') + ' ' + (profile.last_name || '')}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <User className="w-12 h-12 text-gray-400" />
-                  )}
-                </div>
-                <button className="absolute bottom-0 right-0 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors">
-                  <Camera className="w-4 h-4" />
-                </button>
-              </div>
-              <h3 className="font-bold text-lg">{(profile.first_name || '') + ' ' + (profile.last_name || '')}</h3>
             </div>
-          </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
+              <Row icon={<User className="h-4 w-4" />} label="نام و نام خانوادگی" value={fullName} />
+              <Row icon={<Phone className="h-4 w-4" />} label="شمارهٔ همراه" value={profile.phone} ltr />
+              <Row icon={<Mail className="h-4 w-4" />} label="ایمیل" value={profile.email} ltr />
+            </div>
+          )}
         </div>
-        {/* منوی دسترسی سریع */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h3 className="font-bold mb-4">دسترسی سریع</h3>
-          <div className="space-y-2">
-            <Link href={'/history'} className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
-              <Package2 className="w-5 h-5 text-gray-500" />
-              <span>درخواست های من</span>
-            </Link>
-            <Link href={'/addresses'} className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
-              <MapPin className="w-5 h-5 text-gray-500" />
-              <span>آدرس‌های من</span>
-            </Link>
-            {/* <button className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg transition-colors">
-                  <Bell className="w-5 h-5 text-gray-500" />
-                  <span>اعلان‌ها</span>
-                </button> */}
-            <button
-              onClick={() => {
-                logout()
-              }}
-              className="w-full p-3 text-right flex items-center gap-3 hover:bg-gray-50 rounded-lg text-red-500 transition-colors">
-              <LogOut className="w-5 h-5" />
-              <span>خروج از حساب</span>
-            </button>
-          </div>
-        </div>
+      </Card>
+
+      {/* ── what the account has ── */}
+      <div style={{ display: 'grid', gap: S.s3, gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', marginTop: S.s3 }}>
+        <LinkCard
+          href="/history"
+          icon={<Package2 className="h-4 w-4" />}
+          color={C.statusInfo}
+          title="درخواست‌های من"
+          sub={`${fa(profile.pasmandRequests?.length || 0)} درخواست`}
+        />
+        <LinkCard
+          href="/addresses"
+          icon={<MapPin className="h-4 w-4" />}
+          color={C.amber}
+          title="آدرس‌های من"
+          sub={`${fa(profile.addresses?.length || 0)} آدرس ذخیره‌شده`}
+        />
+      </div>
+
+      <div style={{ marginTop: S.s5 }}>
+        <Btn variant="soft" color={C.statusDanger} full onClick={() => logout()}>
+          <LogOut className="h-4 w-4" />
+          خروج از حساب
+        </Btn>
+      </div>
+    </Screen>
+  );
+}
+
+function Row({ icon, label, value, ltr }: { icon: React.ReactNode; label: string; value?: string; ltr?: boolean }) {
+  const empty = !value;
+  // `dir="ltr"` is for phone numbers and email addresses. Applying it to the
+  // "ثبت نشده" placeholder flips that Persian text to the wrong edge, so the
+  // direction follows the content, not the field.
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: S.s3 }}>
+      <IconBadge color={C.statusNeutral} size={36}>{icon}</IconBadge>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <p style={{ margin: 0, fontSize: S.xs, color: C.muted, fontWeight: 600 }}>{label}</p>
+        <p
+          className={ltr && !empty ? 'tnum' : undefined}
+          dir={ltr && !empty ? 'ltr' : undefined}
+          style={{
+            margin: '3px 0 0', fontSize: S.sm, fontWeight: 700,
+            color: empty ? C.subtle : C.textStrong,
+            textAlign: 'start', overflowWrap: 'anywhere',
+          }}
+        >
+          {value || 'ثبت نشده'}
+        </p>
       </div>
     </div>
+  );
+}
+
+function LinkCard({ href, icon, color, title, sub }: { href: string; icon: React.ReactNode; color: string; title: string; sub: string }) {
+  return (
+    <Link href={href} style={{ textDecoration: 'none' }}>
+      <Card interactive>
+        <div style={{ padding: `${S.s4}px`, display: 'flex', alignItems: 'center', gap: S.s3 }}>
+          <IconBadge color={color} size={40}>{icon}</IconBadge>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ margin: 0, fontSize: S.sm, fontWeight: 800, color: C.textStrong }}>{title}</p>
+            <p style={{ margin: '4px 0 0', fontSize: S.xs, color: C.muted }}>{sub}</p>
+          </div>
+          <ChevronLeft className="h-4 w-4" style={{ color: C.subtle, flexShrink: 0 }} />
+        </div>
+      </Card>
+    </Link>
   );
 }

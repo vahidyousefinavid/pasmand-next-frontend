@@ -1,134 +1,137 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Navigation } from '@/components/views/navigation';
-import { TopMenu } from '@/components/views/top-menu';
-import {
-    Trash2,
-    Recycle,
-    Battery,
-    Box,
-    Car,
-    Construction,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import Link from 'next/link';
+import { ChevronDown, ChevronUp, Recycle, PackagePlus } from 'lucide-react';
+import { WASTE_TYPES } from '@/lib/wasteTypes';
+import { C, S, alpha } from '@/components/ui/tokens';
+import { Screen, Hero, Card, IconBadge } from '@/components/ui/kit';
 
-const wasteTypes = [
-    {
-        id: 'household',
-        name: 'پسماند خانگی',
-        icon: <Trash2 className="w-8 h-8" />,
-        description: 'شامل زباله‌های روزمره‌ای مثل پوست میوه، ته‌مانده غذا، دستمال کاغذی مصرف‌شده، و سایر موادی که معمولاً در سطل زباله خانگی می‌ریزیم. بهتره این‌ها رو از موارد قابل بازیافت جدا نگه داریم تا فرآیند بازیافت بهینه بمونه.'
-    },
-    {
-        id: 'recyclable',
-        name: 'قابل بازیافت',
-        icon: <Recycle className="w-8 h-8" />,
-        description: 'موادی مثل بطری‌های پلاستیکی، قوطی‌های فلزی، کاغذ باطله، مقوا، و شیشه که در صورت تمیز بودن دوباره قابل استفاده‌ هستند. برای مثال، بطری نوشابه، قوطی کنسرو، یا روزنامه قدیمی.'
-    },
-    {
-        id: 'electronic',
-        name: 'الکترونیکی',
-        icon: <Battery className="w-8 h-8" />,
-        description: 'لوازم برقی خراب یا بلااستفاده مثل باتری‌ها، گوشی قدیمی، شارژر، کابل، لپ‌تاپ یا تلویزیون. این وسایل نباید با زباله‌های دیگر مخلوط بشن چون می‌تونن محیط زیست رو آلوده کنن.'
-    },
-    {
-        id: 'bulky',
-        name: 'اقلام حجیم',
-        icon: <Box className="w-8 h-8" />,
-        description: 'اشیای بزرگ مثل مبل، تشک، کمد و لوازم چوبی که در زباله‌دان جا نمی‌گیرن. معمولاً نیاز به جمع‌آوری ویژه دارن.'
-    },
-    {
-        id: 'automotive',
-        name: 'خودرو',
-        icon: <Car className="w-8 h-8" />,
-        description: 'شامل روغن سوخته، باتری خودرو، لاستیک فرسوده و قطعات یدکی. این پسماندها نیاز به دفع خاص دارن چون ممکنه خطرناک باشن.'
-    },
-    {
-        id: 'construction',
-        name: 'ساختمانی',
-        icon: <Construction className="w-8 h-8" />,
-        description: 'پسماندهایی مثل آجر، گچ، سیمان، سرامیک شکسته، و نخاله‌های حاصل از تعمیرات یا ساخت‌وساز. این موارد معمولاً توسط شهرداری یا شرکت‌های تخصصی جمع‌آوری می‌شن.'
-    },
-];
+/**
+ * انواع پسماند — the same dotted rail as home, but each node opens.
+ *
+ * The categories are ordered by what the service actually wants first
+ * (recyclables), not alphabetically, and each one ends in a link that carries
+ * its id into the request wizard, so reading about a category and asking for it
+ * to be collected are one step apart instead of two screens apart.
+ */
+export default function WasteTypesView() {
+  const [open, setOpen] = useState<string | null>(WASTE_TYPES[0].id);
 
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1
-        }
-    }
-};
+  // TopMenu and the tab bar come from app/(user)/layout.tsx — rendering them
+  // here as well would stack two headers on the same screen.
+  return (
+    <Screen>
+        <Hero
+          icon={<Recycle className="h-6 w-6" />}
+          title="انواع پسماند"
+          sub="هر چیزی که تحویل می‌دهید در یکی از این شش دسته می‌گنجد. دسته را درست انتخاب کنید تا جمع‌آور با خودرو و تجهیزات مناسب بیاید."
+        />
 
-const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-            type: "spring",
-            stiffness: 100
-        }
-    }
-};
+        <div style={{ position: 'relative', paddingInlineStart: 34 }}>
+          <span
+            aria-hidden
+            style={{
+              position: 'absolute', insetInlineStart: 14, top: 26, bottom: 26, width: 2,
+              backgroundImage: `linear-gradient(to bottom, ${alpha(C.green, 50)} 55%, transparent 0)`,
+              backgroundSize: '2px 10px',
+              backgroundRepeat: 'repeat-y',
+              maskImage: 'linear-gradient(to bottom, #000 0%, #000 84%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, #000 0%, #000 84%, transparent 100%)',
+            }}
+          />
 
-export default function WasteTypesPage() {
-    const [mounted, setMounted] = useState(false);
+          <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
+            {WASTE_TYPES.map((w, i) => {
+              const isOpen = open === w.id;
+              const { Icon } = w;
+              return (
+                <div key={w.id} className="pm-fade-up" style={{ position: 'relative', animationDelay: `${i * 45}ms` }}>
+                  <span
+                    aria-hidden
+                    style={{
+                      position: 'absolute', insetInlineStart: -26, top: 26,
+                      width: 12, height: 12, borderRadius: '50%',
+                      background: C.bg,
+                      border: `2.5px solid ${w.color}`,
+                      boxShadow: isOpen ? `0 0 0 5px ${alpha(w.color, 16)}` : undefined,
+                      transition: 'box-shadow .22s ease',
+                    }}
+                  />
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+                  <Card
+                    accent={w.color}
+                    style={{
+                      borderColor: isOpen ? alpha(w.color, 35) : C.border,
+                      boxShadow: isOpen ? C.shadowLift : C.shadowCard,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setOpen(isOpen ? null : w.id)}
+                      aria-expanded={isOpen}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: S.s3, width: '100%',
+                        padding: `${S.s4}px`, background: 'transparent', border: 'none',
+                        fontFamily: 'inherit', color: 'inherit', cursor: 'pointer', textAlign: 'start',
+                      }}
+                    >
+                      <IconBadge color={w.color}><Icon className="h-5 w-5" /></IconBadge>
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ display: 'block', fontSize: S.base, fontWeight: 800, color: C.textStrong }}>{w.name}</span>
+                        <span style={{ display: 'block', fontSize: S.xs, color: C.muted, marginTop: 5 }}>{w.short}</span>
+                      </span>
+                      <span style={{ color: C.subtle, flexShrink: 0 }}>
+                        {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </span>
+                    </button>
 
-    return (
-        <div className="min-h-screen bg-background pt-10 pb-10">
-            <TopMenu />
-            <div className="relative bg-gradient-to-r from-orange-500 to-orange-600 py-20 px-4 overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557426272-fc759fdf7a8d?auto=format&fit=crop&q=80')] mix-blend-overlay opacity-10"></div>
-                <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent"></div>
-                <div className="max-w-4xl mx-auto text-center relative z-10">
-                    <div className="bg-white/10 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-8 backdrop-blur-sm">
-                        <Trash2 className="h-10 w-10 text-white" />
-                    </div>
-                    <h1 className="text-4xl font-bold mb-6 text-white">انواع پسماند</h1>
-                    {/* <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-                        کارشناسان ما با افتخار آماده پاسخگویی به سؤالات شما هستند. از هر طریقی که راحت‌تر هستید با ما در تماس باشید.
-                    </p> */}
+                    {isOpen && (
+                      <div
+                        className="pm-fade-up"
+                        style={{
+                          padding: `0 ${S.s4}px ${S.s4}px`,
+                          borderTop: `1px dashed ${alpha(w.color, 24)}`,
+                          marginTop: 2, paddingTop: S.s4,
+                        }}
+                      >
+                        <p style={{ margin: 0, fontSize: S.sm, color: C.text, lineHeight: 2 }}>{w.description}</p>
+
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginTop: S.s3 }}>
+                          {w.examples.map((ex) => (
+                            <span
+                              key={ex}
+                              style={{
+                                fontSize: S.xs, fontWeight: 700, padding: '6px 11px', borderRadius: S.rPill,
+                                background: alpha(w.color, 10), color: w.color, border: `1px solid ${alpha(w.color, 22)}`,
+                              }}
+                            >
+                              {ex}
+                            </span>
+                          ))}
+                        </div>
+
+                        <Link
+                          href={`/new-request?type=${w.id}`}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: S.s2, marginTop: S.s4,
+                            padding: '11px 18px', borderRadius: S.r2, textDecoration: 'none',
+                            background: alpha(w.color, 12), color: w.color,
+                            border: `1px solid ${alpha(w.color, 26)}`,
+                            fontSize: S.sm, fontWeight: 800,
+                          }}
+                        >
+                          <PackagePlus className="h-4 w-4" />
+                          درخواست جمع‌آوری {w.name}
+                        </Link>
+                      </div>
+                    )}
+                  </Card>
                 </div>
-            </div>
-            <div className="pt-20 px-4 md:px-6">
-                {/* <h2 className="text-2xl font-bold text-right mb-6">انواع پسماند</h2> */}
-                <motion.div
-                    dir="rtl"
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-20"
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate={mounted ? 'visible' : 'hidden'}
-                >
-                    {wasteTypes.map((item, index) => (
-                        <motion.div key={index} variants={itemVariants}>
-                        <Card className="overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border-none rounded-xl group cursor-default">
-                          <CardContent className="p-6">
-                            <div className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-4">
-                              <div className="space-y-2 flex-1">
-                                <h3 className="font-semibold text-lg leading-none group-hover:text-[hsl(25,84%,48%)] transition-colors duration-300">
-                                  {item.name}
-                                </h3>
-                                <p className="text-sm text-muted-foreground text-justify">{item.description}</p>
-                              </div>
-                              <div className="p-3 rounded-xl bg-[hsl(25,84%,48%)]/10 text-[hsl(25,84%,48%)] group-hover:scale-110 transition-transform duration-300">
-                                {item.icon}
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    ))}
-                </motion.div>
-            </div>
-            <Navigation />
+              );
+            })}
+          </div>
         </div>
-    );
+    </Screen>
+  );
 }

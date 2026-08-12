@@ -1,325 +1,314 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
-    Cross,
-    Banknote,
-    FileClock,
-    MapPinned,
-    HelpCircle,
-    ChevronLeft,
-    ChevronRight,
-    Leaf,
-    Gift,
-    Recycle,
-    ArrowUpRight,
-    Wallet,
-    Phone,
-    Trash2
+  Banknote,
+  FileClock,
+  MapPinned,
+  HelpCircle,
+  Leaf,
+  Gift,
+  Recycle,
+  Wallet,
+  Phone,
+  Trash2,
+  ChevronLeft,
+  PackagePlus,
+  Sparkles,
 } from 'lucide-react';
 import { Navigation } from '@/components/views/navigation';
 import { TopMenu } from '@/components/views/top-menu';
-import Link from 'next/link';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, Pagination, Navigation as SwiperNavigation, EffectFade, EffectCreative } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/pagination';
-import 'swiper/css/navigation';
-import 'swiper/css/effect-fade';
-import 'swiper/css/effect-creative';
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import { useAuth } from '@/context/auth-context';
+import { useCity } from '@/context/data-context';
+import { C, S, alpha } from '@/components/ui/tokens';
+import { Screen, Hero, Card, IconBadge, SectionTitle } from '@/components/ui/kit';
 
-const items = [
-    {
-        icon: <Cross className="h-7 w-7" />,
-        title: 'درخواست جمع آوری',
-        description: 'درخواست جمع آوری جهت تصفیه و کمک به محیط زیست',
-        color: 'text-[hsl(25,84%,48%)]',
-        bgColor: 'bg-[hsl(25,84%,48%)]/10',
-        href: '/new-request'
-    },
-    {
-        icon: <Wallet className="h-7 w-7" />,
-        title: 'کیف پول',
-        description: 'خدمات مالی شما',
-        color: 'text-[hsl(25,84%,48%)]',
-        bgColor: 'bg-[hsl(25,84%,48%)]/10',
-        href: 'wallet'
-    },
-    {
-        icon: <Banknote className="h-7 w-7" />,
-        title: 'تعرفه قیمت‌ها',
-        description: 'قیمت روز تمامی اقلام',
-        color: 'text-[hsl(25,84%,48%)]',
-        bgColor: 'bg-[hsl(25,84%,48%)]/10',
-        href: 'tariff'
-    },
-    {
-        icon: <FileClock className="h-7 w-7" />,
-        title: 'سوابق جمع آوری',
-        description: ' لیست سوابق درخواست های شما',
-        color: 'text-[hsl(25,84%,48%)]',
-        bgColor: 'bg-[hsl(25,84%,48%)]/10',
-        href: 'history'
-    },
-    {
-        icon: <MapPinned className="h-7 w-7" />,
-        title: 'آدرس ها',
-        description: 'آدرس های ثبت شده',
-        color: 'text-[hsl(25,84%,48%)]',
-        bgColor: 'bg-[hsl(25,84%,48%)]/10',
-        href: 'addresses'
-    },
-    {
-        icon: <HelpCircle className="h-7 w-7" />,
-        title: 'راهنمای استفاده',
-        description: 'آموزش استفاده از اپلیکیشن',
-        color: 'text-[hsl(25,84%,48%)]',
-        bgColor: 'bg-[hsl(25,84%,48%)]/10',
-        href: 'guide'
-    },
-    {
-        icon: <Phone className="h-7 w-7" />,
-        title: 'پشتیبانی',
-        description: 'پشتیبانی و تماس با ما',
-        color: 'text-[hsl(25,84%,48%)]',
-        bgColor: 'bg-[hsl(25,84%,48%)]/10',
-        href: 'contact-us'
-    },
-    {
-        icon: <Trash2 className="h-7 w-7" />,
-        title: 'انواع پسماند',
-        description: 'آموزش و اطلاع رسانی انواع پسماند',
-        color: 'text-[hsl(25,84%,48%)]',
-        bgColor: 'bg-[hsl(25,84%,48%)]/10',
-        href: 'waste-types'
-    },
+/**
+ * Home.
+ *
+ * The services list is a dotted rail rather than a grid of equal tiles: the
+ * things a citizen does here are not eight interchangeable options, they are a
+ * route — hand something over, watch it get collected, get paid, learn what
+ * goes where. The rail says that; a 2×4 grid says the opposite.
+ */
+
+const services = [
+  {
+    href: '/new-request',
+    title: 'درخواست جمع‌آوری',
+    description: 'نوع پسماند، محل و زمان را انتخاب کنید تا جمع‌آور بیاید',
+    icon: <PackagePlus className="h-5 w-5" />,
+    color: C.green,
+    primary: true,
+  },
+  {
+    href: '/history',
+    title: 'پیگیری و سوابق',
+    description: 'مرحله‌به‌مرحله ببینید درخواست‌تان کجای مسیر است',
+    icon: <FileClock className="h-5 w-5" />,
+    color: C.statusInfo,
+  },
+  {
+    href: '/wallet',
+    title: 'کیف پول',
+    description: 'موجودی، واریزها و برداشت‌های شما',
+    icon: <Wallet className="h-5 w-5" />,
+    color: C.amber,
+  },
+  {
+    href: '/tariff',
+    title: 'تعرفهٔ قیمت‌ها',
+    description: 'قیمت روز خرید هر قلم پسماند',
+    icon: <Banknote className="h-5 w-5" />,
+    color: C.green,
+  },
+  {
+    href: '/waste-types',
+    title: 'انواع پسماند',
+    description: 'کدام پسماند در کدام دسته می‌گنجد',
+    icon: <Trash2 className="h-5 w-5" />,
+    color: C.violet,
+  },
+  {
+    href: '/addresses',
+    title: 'آدرس‌ها',
+    description: 'آدرس‌های ذخیره‌شده برای جمع‌آوری سریع‌تر',
+    icon: <MapPinned className="h-5 w-5" />,
+    color: C.statusInfo,
+  },
+  {
+    href: '/guide',
+    title: 'راهنمای استفاده',
+    description: 'از ثبت درخواست تا تسویه، قدم به قدم',
+    icon: <HelpCircle className="h-5 w-5" />,
+    color: C.statusNeutral,
+  },
+  {
+    href: '/contact-us',
+    title: 'پشتیبانی',
+    description: 'اگر چیزی مطابق انتظار پیش نرفت، با ما حرف بزنید',
+    icon: <Phone className="h-5 w-5" />,
+    color: C.statusNeutral,
+  },
 ];
 
 const banners = [
-    {
-        title: 'تخفیف ویژه برای جمع آوری بیش از ۵ کیلوگرم!',
-        description: 'با جمع آوری بیشتر، به محیط زیست کمک کنید و از تخفیف های ویژه بهره مند شوید.',
-        bgColor: 'from-[hsl(25,84%,48%)] to-[hsl(25,84%,58%)]',
-        textColor: 'text-white',
-        icon: <Recycle className="h-8 w-8 mb-0" />,
-        buttonText: 'درخواست جمع‌آوری',
-        buttonLink: '/new-request',
-        image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=1470&auto=format&fit=crop'
-    },
-    {
-        title: 'همراه با ما در حفظ محیط زیست سهیم باشید',
-        description: 'با تفکیک زباله‌ها و بازیافت آنها، به حفظ منابع طبیعی کمک کنید.',
-        bgColor: 'from-emerald-600 to-emerald-500',
-        textColor: 'text-white',
-        icon: <Leaf className="h-8 w-8 mb-0" />,
-        buttonText: 'مشاهده راهنما',
-        buttonLink: '/guide',
-        image: 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=1474&auto=format&fit=crop'
-    },
-    {
-        title: 'جایزه ویژه برای کاربران فعال',
-        description: 'با ثبت بیش از ۵ درخواست در ماه، شانس خود را برای دریافت جوایز نقدی امتحان کنید.',
-        bgColor: 'from-blue-600 to-blue-500',
-        textColor: 'text-white',
-        icon: <Gift className="h-8 w-8 mb-0" />,
-        buttonText: 'شرایط دریافت جایزه',
-        buttonLink: '/guide',
-        image: 'https://images.unsplash.com/photo-1607344645866-009c320c5ab0?q=80&w=1470&auto=format&fit=crop'
-    }
+  {
+    title: 'بیش از ۵ کیلوگرم؟ نوبت ویژه بگیرید',
+    description: 'برای حجم بالاتر، جمع‌آور با خودروی بزرگ‌تر می‌آید.',
+    icon: <Recycle className="h-6 w-6" />,
+    cta: 'ثبت درخواست',
+    href: '/new-request',
+    from: C.heroStart,
+    to: C.heroEnd,
+  },
+  {
+    title: 'تفکیک درست، بازیافت واقعی',
+    description: 'پسماند خشکِ تمیز دوباره تولید می‌شود؛ مخلوط، دفن.',
+    icon: <Leaf className="h-6 w-6" />,
+    cta: 'انواع پسماند',
+    href: '/waste-types',
+    from: '#0e6f7a',
+    to: '#1aa0a8',
+  },
+  {
+    title: 'هر جمع‌آوری، اعتبار در کیف پول',
+    description: 'مبلغ پس از توزین، مستقیم به کیف پول شما می‌نشیند.',
+    icon: <Gift className="h-6 w-6" />,
+    cta: 'کیف پول',
+    href: '/wallet',
+    from: '#2f4fa8',
+    to: '#4f7ae0',
+  },
 ];
 
-const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1
-        }
-    }
-};
-
-const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-        y: 0,
-        opacity: 1,
-        transition: {
-            type: "spring",
-            stiffness: 100
-        }
-    }
-};
-
 export default function HomeView() {
-    const [mounted, setMounted] = useState(false);
-    const [activeIndex, setActiveIndex] = useState(0);
-    const { user } = useAuth();
+  const [mounted, setMounted] = useState(false);
+  const [slide, setSlide] = useState(0);
+  const { user } = useAuth();
+  const { selectedCity } = useCity();
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+  useEffect(() => setMounted(true), []);
 
-    useEffect(() => {
-        if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(() => console.log('✅ Service Worker registered'))
-                .catch(err => console.error('SW error:', err));
-        }
-    }, []);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // A PWA that cannot register its worker is still a working website.
+      });
+    }
+  }, []);
 
-    if (!mounted) return null;
+  // Plain interval instead of a carousel library: three slides that cross-fade
+  // do not need 40KB of gesture handling.
+  useEffect(() => {
+    const id = setInterval(() => setSlide((s) => (s + 1) % banners.length), 5500);
+    return () => clearInterval(id);
+  }, []);
 
-    return (
-        <div className="min-h-screen bg-background">
-            <TopMenu />
+  if (!mounted) return null;
 
-            {/* Enhanced Advertisement Banner with Swiper */}
-            <div className="mt-16 pt-[20px] px-[20px]">
-                {mounted && (
-                    <Swiper
-                        spaceBetween={0}
-                        centeredSlides={true}
-                        effect={'creative'}
-                        creativeEffect={{
-                            prev: {
-                                shadow: true,
-                                translate: [0, 0, -400],
-                            },
-                            next: {
-                                translate: ['100%', 0, 0],
-                            },
-                        }}
-                        autoplay={{
-                            delay: 5000,
-                            disableOnInteraction: false,
-                        }}
-                        pagination={{
-                            clickable: true,
-                            dynamicBullets: true,
-                            renderBullet: function (index, className) {
-                                return `<span class="${className} w-3 h-3"></span>`;
-                            },
-                        }}
-                        navigation={{
-                            nextEl: '.swiper-button-next',
-                            prevEl: '.swiper-button-prev',
-                        }}
-                        modules={[Autoplay, Pagination, SwiperNavigation, EffectFade, EffectCreative]}
-                        className="mySwiper relative min-h-[220px] md:h-[350px]"
-                        onSlideChange={(swiper) => setActiveIndex(swiper.activeIndex)}
-                    >
-                        {banners.map((banner, index) => (
-                            <SwiperSlide key={index}>
-                                <div
-                                    className={`h-full min-h-[220px] md:h-[350px] rounded-lg bg-gradient-to-r ${banner.bgColor} ${banner.textColor} relative overflow-hidden py-6`}
-                                    style={{
-                                        backgroundImage: `linear-gradient(to right, ${index === 0 ? 'hsl(25,84%,48%), hsl(25,84%,58%)' : index === 1 ? '#059669, #10b981' : '#2563eb, #3b82f6'})`,
-                                    }}
-                                >
-                                    {/* Background image with overlay */}
-                                    <div
-                                        className="absolute inset-0 opacity-20 bg-cover bg-center mix-blend-overlay"
-                                        style={{ backgroundImage: `url(${banner.image})` }}
-                                    ></div>
+  const name = (user as any)?.firstName || (user as any)?.name || '';
 
-                                    {/* Decorative elements */}
-                                    <div className="absolute top-[-50px] right-[-50px] w-[200px] h-[200px] rounded-full bg-white opacity-10"></div>
-                                    <div className="absolute bottom-[-30px] left-[-30px] w-[150px] h-[150px] rounded-full bg-white opacity-10"></div>
-                                    <div className="absolute top-[30%] left-[20%] w-[70px] h-[70px] rounded-full bg-white opacity-10"></div>
-                                    <div className="absolute bottom-[20%] right-[15%] w-[100px] h-[100px] rounded-full bg-white opacity-10"></div>
+  return (
+    <>
+      <TopMenu />
+      <Screen>
+        <Hero
+          icon={<Leaf className="h-6 w-6" />}
+          title={name ? `سلام ${name}` : 'سلام'}
+          sub={
+            selectedCity?.name
+              ? `پسماند خانه‌تان را در ${selectedCity.name} بفروشید؛ ما درِ خانه تحویل می‌گیریم.`
+              : 'پسماند خانه‌تان را بفروشید؛ ما درِ خانه تحویل می‌گیریم.'
+          }
+          aside={
+            <Link href="/new-request" style={{ textDecoration: 'none' }}>
+              <span
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: S.s2,
+                  background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.3)',
+                  color: C.onHero, padding: '12px 18px', borderRadius: S.rPill,
+                  fontSize: S.sm, fontWeight: 800, whiteSpace: 'nowrap',
+                }}
+              >
+                <PackagePlus className="h-4 w-4" />
+                درخواست جمع‌آوری
+              </span>
+            </Link>
+          }
+        />
 
-                                    <div className="h-full flex items-center justify-center px-6">
-                                        <div className="max-w-4xl mx-auto relative z-10">
-                                            <div className="flex flex-col md:flex-row items-center justify-between gap-3 md:gap-8">
-                                                <div className="text-center md:text-right md:flex-1">
-                                                    <div className="flex items-center gap-3 mb-3">
-                                                        <div className="md:flex-shrink-0 flex items-center justify-center">
-                                                            <div className={`p-3 md:p-6 rounded-full bg-white/20 backdrop-blur-sm animate-pulse`}>
-                                                                {banner.icon}
-                                                            </div>
-                                                        </div>                                                        <h3 className="text-lg md:text-2xl font-bold">{banner.title}</h3>
-                                                    </div>
-                                                    {/* <h3 className="font-bold text-lg md:text-3xl mb-1 md:mb-3 leading-tight">{banner.title}</h3> */}
-                                                    <p className="text-sm md:text-lg mb-3 md:mb-4 max-w-lg mx-auto md:mx-0 opacity-90">{banner.description}</p>
-                                                    <Link
-                                                        href={banner.buttonLink}
-                                                        className="inline-flex items-center gap-2 bg-white hover:bg-opacity-90 transition-all duration-300 font-medium py-2 md:py-3 px-6 md:px-8 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                                                        style={{ color: index === 0 ? 'hsl(25,84%,48%)' : index === 1 ? '#059669' : '#2563eb' }}
-                                                    >
-                                                        <span>{banner.buttonText}</span>
-                                                        <ArrowUpRight className="h-4 w-4" />
-                                                    </Link>
-                                                </div>
-
-                                                {/* <div className="md:flex-shrink-0 flex items-center justify-center">
-                                                    <div className={`p-3 md:p-6 rounded-full bg-white/20 backdrop-blur-sm animate-pulse`}>
-                                                        {banner.icon}
-                                                    </div>
-                                                </div> */}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </SwiperSlide>
-                        ))}
-
-                        {/* Custom navigation buttons */}
-                        <div className="swiper-button-prev !hidden md:!flex absolute left-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/20 hover:bg-white/40 transition-all duration-300 rounded-full w-12 h-12 items-center justify-center cursor-pointer backdrop-blur-sm">
-                            <ChevronRight className="h-6 w-6 text-white" />
-                        </div>
-                        <div className="swiper-button-next !hidden md:!flex absolute right-4 top-1/2 transform -translate-y-1/2 z-10 bg-white/20 hover:bg-white/40 transition-all duration-300 rounded-full w-12 h-12 items-center justify-center cursor-pointer backdrop-blur-sm">
-                            <ChevronLeft className="h-6 w-6 text-white" />
-                        </div>
-
-                        {/* Banner indicator */}
-                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10 flex space-x-2">
-                            {banners.map((_, index) => (
-                                <div
-                                    key={index}
-                                    className={`h-1.5 rounded-full transition-all duration-300 ${index === activeIndex ? 'w-10 bg-white' : 'w-3 bg-white/50'
-                                        }`}
-                                ></div>
-                            ))}
-                        </div>
-                    </Swiper>
-                )}
-            </div>
-            <div className="p-4 md:p-6 ">
-                <motion.div
-                    dir="rtl"
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pb-20"
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                >
-                    {items.map((item, index) => (
-                        <motion.div key={index} variants={itemVariants}>
-                            <Link href={item?.href}>
-                                <Card
-                                    className="overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border-none cursor-pointer rounded-xl group"
-                                >
-                                    <CardContent className="p-6">
-                                        <div className="flex justify-start items-center space-x-4">
-                                            <div className="space-y-2 flex-1">
-                                                <h3 className="font-medium text-lg leading-none group-hover:text-[hsl(25,84%,48%)] transition-colors duration-300">{item.title}</h3>
-                                                <p className="text-sm text-muted-foreground">{item.description}</p>
-                                            </div>
-                                            <div className={`p-3 rounded-xl ${item.bgColor} ${item.color} group-hover:scale-110 transition-transform duration-300`}>
-                                                {item.icon}
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        </motion.div>
-                    ))}
-                </motion.div>
-            </div>
-            {/* </ScrollArea> */}
-            <Navigation />
+        {/* ── rotating notice ── */}
+        <div style={{ position: 'relative', height: 132, marginBottom: S.s2 }}>
+          {banners.map((b, i) => (
+            <Link
+              key={b.title}
+              href={b.href}
+              aria-hidden={i !== slide}
+              tabIndex={i === slide ? 0 : -1}
+              style={{
+                position: 'absolute', inset: 0, textDecoration: 'none',
+                borderRadius: S.r3, overflow: 'hidden',
+                background: `linear-gradient(120deg, ${b.from}, ${b.to})`,
+                color: '#fff',
+                display: 'flex', alignItems: 'center', gap: S.s4,
+                padding: `0 ${S.s5}px`,
+                opacity: i === slide ? 1 : 0,
+                transform: i === slide ? 'none' : 'scale(0.98)',
+                transition: 'opacity .5s ease, transform .5s ease',
+                pointerEvents: i === slide ? 'auto' : 'none',
+                boxShadow: C.shadowCard,
+              }}
+            >
+              <span style={{ width: 46, height: 46, borderRadius: 16, display: 'grid', placeItems: 'center', background: 'rgba(255,255,255,0.18)', flexShrink: 0 }}>
+                {b.icon}
+              </span>
+              <span style={{ minWidth: 0, flex: 1 }}>
+                <span style={{ display: 'block', fontSize: S.base, fontWeight: 800 }}>{b.title}</span>
+                <span style={{ display: 'block', fontSize: S.xs, opacity: 0.85, marginTop: 5, lineHeight: 1.7 }}>{b.description}</span>
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: S.xs, fontWeight: 800, whiteSpace: 'nowrap', opacity: 0.95 }}>
+                {b.cta}
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </span>
+            </Link>
+          ))}
         </div>
-    );
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: S.s2 }}>
+          {banners.map((b, i) => (
+            <button
+              key={b.title}
+              type="button"
+              aria-label={`اعلان ${i + 1}`}
+              onClick={() => setSlide(i)}
+              style={{
+                height: 5, width: i === slide ? 22 : 8, borderRadius: 999, border: 'none', padding: 0,
+                background: i === slide ? C.green : C.borderStrong,
+                transition: 'width .3s ease, background .3s ease', cursor: 'pointer',
+              }}
+            />
+          ))}
+        </div>
+
+        {/* ── services, threaded on a dotted rail ── */}
+        <SectionTitle
+          title="خدمات"
+          action={
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: S.xs, color: C.muted, fontWeight: 600 }}>
+              <Sparkles className="h-3.5 w-3.5" />
+              مسیر یک درخواست
+            </span>
+          }
+        />
+
+        <div style={{ position: 'relative', paddingInlineStart: 34 }}>
+          {/* The rail itself, on the start edge — the right, in Persian.
+              Dotted, because the distance between two services is a wait, and
+              it fades at the tail so the list does not look truncated. */}
+          <span
+            aria-hidden
+            style={{
+              position: 'absolute', insetInlineStart: 14, top: 26, bottom: 26, width: 2,
+              backgroundImage: `linear-gradient(to bottom, ${alpha(C.green, 55)} 55%, transparent 0)`,
+              backgroundSize: '2px 10px',
+              backgroundRepeat: 'repeat-y',
+              maskImage: 'linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, #000 0%, #000 82%, transparent 100%)',
+              animation: 'pmDashFlow 1.6s linear infinite',
+            }}
+          />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
+            {services.map((s, i) => (
+              <div key={s.href} className="pm-fade-up" style={{ position: 'relative', animationDelay: `${i * 45}ms` }}>
+                {/* the node on the rail */}
+                <span
+                  aria-hidden
+                  style={{
+                    position: 'absolute', insetInlineStart: -26, top: 26,
+                    width: 12, height: 12, borderRadius: '50%',
+                    background: C.bg,
+                    border: `2.5px solid ${s.color}`,
+                    boxShadow: s.primary ? `0 0 0 5px ${alpha(s.color, 14)}` : undefined,
+                  }}
+                />
+
+                <Link href={s.href} style={{ textDecoration: 'none', display: 'block' }}>
+                  <Card accent={s.primary ? s.color : undefined} interactive>
+                    <div style={{ padding: `${S.s4}px`, display: 'flex', alignItems: 'center', gap: S.s3 }}>
+                      <IconBadge color={s.color}>{s.icon}</IconBadge>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: 0, fontSize: S.base, fontWeight: 800, color: C.textStrong }}>{s.title}</p>
+                        <p style={{ margin: '5px 0 0', fontSize: S.xs, color: C.muted, lineHeight: 1.75 }}>{s.description}</p>
+                      </div>
+                      <ChevronLeft className="h-4 w-4" style={{ color: C.subtle, flexShrink: 0 }} />
+                    </div>
+                  </Card>
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* A link, not a <Btn>: a button inside an anchor is invalid markup and
+            keyboard users get two focus stops for one action. */}
+        <Link
+          href="/new-request"
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: S.s2,
+            marginTop: S.s6, padding: '14px 20px', borderRadius: S.r2,
+            background: C.green, color: C.onAccent, textDecoration: 'none',
+            fontSize: S.base, fontWeight: 800,
+            boxShadow: `0 8px 20px ${alpha(C.green, 28)}`,
+          }}
+        >
+          <PackagePlus className="h-4 w-4" />
+          ثبت درخواست جمع‌آوری
+        </Link>
+      </Screen>
+      <Navigation />
+    </>
+  );
 }
