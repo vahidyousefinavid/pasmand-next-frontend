@@ -1,4 +1,5 @@
-import WelcomeView from '@/components/views/Welcome/welcome';
+import Landing from '@/components/views/Welcome/landing';
+import { getCities, loadBoard } from '@/lib/publicData';
 import { JsonLd, SITE_URL, pageMeta, MUNICIPAL_KEYWORDS, SERVICE_KEYWORDS, cityKeywords, BRAND_NAMES } from '@/lib/seo';
 import { GUIDE_FAQS } from '@/lib/faq';
 
@@ -8,7 +9,14 @@ import { GUIDE_FAQS } from '@/lib/faq';
  * Served at `/` by the middleware for anyone without a session, so its canonical
  * is the site root rather than this path — two URLs showing one page is the
  * fastest way to split a brand's ranking between them.
+ *
+ * Rendered per request rather than at build time, because the prices on it are
+ * live: a board showing what a city paid the day the image was built would be
+ * worse than no board. The fetch has its own fallback, so an API that is
+ * restarting costs the page its price list and nothing else.
  */
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   ...pageMeta({
     title: 'شهر شهر | سامانهٔ خدمات شهری — شهروند سبز',
@@ -17,8 +25,11 @@ export const metadata = {
     path: '/',
     keywords: [...MUNICIPAL_KEYWORDS, ...SERVICE_KEYWORDS, ...cityKeywords(['خدمات شهری', 'خرید ضایعات'])],
   }),
-  // The brand is the query this page has to win; say it the way people type it.
-  title: 'شهر شهر | سامانهٔ خدمات شهری — شهروند سبز',
+  // `absolute` skips the layout's «%s | شهرشهر» template, which was appending
+  // the brand a second time: «شهر شهر | … — شهروند سبز | شهرشهر». The brand is
+  // the query this page has to win, but saying it twice wastes the width Google
+  // gives a title and reads as a mistake.
+  title: { absolute: 'شهر شهر | سامانهٔ خدمات شهری — شهروند سبز' },
 };
 
 const LD = {
@@ -50,11 +61,15 @@ const LD = {
   ],
 };
 
-export default function Welcome() {
+export default async function Welcome() {
+  // The board can only show cities that have published prices; the coverage map
+  // has to show the ones that have not opened yet as well.
+  const [board, cities] = await Promise.all([loadBoard(), getCities()]);
+
   return (
     <>
       <JsonLd data={LD} />
-      <WelcomeView />
+      <Landing board={board} cities={cities} />
     </>
   );
 }

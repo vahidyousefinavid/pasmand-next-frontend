@@ -15,16 +15,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Check for auth token in cookies
-      const token = Cookies.get('auth_token');
-      const storedUser = localStorage.getItem('user');
+    if (typeof window === 'undefined') return;
 
-      if (token && storedUser) {
-        const user = JSON.parse(storedUser);
-        setAuthState({ user, isAuthenticated: true });
-      }
+    // The cookie is what actually decides access — the middleware gates every
+    // route on it. localStorage only caches who the token belongs to, and it
+    // can be cleared on its own (browser cleanup, storage pressure, private
+    // mode). Requiring both meant a valid session still rendered a «ورود»
+    // button in the header, on a page the middleware had just let through.
+    const token = Cookies.get('auth_token');
+    if (!token) return;
+
+    let user: User | null = null;
+    try {
+      const stored = localStorage.getItem('user');
+      if (stored) user = JSON.parse(stored);
+    } catch {
+      // A corrupt entry is no reason to sign somebody out.
     }
+
+    setAuthState({ user, isAuthenticated: true });
   }, []);
 
   const login = (user: User) => {

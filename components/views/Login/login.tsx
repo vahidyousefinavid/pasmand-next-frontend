@@ -163,7 +163,13 @@ export default function LoginPage() {
         localStorage.setItem('userPhone', phone);
         login({ id: res.data.id || '1', phone, token });
         toast({ variant: 'success', title: 'خوش آمدید', description: 'با موفقیت وارد شدید.' });
-        router.push('/');
+        // A full navigation, not router.push. `/` serves two different pages
+        // depending on the cookie, and the middleware decides which — but the
+        // client router caches the RSC payload it fetched for `/` while the
+        // visitor was still anonymous, which is the landing page. Pushing would
+        // replay that cache and drop somebody who just signed in back onto the
+        // marketing page.
+        window.location.href = '/';
       })
       .catch(() => {
         setLoading(false);
@@ -190,7 +196,7 @@ export default function LoginPage() {
         <div style={{ display: 'grid', justifyItems: 'center', gap: S.s3 }}>
           <EcoGlobe size={210} />
           <h1 style={{ margin: 0, fontSize: S.xxl, fontWeight: 800, color: C.textStrong, letterSpacing: '-0.02em' }}>
-            شهروند سبز
+            شهر شهر
           </h1>
           <p style={{ margin: 0, fontSize: S.sm, color: C.muted, textAlign: 'center', lineHeight: 1.9, maxWidth: '34ch' }}>
             {cityData ? `سامانهٔ خدمات شهری ${cityData.name}` : 'خدمات شهری، از تلفن همراه تا درِ خانه.'}
@@ -228,7 +234,7 @@ export default function LoginPage() {
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={city.icon}
-                        alt=""
+                        alt={`نشان شهر ${city.name}`}
                         width={40}
                         height={40}
                         style={{ width: 40, height: 40, borderRadius: 12, objectFit: 'cover', flexShrink: 0, background: C.bgSubtle }}

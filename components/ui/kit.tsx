@@ -22,9 +22,14 @@ export function Screen({ children, style }: { children: ReactNode; style?: CSSPr
         minHeight: '100vh',
         background: C.bg,
         color: C.text,
-        // Room for the fixed top bar (62px of content) and the floating tab
-        // bar, plus a gap on each side.
-        padding: `calc(78px + env(safe-area-inset-top)) 0 calc(104px + env(safe-area-inset-bottom))`,
+        /**
+         * Room for the fixed top bar (62px of content) and the floating tab
+         * bar, plus a gap on each side — *when they are there*. The public
+         * chrome has neither, and sets these two variables to a few pixels, so
+         * a visitor without an account does not get a hundred pixels of empty
+         * band top and bottom where the app's furniture would have been.
+         */
+        padding: `calc(var(--pm-chrome-top, 78px) + env(safe-area-inset-top)) 0 calc(var(--pm-chrome-bottom, 104px) + env(safe-area-inset-bottom))`,
         ...style,
       }}
     >

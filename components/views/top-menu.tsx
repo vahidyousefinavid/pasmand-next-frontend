@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation';
 import {
   CircleUser, MenuIcon, LogIn, Leaf, MapPin, ChevronDown, ChevronLeft, Check, X,
   PackagePlus, FileClock, Wallet, MapPinned, Banknote, Trash2, BookOpen, User, Headphones,
+  MessagesSquare, Bell,
+  Globe,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -14,6 +16,9 @@ import { useAuth } from '@/context/auth-context';
 import { useCity } from '@/context/data-context';
 import InstallButton from './InstallButton';
 import { C, S, alpha } from '@/components/ui/tokens';
+import NotificationCenter from '@/components/notification-center';
+import { serviceIcon, useCityServices } from '@/lib/cityServices';
+import MessagesBell from '@/components/messages-bell';
 
 /**
  * The fixed header.
@@ -37,6 +42,8 @@ const MENU_GROUPS: { label: string; items: { title: string; sub: string; href: s
     items: [
       { title: 'ثبت درخواست', sub: 'جمع‌آوری پسماند از درِ خانه', href: '/new-request', Icon: PackagePlus, color: C.green },
       { title: 'پیگیری درخواست‌ها', sub: 'مسیر هر درخواست، مرحله به مرحله', href: '/history', Icon: FileClock, color: C.statusInfo },
+      { title: 'پیام‌ها', sub: 'گفتگو با جمع‌آوران', href: '/messages', Icon: MessagesSquare, color: C.statusInfo },
+      { title: 'اعلان‌ها', sub: 'هر خبری که برای شما آمده', href: '/notifications', Icon: Bell, color: C.amber },
       { title: 'کیف پول', sub: 'موجودی و برداشت', href: '/wallet', Icon: Wallet, color: C.amber },
       { title: 'آدرس‌های من', sub: 'آدرس‌های ذخیره‌شده', href: '/addresses', Icon: MapPinned, color: C.violet },
     ],
@@ -54,6 +61,11 @@ const MENU_GROUPS: { label: string; items: { title: string; sub: string; href: s
     items: [
       { title: 'پروفایل', sub: 'اطلاعات شخصی شما', href: '/profile', Icon: User, color: C.statusNeutral },
       { title: 'پشتیبانی', sub: 'تماس، ایمیل و گفتگو', href: '/contact-us', Icon: Headphones, color: C.statusNeutral },
+      // The public site is a one-way door without this. `/` serves the landing
+      // page only to visitors with no cookie, so once you are signed in the
+      // page describing the service becomes unreachable from inside the app —
+      // and it is where the tariff, the waste guide and the FAQ are introduced.
+      { title: 'صفحهٔ نخست سایت', sub: 'معرفی سامانه و خدمات شهری', href: '/welcome', Icon: Globe, color: C.green },
     ],
   },
 ];
@@ -64,6 +76,9 @@ export function TopMenu() {
   const { isAuthenticated } = useAuth();
   // The list comes from the panel; see context/data-context.tsx.
   const { selectedCity, setSelectedCity, cities } = useCity();
+  // Whatever this city runs beyond the waste service — the drawer is where
+  // somebody goes looking for a service they were told about.
+  const { services: cityModules } = useCityServices();
   const pathname = usePathname();
 
   return (
@@ -131,7 +146,7 @@ export function TopMenu() {
                       <Leaf className="h-5 w-5" />
                     </span>
                     <div style={{ minWidth: 0 }}>
-                      <p style={{ margin: 0, fontSize: S.md, fontWeight: 800 }}>شهروند سبز</p>
+                      <p style={{ margin: 0, fontSize: S.md, fontWeight: 800 }}>شهر شهر</p>
                       <p style={{ margin: '4px 0 0', fontSize: S.xs, color: C.onHeroMuted }}>
                         {isAuthenticated ? 'حساب شما فعال است' : 'برای ثبت درخواست وارد شوید'}
                       </p>
@@ -151,7 +166,7 @@ export function TopMenu() {
                   >
                     {selectedCity?.icon ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={selectedCity.icon} alt="" style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
+                      <img src={selectedCity.icon} alt={`نشان شهر ${selectedCity.name}`} style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
                     ) : (
                       <MapPin className="h-4 w-4" />
                     )}
@@ -165,6 +180,50 @@ export function TopMenu() {
 
                 {/* ── grouped navigation ── */}
                 <nav style={{ padding: `${S.s4}px ${S.s3}px`, display: 'flex', flexDirection: 'column', gap: S.s4, flex: 1 }}>
+                  {cityModules.filter((service) => service.key !== 'waste').length > 0 && (
+                    <div>
+                      <p style={{ margin: `0 ${S.s2}px ${S.s2}px`, fontSize: 10, fontWeight: 800, letterSpacing: '0.04em', color: C.subtle }}>
+                        خدمات شهر شما
+                      </p>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {cityModules.filter((service) => service.key !== 'waste').map((service) => {
+                          const Icon = serviceIcon(service.icon);
+                          const active = pathname === service.href;
+                          return (
+                            <Link
+                              key={service.key}
+                              href={service.href}
+                              onClick={() => setOpen(false)}
+                              aria-current={active ? 'page' : undefined}
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: S.s3, textDecoration: 'none',
+                                padding: `${S.s2}px ${S.s2}px`, borderRadius: S.r2,
+                                background: active ? C.surface : 'transparent',
+                                border: `1px solid ${active ? alpha(service.color, 30) : 'transparent'}`,
+                                boxShadow: active ? C.shadowCard : 'none',
+                              }}
+                            >
+                              <span
+                                style={{
+                                  width: 38, height: 38, borderRadius: 13, flexShrink: 0, display: 'grid', placeItems: 'center',
+                                  background: alpha(service.color, 12), color: service.color,
+                                  border: `1px solid ${alpha(service.color, 22)}`,
+                                }}
+                              >
+                                <Icon className="h-4 w-4" />
+                              </span>
+                              <span style={{ flex: 1, minWidth: 0 }}>
+                                <span style={{ display: 'block', fontSize: S.sm, fontWeight: 800, color: C.textStrong }}>{service.title}</span>
+                                <span style={{ display: 'block', marginTop: 2, fontSize: 10, color: C.muted }}>{service.short}</span>
+                              </span>
+                              <ChevronLeft className="h-4 w-4" style={{ color: C.subtle, flexShrink: 0 }} />
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   {MENU_GROUPS.map((group) => (
                     <div key={group.label}>
                       <p
@@ -257,7 +316,7 @@ export function TopMenu() {
           >
             {selectedCity?.icon ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={selectedCity.icon} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover' }} />
+              <img src={selectedCity.icon} alt={`نشان شهر ${selectedCity.name}`} style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover' }} />
             ) : (
               <MapPin className="h-4 w-4" />
             )}
@@ -266,6 +325,12 @@ export function TopMenu() {
           </button>
 
           <span style={{ flex: 1 }} />
+
+          {/* Two different things, two controls: what happened (the bell)
+              and what somebody said to you (the conversations). */}
+          <MessagesBell />
+
+          <NotificationCenter />
 
           {/* account */}
           {isAuthenticated ? (
@@ -345,7 +410,7 @@ export function TopMenu() {
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={city.icon}
-                      alt=""
+                      alt={`نشان شهر ${city.name}`}
                       style={{ width: 40, height: 40, borderRadius: 12, objectFit: 'cover', flexShrink: 0, background: C.bgSubtle }}
                     />
                     <span style={{ flex: 1, minWidth: 0, fontSize: S.base, fontWeight: 800, color: C.textStrong }}>{city.name}</span>

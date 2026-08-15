@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import {
   ArrowUpIcon, ArrowDownIcon, Package2Icon, BanknoteIcon, ScaleIcon,
   Pencil, X, Loader2, MapPin, CalendarClock, FileClock, PackagePlus, RotateCw,
+  MessageSquare, PhoneCall,
 } from 'lucide-react';
 
 import { axiosService } from '@/lib/axiosService';
@@ -15,6 +16,7 @@ import { toast } from '@/hooks/use-toast';
 import { WASTE_TYPES, wasteMeta } from '@/lib/wasteTypes';
 import { C, S, alpha, STATUS_THEME, fa, type RequestStatus } from '@/components/ui/tokens';
 import { Screen, Hero, Card, IconBadge, Btn, Stat, StepRail, EmptyState, Modal, type Step } from '@/components/ui/kit';
+import RequestChat from '@/components/views/Chat/request-chat';
 
 const MapWithNoSSR = dynamic(() => import('@/components/views/Components/map'), {
   ssr: false,
@@ -44,6 +46,9 @@ interface HistoryItem {
   wasteType?: string;
   timeSlot: { date: string; time: string; _id: string };
   collector?: string;
+  /** Set once a collector has taken the job — see the API's user-requests. */
+  collectorName?: string;
+  collectorPhone?: string;
   user: string;
   __v: number;
 }
@@ -82,6 +87,10 @@ export default function HistoryPage() {
   const [requestsItems, setRequestsItems] = useState<HistoryItem[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<'all' | RequestStatus>('all');
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  /** The request whose conversation is open, if any. */
+  const [chatFor, setChatFor] = useState<string | null>(null);
+  /** Unread message count per request id, for the badge on each chat button. */
+  const [unread, setUnread] = useState<Record<string, number>>({});
   const [selectedRequest, setSelectedRequest] = useState<HistoryItem | null>(null);
   const [showConfirmCancel, setShowConfirmCancel] = useState(false);
   const [requestToCancel, setRequestToCancel] = useState<string | null>(null);
@@ -109,7 +118,45 @@ export default function HistoryPage() {
       });
   };
 
-  useEffect(() => { getRequests(); }, []);
+  const getUnread = () => {
+    axiosService({ url: '/api/v1/chat/unread', method: 'get', token: Cookies.get('auth_token') })
+      .then((res: any) => setUnread(res?.data?.byRequest || {}))
+      .catch(() => {
+        // A badge that fails to load is not worth a toast.
+      });
+  };
+
+  useEffect(() => { getRequests(); getUnread(); }, []);
+
+  /**
+   * Keep an open request current without being asked.
+   *
+   * A push notification is the right way to be told a collector accepted or
+   * finished — but it only arrives if the citizen granted permission, and it
+   * does nothing for somebody who already has this screen open. So while any
+   * request is still moving, the list refreshes itself; once everything is
+   * settled or cancelled there is nothing left to watch and the timer stops.
+   *
+   * It also refreshes when the tab comes back to the foreground, which is what
+   * actually happens after tapping a notification.
+   */
+  const hasOpenRequest = requestsItems.some(
+    (r) => r.status === 'pending' || r.status === 'collecting',
+  );
+
+  useEffect(() => {
+    if (!hasOpenRequest) return;
+
+    const timer = setInterval(() => { getRequests(); getUnread(); }, 20000);
+    const onVisible = () => { if (!document.hidden) { getRequests(); getUnread(); } };
+    document.addEventListener('visibilitychange', onVisible);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasOpenRequest]);
 
   const handleCancelRequest = async (requestId: string) => {
     try {
@@ -381,7 +428,7 @@ export default function HistoryPage() {
                               canceled && idx === 1
                                 ? 'این درخواست پیش از تأیید لغو شد.'
                                 : idx === 2 && item.collector
-                                  ? `جمع‌آور: ${item.collector}`
+                                  ? `جمع‌آور: ${item.collectorName || '—'}`
                                   : idx === 3 && item.status === 'completed'
                                     ? `${fa(item.totalPrice)} تومان به کیف پول شما واریز شد.`
                                     : undefined,
@@ -449,6 +496,46 @@ export default function HistoryPage() {
                         </div>
                       )}
 
+                      {/* Once a collector is on the job there is somebody to
+                          talk to, and the two things people actually need are a
+                          message and a phone call. Before that the thread has
+                          no second party, so neither is offered. */}
+                      {item.collector && item.status !== 'canceled' && (
+                        <div style={{ display: 'flex', gap: S.s2, marginTop: S.s4, flexWrap: 'wrap' }}>
+                          <Btn
+                            variant="soft"
+                            color={C.statusInfo}
+                            onClick={() => { setChatFor(item._id); setUnread((u) => ({ ...u, [item._id]: 0 })); }}
+                            style={{ padding: '10px 16px', fontSize: S.sm, position: 'relative' }}
+                          >
+                            <MessageSquare className="h-3.5 w-3.5" />
+                            گفتگو با جمع‌آور
+                            {unread[item._id] > 0 && (
+                              <span
+                                className="tnum"
+                                aria-label={`${unread[item._id]} پیام خوانده‌نشده`}
+                                style={{
+                                  minWidth: 20, height: 20, paddingInline: 5, borderRadius: 999,
+                                  display: 'grid', placeItems: 'center',
+                                  background: C.statusDanger, color: C.onAccent,
+                                  fontSize: 10, fontWeight: 800,
+                                }}
+                              >
+                                {fa(unread[item._id])}
+                              </span>
+                            )}
+                          </Btn>
+                          {item.collectorPhone && (
+                            <a href={`tel:${item.collectorPhone}`} style={{ textDecoration: 'none' }}>
+                              <Btn variant="soft" color={C.green} style={{ padding: '10px 16px', fontSize: S.sm }}>
+                                <PhoneCall className="h-3.5 w-3.5" />
+                                تماس
+                              </Btn>
+                            </a>
+                          )}
+                        </div>
+                      )}
+
                       {/* only a request that has not been approved can still be changed */}
                       {item.status === 'pending' && (
                         <div style={{ display: 'flex', gap: S.s2, marginTop: S.s4 }}>
@@ -475,6 +562,8 @@ export default function HistoryPage() {
           </div>
         )}
       </Screen>
+
+      {chatFor && <RequestChat requestId={chatFor} onClose={() => setChatFor(null)} />}
 
       {/* ── cancel confirmation ── */}
       {showConfirmCancel && (

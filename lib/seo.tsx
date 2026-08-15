@@ -14,6 +14,14 @@ import type { Metadata } from 'next';
 
 export const SITE_URL = 'https://shahrshahr.ir';
 
+/** The social card, rendered once at 1200×630 with the site's own typeface. */
+export const OG_IMAGE = {
+  url: `${SITE_URL}/og.png`,
+  width: 1200,
+  height: 630,
+  alt: 'شهر شهر — سامانهٔ خدمات شهری؛ خرید و جمع‌آوری پسماند خشک از درِ خانه',
+};
+
 /** The brand, as it is written when there is one canonical form. */
 export const SITE_NAME = 'شهرشهر';
 
@@ -105,8 +113,9 @@ export function pageMeta({
       url,
       title,
       description,
+      images: [OG_IMAGE],
     },
-    twitter: { card: 'summary_large_image', title, description },
+    twitter: { card: 'summary_large_image', title, description, images: [OG_IMAGE.url] },
   };
 }
 

@@ -23,6 +23,7 @@ import { useAuth } from '@/context/auth-context';
 import { useCity } from '@/context/data-context';
 import { C, S, alpha } from '@/components/ui/tokens';
 import { Screen, Hero, Card, IconBadge, SectionTitle } from '@/components/ui/kit';
+import { serviceIcon, useCityServices } from '@/lib/cityServices';
 
 /**
  * Home.
@@ -124,6 +125,30 @@ const banners = [
 ];
 
 export default function HomeView() {
+  // The modules this city has switched on, appended to the fixed four below.
+  const { services: cityModules } = useCityServices();
+
+  /**
+   * The rail: the fixed parts of the waste service, then whatever else this
+   * city runs. Built here rather than written into the constant below, because
+   * the answer belongs to the municipality and changes without a deploy.
+   */
+  const rail = [
+    ...services,
+    ...cityModules
+      .filter((service) => service.key !== 'waste')
+      .map((service) => {
+        const Icon = serviceIcon(service.icon);
+        return {
+          href: service.href,
+          title: service.title,
+          description: service.short,
+          icon: <Icon className="h-5 w-5" />,
+          color: service.color,
+          primary: false,
+        };
+      }),
+  ];
   const [mounted, setMounted] = useState(false);
   const [slide, setSlide] = useState(0);
   const { user } = useAuth();
@@ -232,7 +257,11 @@ export default function HomeView() {
           ))}
         </div>
 
-        {/* ── services, threaded on a dotted rail ── */}
+        {/* ── services, threaded on a dotted rail ──
+            The four fixed entries are the parts of the waste service every city
+            has. Anything after them is a module this particular municipality
+            switched on, which is why the list is built at render time rather
+            than written out here. */}
         <SectionTitle
           title="خدمات"
           action={
@@ -261,7 +290,7 @@ export default function HomeView() {
           />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
-            {services.map((s, i) => (
+            {rail.map((s, i) => (
               <div key={s.href} className="pm-fade-up" style={{ position: 'relative', animationDelay: `${i * 45}ms` }}>
                 {/* the node on the rail */}
                 <span

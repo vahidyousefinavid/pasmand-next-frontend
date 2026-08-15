@@ -11,4 +11,19 @@ export const API = {
     DELETE_ADDRESS: "api/v1/remove-user-address",
     GET_WALLET: "api/v1/wallet/get-wallet",
     ADD_TRANSACTION_WALLET: "api/v1/wallet/add-transaction",
+
+    /** Everything the wallet screen calls. */
+    WALLET: {
+        GET: "api/v1/wallet/get-wallet",
+        TRANSACTIONS: "api/v1/wallet/transactions",
+        ACCOUNTS: "api/v1/wallet/bank-accounts",
+        CHECK_ACCOUNT: "api/v1/wallet/bank-accounts/check",
+        WITHDRAW: "api/v1/wallet/withdrawals",
+        TRANSFER: "api/v1/wallet/transfer",
+        LOOKUP: "api/v1/wallet/transfer/lookup",
+        TOPUP: "api/v1/wallet/topup",
+        CONTRIBUTE: "api/v1/wallet/contribute",
+        SETTINGS: "api/v1/wallet/settings",
+        PIN: "api/v1/wallet/pin",
+    },
 }

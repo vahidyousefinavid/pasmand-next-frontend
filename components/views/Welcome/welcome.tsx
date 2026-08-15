@@ -1,9 +1,11 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Cookies from 'js-cookie';
 import {
   Recycle, PackagePlus, Banknote, Truck, Scale, Wallet, MapPin, Leaf,
-  ChevronLeft, Building2, ShieldCheck, Clock,
+  ChevronLeft, Building2, ShieldCheck, Clock, LogIn, LayoutGrid,
 } from 'lucide-react';
 
 import { useCity } from '@/context/data-context';
@@ -69,8 +71,26 @@ const HIGHLIGHTS = [
   { icon: <Leaf className="h-4 w-4" />, title: 'جمع‌آوری رایگان', sub: 'بدون هزینه برای شهروند' },
 ];
 
+/**
+ * Is there a session in this browser?
+ *
+ * Read after mount, never during render. This page is served to anonymous
+ * visitors at `/` and its HTML is what search engines index, so the first paint
+ * has to be identical for everyone; reading a cookie during render would also
+ * mismatch the server's output and break hydration.
+ */
+function useSignedIn() {
+  const [signedIn, setSignedIn] = useState(false);
+  useEffect(() => { setSignedIn(Boolean(Cookies.get('auth_token'))); }, []);
+  return signedIn;
+}
+
 export default function WelcomeView() {
   const { cities } = useCity();
+  // A signed-in visitor reaching this page (from the app's own menu, or an old
+  // bookmark) was offered nothing but «ورود شهروندان» — a link that bounces
+  // them straight back. They get a way *into* the app instead.
+  const signedIn = useSignedIn();
 
   return (
     <div
@@ -101,7 +121,7 @@ export default function WelcomeView() {
             <span style={{ display: 'block', fontSize: 10, color: C.onHeroMuted }}>سامانهٔ خدمات شهری</span>
           </span>
           <Link
-            href="/login"
+            href={signedIn ? '/' : '/login'}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none', flexShrink: 0,
               padding: '10px 16px', borderRadius: 999,
@@ -109,7 +129,8 @@ export default function WelcomeView() {
               color: C.onHero, fontSize: S.xs, fontWeight: 800,
             }}
           >
-            ورود شهروندان
+            {signedIn ? <LayoutGrid className="h-3.5 w-3.5" /> : <LogIn className="h-3.5 w-3.5" />}
+            {signedIn ? 'ورود به برنامه' : 'ورود شهروندان'}
           </Link>
         </div>
       </header>
@@ -133,7 +154,7 @@ export default function WelcomeView() {
 
           <div style={{ display: 'flex', gap: S.s3, flexWrap: 'wrap', justifyContent: 'center' }}>
             <Link
-              href="/login"
+              href={signedIn ? '/new-request' : '/login'}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: S.s2,
                 padding: '15px 26px', borderRadius: S.r2, textDecoration: 'none',
@@ -249,6 +270,62 @@ export default function WelcomeView() {
           </Card>
         </section>
 
+        {/* ── what this is, in the words people search with ──
+            Prose, not a keyword list: the queries this section answers are
+            «خرید و فروش پسماند», «خدمات شهری» and «قیمت روز ضایعات», and each is
+            answered with a real sentence that links to the page that proves it. */}
+        <section style={{ marginTop: S.s7 }}>
+          <h2 style={{ margin: `0 0 ${S.s4}px`, fontSize: S.xl, fontWeight: 800, color: C.textStrong }}>
+            خرید و فروش پسماند در شهر شهر
+          </h2>
+
+          <div style={{ display: 'grid', gap: S.s3, gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))' }}>
+            <Card>
+              <div style={{ padding: S.s4 }}>
+                <h3 style={{ margin: 0, fontSize: S.base, fontWeight: 800, color: C.textStrong }}>
+                  پسماند خشک خود را بفروشید
+                </h3>
+                <p style={{ margin: `${S.s2}px 0 0`, fontSize: S.sm, color: C.muted, lineHeight: 2 }}>
+                  کاغذ باطله، مقوا، پت، نایلون، شیشه، آهن، مس و آلومینیوم را جدا نگه دارید و درخواست
+                  جمع‌آوری بدهید. خرید پسماند بر اساس{' '}
+                  <Link href="/tariff" style={{ color: C.green, fontWeight: 700 }}>قیمت روز ضایعات</Link>{' '}
+                  همان شهر و با توزین در محل انجام می‌شود؛ جمع‌آوری رایگان است و بابت بار، پول می‌گیرید.
+                </p>
+              </div>
+            </Card>
+
+            <Card>
+              <div style={{ padding: S.s4 }}>
+                <h3 style={{ margin: 0, fontSize: S.base, fontWeight: 800, color: C.textStrong }}>
+                  خدمات شهری روی تلفن همراه
+                </h3>
+                <p style={{ margin: `${S.s2}px 0 0`, fontSize: S.sm, color: C.muted, lineHeight: 2 }}>
+                  شهر شهر خدمات شهرداری را از یک برنامه در دسترس شهروند می‌گذارد: ثبت درخواست، پیگیری
+                  مرحله‌به‌مرحله، کیف پول و{' '}
+                  <Link href="/contact-us" style={{ color: C.green, fontWeight: 700 }}>پشتیبانی</Link>.
+                  هر شهر خدمات و تعرفهٔ خودش را دارد و مدیریت آن با شهرداری همان شهر است.
+                </p>
+              </div>
+            </Card>
+
+            <Card>
+              <div style={{ padding: S.s4 }}>
+                <h3 style={{ margin: 0, fontSize: S.base, fontWeight: 800, color: C.textStrong }}>
+                  تفکیک درست، درآمد بیشتر
+                </h3>
+                <p style={{ margin: `${S.s2}px 0 0`, fontSize: S.sm, color: C.muted, lineHeight: 2 }}>
+                  پسماند تمیز و تفکیک‌شده قیمت بالاتری دارد و واقعاً بازیافت می‌شود؛ بار مخلوط معمولاً
+                  دفن می‌شود.{' '}
+                  <Link href="/waste-types" style={{ color: C.green, fontWeight: 700 }}>انواع پسماند</Link>{' '}
+                  و{' '}
+                  <Link href="/guide" style={{ color: C.green, fontWeight: 700 }}>راهنمای تفکیک</Link>{' '}
+                  را ببینید تا بدانید هر قلم در کدام دسته می‌گنجد.
+                </p>
+              </div>
+            </Card>
+          </div>
+        </section>
+
         {/* ── footer ── */}
         <footer style={{ marginTop: S.s7, paddingTop: S.s5, borderTop: `1px dashed ${C.border}`, textAlign: 'center' }}>
           <p style={{ margin: 0, fontSize: S.sm, color: C.muted, lineHeight: 2 }}>
@@ -260,7 +337,9 @@ export default function WelcomeView() {
                 {s.title}
               </Link>
             ))}
-            <Link href="/login" style={{ fontSize: S.xs, color: C.green, fontWeight: 700, textDecoration: 'none' }}>ورود شهروندان</Link>
+            <Link href={signedIn ? '/' : '/login'} style={{ fontSize: S.xs, color: C.green, fontWeight: 700, textDecoration: 'none' }}>
+              {signedIn ? 'ورود به برنامه' : 'ورود شهروندان'}
+            </Link>
           </nav>
         </footer>
       </main>

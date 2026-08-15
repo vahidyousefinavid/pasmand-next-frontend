@@ -21,7 +21,9 @@ async function rewrites() {
 
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: false,
+  // Rust minifier instead of Terser — see the note in the Dockerfile about
+  // where this build's time goes.
+  swcMinify: true,
   compress: true,
   rewrites,
   eslint: {

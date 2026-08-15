@@ -23,7 +23,13 @@ const PUBLIC_PATHS = [
   '/guide',
   '/tariff',
   '/contact-us',
+  // Somebody looking for a relative's grave arrives from a search engine and
+  // should not meet a login form; the register is published on purpose.
+  '/deceased',
 ];
+
+/** Public families: everything under these is served without a session. */
+const PUBLIC_PREFIXES = ['/tariff/'];
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -44,7 +50,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.rewrite(new URL('/welcome', request.url));
   }
 
-  if (PUBLIC_PATHS.includes(pathname)) {
+  // `/tariff/nahavand` is as public as `/tariff`. An exact-match list sent the
+  // per-city price lists — the pages a local search actually lands on — to the
+  // login form.
+  const isPublic = PUBLIC_PATHS.includes(pathname)
+    || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+
+  if (isPublic) {
     // A signed-in visitor has no business on the login form.
     if (token && isLoginPage) return NextResponse.redirect(new URL('/', request.url));
     return NextResponse.next();
@@ -58,6 +70,9 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Static assets, the API routes and the crawler files are never gated.
-    '/((?!api|_next/static|_next/image|img|icons|fonts|markers|mayors|favicon.ico|manifest.json|manifest.webmanifest|robots.txt|sitemap.xml|sw.js).*)',
+    // `.*\\..*` covers anything with a file extension — og.png, sw.js,
+    // robots.txt, the fonts — so a new asset can never be accidentally put
+    // behind the login the way og.png was.
+    '/((?!api|_next/static|_next/image|.*\\..*).*)',
   ],
 };

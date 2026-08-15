@@ -90,7 +90,7 @@ export default function ProfilePage() {
           >
             {profile.personalPicture ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.personalPicture} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={profile.personalPicture} alt={`تصویر پروفایل ${fullName || 'کاربر'}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : initials ? (
               initials
             ) : (

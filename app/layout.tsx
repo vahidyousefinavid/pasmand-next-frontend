@@ -5,8 +5,9 @@ import type { Metadata, Viewport } from 'next';
 import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/auth-context';
+import PushRegister from '@/components/push-register';
 import { CityProvider } from '@/context/data-context';
-import { BRAND_NAMES, CITIES, JsonLd, MUNICIPAL_KEYWORDS, ORGANISATION_LD, SERVICE_KEYWORDS, SITE_URL } from '@/lib/seo';
+import { BRAND_NAMES, CITIES, JsonLd, MUNICIPAL_KEYWORDS, OG_IMAGE, ORGANISATION_LD, SERVICE_KEYWORDS, SITE_URL } from '@/lib/seo';
 
 const APP_NAME = 'شهرشهر';
 /**
@@ -58,11 +59,13 @@ export const metadata: Metadata = {
     url: SITE_URL,
     title: { default: APP_DEFAULT_TITLE, template: APP_TITLE_TEMPLATE },
     description: APP_DESCRIPTION,
+    images: [OG_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: { default: APP_DEFAULT_TITLE, template: APP_TITLE_TEMPLATE },
     description: APP_DESCRIPTION,
+    images: [OG_IMAGE.url],
   },
   robots: {
     index: true,
@@ -98,6 +101,7 @@ export default function RootLayout({
           <AuthProvider>
             <Providers>
               {children}
+              <PushRegister />
               <Toaster />
             </Providers>
           </AuthProvider>

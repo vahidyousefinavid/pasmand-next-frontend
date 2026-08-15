@@ -28,6 +28,16 @@ export default function WasteTypes() {
   return (
     <>
       <JsonLd data={LD} />
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'شهر شهر', item: SITE_URL },
+            { '@type': 'ListItem', position: 2, name: 'انواع پسماند', item: `${SITE_URL}/waste-types` },
+          ],
+        }}
+      />
       <WasteTypesPage />
     </>
   );

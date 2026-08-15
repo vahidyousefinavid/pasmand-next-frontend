@@ -1,5 +1,5 @@
 import ContactUsPage from '@/components/views/ContactUs/contact-us';
-import { pageMeta } from '@/lib/seo';
+import { JsonLd, SITE_URL, pageMeta } from '@/lib/seo';
 
 export const metadata = pageMeta({
   title: 'تماس با پشتیبانی',
@@ -10,5 +10,19 @@ export const metadata = pageMeta({
 });
 
 export default function ContactUs() {
-  return <ContactUsPage />;
+  return (
+    <>
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'شهر شهر', item: SITE_URL },
+            { '@type': 'ListItem', position: 2, name: 'تماس با ما', item: `${SITE_URL}/contact-us` },
+          ],
+        }}
+      />
+      <ContactUsPage />
+    </>
+  );
 }
