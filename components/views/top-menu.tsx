@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   CircleUser, MenuIcon, LogIn, Leaf, MapPin, ChevronDown, ChevronLeft, Check, X,
   PackagePlus, FileClock, Wallet, MapPinned, Banknote, Trash2, BookOpen, User, Headphones,
-  MessagesSquare, Bell,
+  MessagesSquare, Bell, ListChecks,
   Globe,
   type LucideIcon,
 } from 'lucide-react';
@@ -40,8 +40,11 @@ const MENU_GROUPS: { label: string; items: { title: string; sub: string; href: s
   {
     label: 'کارهای من',
     items: [
+      // First, because it is the answer to the question the rest of this group
+      // asks one service at a time.
+      { title: 'همهٔ کارهای من', sub: 'درخواست، رزرو، گزارش و نامه — در یک فهرست', href: '/activity', Icon: ListChecks, color: C.green },
       { title: 'ثبت درخواست', sub: 'جمع‌آوری پسماند از درِ خانه', href: '/new-request', Icon: PackagePlus, color: C.green },
-      { title: 'پیگیری درخواست‌ها', sub: 'مسیر هر درخواست، مرحله به مرحله', href: '/history', Icon: FileClock, color: C.statusInfo },
+      { title: 'پیگیری درخواست‌ها', sub: 'مسیر هر درخواست پسماند، مرحله به مرحله', href: '/history', Icon: FileClock, color: C.statusInfo },
       { title: 'پیام‌ها', sub: 'گفتگو با جمع‌آوران', href: '/messages', Icon: MessagesSquare, color: C.statusInfo },
       { title: 'اعلان‌ها', sub: 'هر خبری که برای شما آمده', href: '/notifications', Icon: Bell, color: C.amber },
       { title: 'کیف پول', sub: 'موجودی و برداشت', href: '/wallet', Icon: Wallet, color: C.amber },
@@ -75,7 +78,7 @@ export function TopMenu() {
   const [cityOpen, setCityOpen] = useState(false);
   const { isAuthenticated } = useAuth();
   // The list comes from the panel; see context/data-context.tsx.
-  const { selectedCity, setSelectedCity, cities } = useCity();
+  const { selectedCity, setSelectedCity, cities, switching } = useCity();
   // Whatever this city runs beyond the waste service — the drawer is where
   // somebody goes looking for a service they were told about.
   const { services: cityModules } = useCityServices();
@@ -384,8 +387,10 @@ export function TopMenu() {
               </button>
             </div>
 
+            {/* What actually happens when they choose — every screen in the
+                app answers for this city, not only the price list. */}
             <p style={{ margin: `0 0 ${S.s3}px`, fontSize: S.xs, color: C.muted, lineHeight: 1.8 }}>
-              تعرفه‌ها و درخواست‌ها به شهر انتخابی محدود می‌شوند.
+              خدمات، تعرفه‌ها، اماکن و همهٔ کارهای شما به شهر انتخابی تغییر می‌کند.
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: S.s2 }}>
@@ -395,12 +400,14 @@ export function TopMenu() {
                   <button
                     key={city.id}
                     type="button"
+                    disabled={switching}
                     onClick={() => {
                       setSelectedCity(city);
                       setCityOpen(false);
                     }}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: S.s3, textAlign: 'start', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: S.s3, textAlign: 'start',
+                      cursor: switching ? 'progress' : 'pointer', opacity: switching && !on ? 0.6 : 1,
                       padding: `${S.s3}px`, borderRadius: S.r2, fontFamily: 'inherit',
                       background: on ? alpha(C.green, 10) : C.surface2,
                       border: `1.5px solid ${on ? C.green : C.border}`,

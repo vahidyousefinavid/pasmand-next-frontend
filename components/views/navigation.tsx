@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FileClock, Home, PackagePlus, Wallet, User } from 'lucide-react';
+import { Home, ListChecks, PackagePlus, Wallet, User } from 'lucide-react';
 import { C, S, alpha } from '@/components/ui/tokens';
 
 /**
@@ -12,10 +12,18 @@ import { C, S, alpha } from '@/components/ui/tokens';
  * the thing a citizen opens this app to do should not be one of five identical
  * grey glyphs. Labels stay visible: icon-only bars are guessing games in any
  * language, and more so in one the icon set was not drawn for.
+ *
+ * «پیگیری» used to sit in the second slot and it went to `/history`, which is
+ * the history of *waste requests* — one of five services. A citizen whose hall
+ * booking was waiting on approval, or whose ۱۳۷ report had just moved, found
+ * none of it there. «کارهای من» is the same slot answering the question the tab
+ * always implied: everything of yours that is still open, whichever service it
+ * belongs to. `/history` is unchanged and still reachable from the waste
+ * section — it is the deep list, not the tab.
  */
 const TABS = [
   { href: '/', label: 'خانه', Icon: Home },
-  { href: '/history', label: 'پیگیری', Icon: FileClock },
+  { href: '/activity', label: 'کارهای من', Icon: ListChecks },
   { href: '/new-request', label: 'درخواست', Icon: PackagePlus, primary: true },
   { href: '/wallet', label: 'کیف پول', Icon: Wallet },
   { href: '/profile', label: 'پروفایل', Icon: User },

@@ -46,7 +46,7 @@ export const SITE_TAGLINE = 'سامانهٔ خدمات شهری';
 export const CURRENT_SERVICE = 'جمع‌آوری و خرید پسماند خشک';
 
 /** The cities the service currently covers; they carry most of the local intent. */
-export const CITIES = ['نهاوند', 'اصفهان', 'ملایر'];
+export const CITIES = ['همدان', 'نهاوند', 'ملایر', 'اصفهان'];
 
 /**
  * What the service actually is, in the words people search with.

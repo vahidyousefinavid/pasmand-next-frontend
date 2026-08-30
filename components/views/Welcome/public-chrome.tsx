@@ -30,6 +30,7 @@ import { C, S, alpha } from '@/components/ui/tokens';
  * each of them. `/tariff` itself always shows the live set.
  */
 const CITY_LINKS = [
+  { slug: 'hamedan', name: 'همدان' },
   { slug: 'nahavand', name: 'نهاوند' },
   { slug: 'malayer', name: 'ملایر' },
   { slug: 'isfahan', name: 'اصفهان' },
@@ -48,6 +49,27 @@ function Emblem({ size = 34 }: { size?: number }) {
         boxShadow: `0 6px 16px ${alpha(C.green, 26)}`,
       }}
     />
+  );
+}
+
+/**
+ * The heading every section of the public site is introduced by.
+ *
+ * Shared rather than repeated: the front page and the services section are two
+ * files now, and a section head that drifts between them is how a page starts
+ * looking assembled instead of designed.
+ */
+export function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
+  return (
+    <div style={{ maxWidth: '58ch', marginBottom: S.s5 }}>
+      <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', color: 'var(--ss-brass-ink)' }}>
+        {eyebrow}
+      </p>
+      <h2 className="ss-display" style={{ margin: '10px 0 0', fontSize: 'var(--ss-h2)', color: C.textStrong }}>
+        {title}
+      </h2>
+      {sub && <p style={{ margin: '12px 0 0', fontSize: S.sm, color: C.muted, lineHeight: 2.1 }}>{sub}</p>}
+    </div>
   );
 }
 
@@ -110,6 +132,28 @@ export function PublicHeader({ signedIn }: { signedIn: boolean }) {
   );
 }
 
+
+function EnamadTrustSeal() {
+  return (
+    <div
+      aria-label="نماد اعتماد الکترونیکی شهرشهر"
+      style={{
+        display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', gap: 8,
+        padding: 12, borderRadius: 16, background: C.surface,
+        border: `1px solid ${C.border}`, boxShadow: C.shadowCard,
+      }}
+    >
+      <span style={{ fontSize: 12, fontWeight: 800, color: C.textStrong }}>نماد اعتماد الکترونیکی</span>
+      <div
+        style={{ minHeight: 110, display: 'grid', placeItems: 'center' }}
+        dangerouslySetInnerHTML={{
+          __html: `<a referrerpolicy="origin" target="_blank" rel="noopener noreferrer" href="https://trustseal.enamad.ir/?id=7460431&Code=iJBIECWjcPSWSXnXOXLSG9JJBAHMLY4i"><img referrerpolicy="origin" src="https://trustseal.enamad.ir/logo.aspx?id=7460431&Code=iJBIECWjcPSWSXnXOXLSG9JJBAHMLY4i" alt="نماد اعتماد الکترونیکی شهرشهر" style="cursor:pointer;max-width:96px;height:auto" code="iJBIECWjcPSWSXnXOXLSG9JJBAHMLY4i"></a>`,
+        }}
+      />
+    </div>
+  );
+}
+
 export function PublicFooter({ signedIn }: { signedIn: boolean }) {
   return (
     <footer style={{ borderTop: `1px solid ${C.border}`, background: C.bgSubtle }}>
@@ -148,6 +192,14 @@ export function PublicFooter({ signedIn }: { signedIn: boolean }) {
           ]}
         />
 
+        {/* The city pages are the site's own answer to «خدمات شهرداری من چه
+            هست» — the search a citizen actually runs — so they belong in the
+            furniture rather than only on the front page's console. */}
+        <FooterColumn
+          title="شهرها"
+          links={CITY_LINKS.map((city) => ({ href: `/city/${city.slug}`, label: `خدمات شهرداری ${city.name}` }))}
+        />
+
         <FooterColumn
           title="راهنما"
           links={[
@@ -165,6 +217,10 @@ export function PublicFooter({ signedIn }: { signedIn: boolean }) {
             { href: '/report', label: 'معرفی سامانه' },
           ]}
         />
+
+        <div>
+          <EnamadTrustSeal />
+        </div>
       </div>
 
       <div className="ss-wrap" style={{ paddingBottom: S.s5 }}>

@@ -40,12 +40,50 @@ export default function LoginPage() {
   const [phoneError, setPhoneError] = useState('');
   const [selectedCity, setSelectedCity] = useState('');
   const [showCitySelect, setShowCitySelect] = useState(true);
+  /**
+   * کجا برگردد.
+   *
+   * The public site now goes a long way before it needs an account: somebody
+   * can pick their city, find the pool, choose Thursday's ۱۶:۰۰ and only then
+   * be asked who they are. Losing all of that on the way through a login form
+   * and landing on the app's home screen would make the whole public flow
+   * pointless, so the destination travels in `?next=` and is honoured here.
+   */
+  const [next, setNext] = useState('/');
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
   const { toast } = useToast();
   const { login } = useAuth();
   // Cities are whatever the panel currently offers, not a compiled-in list.
   const { cities } = useCity();
+
+  /**
+   * What the visitor was doing before they got here.
+   *
+   * Read from `window.location` rather than with `useSearchParams`, which would
+   * force this whole page to render dynamically for the sake of two optional
+   * parameters.
+   *
+   * `next` is checked to be a path on this site — a bare `/…` and not `//host`
+   * — because a login form that redirects wherever the query string says is an
+   * open redirect, and one on the page that asks for a phone number is the
+   * worst place to have one.
+   */
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+
+    const target = query.get('next') || '';
+    if (target.startsWith('/') && !target.startsWith('//')) setNext(target);
+
+    // The city the public page was showing. It decides which municipality the
+    // account is created in, so it outranks whatever the browser remembers.
+    const city = query.get('city');
+    if (city) {
+      setSelectedCity(city);
+      localStorage.setItem('selectedCity', city);
+      setShowCitySelect(false);
+    }
+  }, []);
 
   useEffect(() => {
     const savedCity = localStorage.getItem('selectedCity');
@@ -168,8 +206,9 @@ export default function LoginPage() {
         // client router caches the RSC payload it fetched for `/` while the
         // visitor was still anonymous, which is the landing page. Pushing would
         // replay that cache and drop somebody who just signed in back onto the
-        // marketing page.
-        window.location.href = '/';
+        // marketing page. The same reasoning applies to `next`, which is a page
+        // the anonymous visitor may well have already loaded.
+        window.location.href = next;
       })
       .catch(() => {
         setLoading(false);

@@ -2,17 +2,18 @@
 
 import Link from 'next/link';
 import {
-  ArrowLeft, Building2, ChevronLeft, Clock3, MapPin, MessagesSquare, PackagePlus,
+  ArrowLeft, Building2, Clock3, LogIn, MapPin, MessagesSquare, PackagePlus,
   Route, Scale, Wallet,
 } from 'lucide-react';
 
 import { C, S, alpha, fa } from '@/components/ui/tokens';
-import { WASTE_TYPES } from '@/lib/wasteTypes';
-import { GUIDE_FAQS } from '@/lib/faq';
-import type { BoardCity, PublicCity } from '@/lib/publicData';
+import { HOME_FAQS } from '@/lib/faq';
+import type { BoardCity, PublicCity, PublicService } from '@/lib/publicData';
+import type { CityHighlights } from '@/lib/publicVenues';
 import RateBoard from './rate-board';
 import IranMap from './iran-map';
-import { PublicFooter, PublicHeader, useSignedIn } from './public-chrome';
+import CityConsole from './city-console';
+import { PublicFooter, PublicHeader, SectionHead, useSignedIn } from './public-chrome';
 
 /**
  * The front door of شهرشهر.
@@ -21,12 +22,20 @@ import { PublicFooter, PublicHeader, useSignedIn } from './public-chrome';
  * «قیمت روز ضایعات نهاوند» and landed on the root of the domain. On a phone,
  * in Persian, with one question — is this real, and what will they pay me?
  *
- * So the page answers in that order. Today's prices, on a board, in the first
- * screen. Then how the four steps actually go. Then what counts as waste, which
- * cities are covered, and the questions people ask before they trust a
- * municipality with their afternoon.
+ * It used to answer with a price board and then, four sections later, with a
+ * list of services that all led to a login form. That order was written when
+ * this was a waste app: prices were the only thing a city had to offer and the
+ * only thing anybody could be shown without an account.
  *
- * The board is the only loud thing on the page; everything around it is
+ * There are five services now, each city runs its own set, and two of them can
+ * be used end-to-end by somebody who has never signed up. So the page opens on
+ * **the console** — your city, its services, and the sessions its اماکن have
+ * free this week — and the price board stands underneath with the service it
+ * belongs to. Everything below that is unchanged: how collection goes, what
+ * counts as waste, which cities are covered, and the questions people ask
+ * before trusting a municipality with their afternoon.
+ *
+ * The console is the only loud thing on the page; everything around it is
  * deliberately quiet, because a page where everything shouts says nothing.
  */
 
@@ -71,20 +80,6 @@ function CoverageStat({ value, label, tone }: { value: number; label: string; to
   );
 }
 
-function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: string; sub?: string }) {
-  return (
-    <div style={{ maxWidth: '58ch', marginBottom: S.s5 }}>
-      <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', color: 'var(--ss-brass-ink)' }}>
-        {eyebrow}
-      </p>
-      <h2 className="ss-display" style={{ margin: '10px 0 0', fontSize: 'var(--ss-h2)', color: C.textStrong }}>
-        {title}
-      </h2>
-      {sub && <p style={{ margin: '12px 0 0', fontSize: S.sm, color: C.muted, lineHeight: 2.1 }}>{sub}</p>}
-    </div>
-  );
-}
-
 /**
  * Two lists, deliberately.
  *
@@ -92,10 +87,29 @@ function SectionHead({ eyebrow, title, sub }: { eyebrow: string; title: string; 
  * show. `cities` is every city the panel knows, including the ones that have
  * not opened, because the coverage map's whole point is to show both states.
  */
-export default function Landing({ board, cities }: { board: BoardCity[]; cities: PublicCity[] }) {
+export default function Landing({
+  board,
+  cities,
+  catalogue,
+  highlights,
+}: {
+  board: BoardCity[];
+  cities: PublicCity[];
+  /** خدمات شهرشهر, as the API defines them — see `city-console.tsx`. */
+  catalogue: PublicService[];
+  /** Live venue availability per city, for the console's rail. */
+  highlights: CityHighlights[];
+}) {
   const signedIn = useSignedIn();
 
   const cityNames = cities.filter((c) => c.isActive).map((c) => c.name);
+
+  // The largest number of services any city actually runs today. It is what the
+  // hero can claim without naming a city, and it is a fact rather than a plan.
+  const mostServices = Math.max(
+    0,
+    ...cities.filter((c) => c.isActive).map((c) => c.services.length),
+  );
 
   // The map needs coordinates; a city without them is still listed beside it.
   const mapCities = cities.filter((c) => Number.isFinite(c.lat) && Number.isFinite(c.lng));
@@ -108,62 +122,84 @@ export default function Landing({ board, cities }: { board: BoardCity[]; cities:
       <PublicHeader signedIn={signedIn} />
 
       <main>
-        {/* ── hero: the claim, and the board that proves it ── */}
-        <section className="ss-wrap" style={{ paddingTop: 'clamp(28px, 5vw, 64px)', paddingBottom: 'clamp(32px, 5vw, 72px)' }}>
-          <div
-            style={{
-              display: 'grid', gap: 'clamp(28px, 4vw, 52px)', alignItems: 'center',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(330px, 1fr))',
-            }}
-          >
-            <div className="ss-rise">
+        {/* ── hero: your city, and what it can do for you today ──
+            The headline used to share this screen with the price board, and
+            everything a city actually offers began four sections further down.
+            Somebody who came to book a hall met a paragraph about waste. The
+            console is now the first thing on the page, because «شهرداری شهر من
+            چه کاری را آنلاین انجام می‌دهد، و چطور همین حالا انجامش بدهم؟» is
+            the question this site exists to answer. */}
+        <section className="ss-wrap" style={{ paddingTop: 'clamp(18px, 2.6vw, 38px)', paddingBottom: 'clamp(24px, 3.4vw, 46px)' }}>
+          <div className="ss-hero">
+            <div>
               <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', color: 'var(--ss-brass-ink)' }}>
                 خدمات شهری شهرشهر · شهروند سبز
               </p>
 
-              <h1 className="ss-display" style={{ margin: '14px 0 0', fontSize: 'var(--ss-h1)', color: C.textStrong }}>
-                خدمات شهرداری،
+              <h1 className="ss-display" style={{ margin: '12px 0 0', color: C.textStrong }}>
+                خدمات شهرداریِ شهر شما،
                 <br />
-                از <span style={{ color: C.green }}>گوشیِ خودتان</span>.
+                <span style={{ color: C.green }}>همین‌جا</span>.
               </h1>
 
-              <p style={{ margin: '18px 0 0', fontSize: 'var(--ss-lede)', color: C.muted, lineHeight: 2.1, maxWidth: '48ch' }}>
-                شهرشهر بستری است که هر شهرداری خدماتش را روی آن به شهروند می‌رساند — و خدمت‌به‌خدمت
-                کامل می‌شود.
+              <p style={{ margin: '14px 0 0', fontSize: S.base, color: C.muted, lineHeight: 2, maxWidth: '34ch' }}>
+                شهر خود را انتخاب کنید و ببینید شهرداری‌تان چه خدماتی را آنلاین ارائه می‌کند — بدون
+                ثبت‌نام.
+              </p>
+            </div>
+
+            {/* The one thing on this screen that is not a sentence. */}
+            <CityConsole cities={cities} catalogue={catalogue} highlights={highlights} />
+          </div>
+
+          {cityNames.length > 0 && (
+            <p style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: `${S.s4}px 0 0`, fontSize: S.sm, color: C.muted }}>
+              <MapPin className="h-4 w-4" style={{ color: C.green }} aria-hidden />
+              فعال در
+              <strong style={{ color: C.textStrong, fontWeight: 800 }}>{cityNames.join('، ')}</strong>
+              {mostServices > 1 && (
+                <span>
+                  · تا <strong className="ss-fig" style={{ color: C.textStrong, fontWeight: 800 }}>{fa(mostServices)}</strong> خدمت در یک شهر
+                </span>
+              )}
+            </p>
+          )}
+        </section>
+
+        {/* ── نرخ امروز ──
+            The board is the waste service's own proof, so it now stands with
+            that service rather than in front of every other one. It is still
+            high on the page and still server-rendered: «قیمت روز ضایعات» is the
+            query this site wins, and it is answered above the fold on a laptop
+            and one flick down on a phone. */}
+        <section style={{ background: C.surface, borderBlock: `1px solid ${C.border}` }}>
+          <div
+            className="ss-wrap"
+            style={{
+              paddingBlock: 'clamp(30px, 4vw, 60px)',
+              display: 'grid', gap: 'clamp(22px, 3.4vw, 44px)', alignItems: 'center',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            }}
+          >
+            <div>
+              <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', color: 'var(--ss-brass-ink)' }}>
+                خدمت فعال · جمع‌آوری پسماند
+              </p>
+              <h2 className="ss-display" style={{ margin: '12px 0 0', fontSize: 'var(--ss-h2)', color: C.textStrong }}>
+                نرخ امروزِ پسماند خشک
+              </h2>
+              <p style={{ margin: '14px 0 0', fontSize: S.sm, color: C.muted, lineHeight: 2.1, maxWidth: '44ch' }}>
+                قیمت‌ها را شهرداری هر شهر خودش ثبت می‌کند. بار در خانهٔ شما و جلوی خودتان توزین
+                می‌شود و مبلغش همان لحظه به کیف پولتان می‌نشیند.
               </p>
 
-              {/* The service that exists today, named as such. A platform page
-                  that stays abstract gives a visitor nothing to do; one that
-                  only talks about waste hides what the system is. */}
-              <div
-                style={{
-                  display: 'flex', alignItems: 'flex-start', gap: 11, marginTop: S.s4,
-                  padding: `${S.s3}px ${S.s4}px`, borderRadius: 16,
-                  background: C.surface, border: `1px solid ${C.border}`, maxWidth: '48ch',
-                }}
-              >
-                <span
-                  style={{
-                    marginTop: 3, flexShrink: 0, fontSize: 10, fontWeight: 800, padding: '4px 10px',
-                    borderRadius: 999, background: alpha(C.green, 12), color: C.green,
-                    border: `1px solid ${alpha(C.green, 26)}`, whiteSpace: 'nowrap',
-                  }}
-                >
-                  خدمت فعال
-                </span>
-                <span style={{ minWidth: 0, fontSize: S.sm, color: C.text, lineHeight: 2 }}>
-                  <strong style={{ color: C.textStrong, fontWeight: 800 }}>جمع‌آوری و خرید پسماند خشک</strong>{' '}
-                  از درِ خانه: رایگان، با توزین جلوی خودتان و پرداخت همان لحظه به کیف پول.
-                </span>
-              </div>
-
-              <div style={{ display: 'flex', gap: S.s3, flexWrap: 'wrap', marginTop: S.s5 }}>
+              <div style={{ display: 'flex', gap: S.s3, flexWrap: 'wrap', marginTop: S.s4 }}>
                 <Link
                   href={signedIn ? '/new-request' : '/login'}
                   className="ss-cta"
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: S.s2, textDecoration: 'none',
-                    padding: '15px 26px', borderRadius: 16,
+                    padding: '14px 24px', borderRadius: 16,
                     background: C.green, color: C.onAccent, fontSize: S.base, fontWeight: 800,
                     boxShadow: `0 12px 26px ${alpha(C.green, 30)}`,
                   }}
@@ -176,8 +212,8 @@ export default function Landing({ board, cities }: { board: BoardCity[]; cities:
                   className="ss-cta"
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: S.s2, textDecoration: 'none',
-                    padding: '15px 24px', borderRadius: 16,
-                    background: C.surface, color: C.textStrong,
+                    padding: '14px 22px', borderRadius: 16,
+                    background: C.bgSubtle, color: C.textStrong,
                     border: `1px solid ${C.border}`, fontSize: S.base, fontWeight: 800,
                   }}
                 >
@@ -185,22 +221,9 @@ export default function Landing({ board, cities }: { board: BoardCity[]; cities:
                   <ArrowLeft className="h-4 w-4" aria-hidden />
                 </Link>
               </div>
-
-              {cityNames.length > 0 && (
-                <p style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: `${S.s5}px 0 0`, fontSize: S.sm, color: C.muted }}>
-                  <MapPin className="h-4 w-4" style={{ color: C.green }} aria-hidden />
-                  فعال در
-                  <strong style={{ color: C.textStrong, fontWeight: 800 }}>{cityNames.join('، ')}</strong>
-                </p>
-              )}
             </div>
 
-            <div>
-              <p style={{ margin: `0 0 ${S.s3}px`, fontSize: 12, fontWeight: 800, color: 'var(--ss-brass-ink)', letterSpacing: '0.06em' }}>
-                نرخ امروزِ خدمت فعال
-              </p>
-              <RateBoard cities={board} />
-            </div>
+            <RateBoard cities={board} />
           </div>
         </section>
 
@@ -228,99 +251,82 @@ export default function Landing({ board, cities }: { board: BoardCity[]; cities:
           </div>
         </section>
 
-        {/* ── how it goes ── */}
-        <section className="ss-wrap" style={{ paddingBlock: 'clamp(44px, 6vw, 88px)' }}>
-          <SectionHead
-            eyebrow="خدمت فعال · جمع‌آوری پسماند"
-            title="از درخواست تا پول، در یک بعدازظهر"
-            sub="هیچ مرحله‌ای پشت درِ بسته انجام نمی‌شود؛ وزن و مبلغ را همان‌جا می‌بینید و در برنامه هم ثبت می‌ماند."
-          />
-
-          <ol className="ss-steps" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-            {STEPS.map((step) => (
-              <li key={step.n} className="ss-card" style={{ padding: S.s4 }}>
-                <span className="ss-step-no">قدم {step.n}</span>
-                <p className="ss-display" style={{ margin: '10px 0 0', fontSize: 16, color: C.textStrong, lineHeight: 1.6 }}>
-                  {step.title}
-                </p>
-                <p style={{ margin: '9px 0 0', fontSize: 13, color: C.muted, lineHeight: 2 }}>{step.body}</p>
-              </li>
-            ))}
-          </ol>
-        </section>
-
-        {/* ── what counts as waste here ── */}
-        <section style={{ background: C.bgSubtle, borderBlock: `1px solid ${C.border}` }}>
-          <div className="ss-wrap" style={{ paddingBlock: 'clamp(44px, 6vw, 88px)' }}>
-            <SectionHead
-              eyebrow="خدمت فعال · چه چیزی تحویل بدهم"
-              title="شش دستهٔ پسماند"
-              sub="دستهٔ «قابل بازیافت» همان است که بابتش پول می‌گیرید؛ بقیه جمع‌آوری می‌شوند تا سرِ جای درستشان بروند."
-            />
-
-            <div style={{ display: 'grid', gap: S.s3, gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))' }}>
-              {WASTE_TYPES.map((type) => (
-                <Link key={type.id} href="/waste-types" className="ss-card ss-link-card" style={{ padding: S.s4 }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-                    <span
-                      style={{
-                        width: 40, height: 40, borderRadius: 13, display: 'grid', placeItems: 'center', flexShrink: 0,
-                        background: alpha(type.color, 12), color: type.color, border: `1px solid ${alpha(type.color, 24)}`,
-                      }}
-                    >
-                      <type.Icon className="h-5 w-5" aria-hidden />
-                    </span>
-                    <span style={{ minWidth: 0 }}>
-                      <span style={{ display: 'block', fontSize: 15, fontWeight: 800, color: C.textStrong }}>{type.name}</span>
-                      <span style={{ display: 'block', marginTop: 3, fontSize: 12, color: C.muted }}>{type.short}</span>
-                    </span>
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── the part that is not about waste ──
-            The reason this page is not «a waste app»: collection is the first
-            service on it, and everything under that service — requests,
-            tracking, the wallet, the conversation, the city's own panel — was
-            built once and belongs to the platform. Naming those is honest,
-            where naming services nobody has agreed to yet would not be. */}
-        <section className="ss-wrap" style={{ paddingBottom: 'clamp(44px, 6vw, 88px)' }}>
-          <SectionHead
-            eyebrow="سامانه، نه یک برنامهٔ تک‌کاره"
-            title="خدمت بعدی، از روز اول این‌ها را دارد"
-            sub="جمع‌آوری پسماند نخستین خدمتی است که روی شهرشهر اجرا شده. آنچه زیرِ آن ساخته شده مخصوص پسماند نیست و هر خدمت تازه‌ای از همان ابتدا از آن استفاده می‌کند."
-          />
-
-          <div style={{ display: 'grid', gap: S.s3, gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-            {PLATFORM.map((item) => (
-              <div key={item.title} className="ss-card" style={{ padding: S.s4 }}>
-                <span
-                  style={{
-                    width: 38, height: 38, borderRadius: 12, display: 'grid', placeItems: 'center',
-                    background: alpha(C.green, 10), color: C.green, border: `1px solid ${alpha(C.green, 22)}`,
-                  }}
-                >
-                  {item.icon}
-                </span>
-                <p style={{ margin: '12px 0 0', fontSize: 14, fontWeight: 800, color: C.textStrong }}>{item.title}</p>
-                <p style={{ margin: '7px 0 0', fontSize: 12, color: C.muted, lineHeight: 1.95 }}>{item.body}</p>
-              </div>
-            ))}
-          </div>
-
-          <p
+        {/* ── خدمت فعال: پسماند، در یک نوار ──
+            This was two full sections — four numbered steps and six waste
+            categories — and together they were the better part of two screens
+            about *one* service, on a page five services now share. Both already
+            have pages of their own (`/guide`, `/waste-types`, `/tariff`) which
+            say the same things with more room; the front page's job is to say
+            the service exists, what it gives you, and where to read it
+            properly. A visitor who came to book a hall no longer scrolls
+            through a tutorial on sorting rubbish to reach the map. */}
+        <section className="ss-wrap" style={{ paddingBlock: 'clamp(36px, 5vw, 72px)' }}>
+          <div
+            className="ss-card"
             style={{
-              margin: `${S.s4}px 0 0`, padding: `${S.s3}px ${S.s4}px`, borderRadius: 14,
-              background: C.bgSubtle, border: `1px dashed ${C.border}`,
-              fontSize: 13, color: C.muted, lineHeight: 2.1, maxWidth: '70ch',
+              padding: 'clamp(20px, 3vw, 34px)',
+              display: 'grid', gap: 'clamp(18px, 2.6vw, 32px)',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 260px), 1fr))',
+              alignItems: 'center',
             }}
           >
-            خدمت بعدی را <strong style={{ color: C.textStrong }}>شهرداری هر شهر</strong> تعیین می‌کند و روی
-            همین سامانه اضافه می‌شود — بدون برنامهٔ تازه‌ای برای نصب و بدون حساب تازه‌ای برای ساختن.
-          </p>
+            <div>
+              <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: '0.06em', color: 'var(--ss-brass-ink)' }}>
+                خدمت فعال · جمع‌آوری پسماند
+              </p>
+              <h2 className="ss-display" style={{ margin: '10px 0 0', fontSize: 'var(--ss-h2)', color: C.textStrong }}>
+                از درخواست تا پول، در یک بعدازظهر
+              </h2>
+              <p style={{ margin: '12px 0 0', fontSize: S.sm, color: C.muted, lineHeight: 2.1, maxWidth: '46ch' }}>
+                درخواست می‌دهید، جمع‌آور به درِ خانه می‌آید، بار جلوی خودتان توزین می‌شود و مبلغش همان
+                لحظه به کیف پولتان می‌نشیند.
+              </p>
+
+              <div style={{ display: 'flex', gap: S.s2, flexWrap: 'wrap', marginTop: S.s4 }}>
+                {[
+                  { href: '/guide', label: 'چطور کار می‌کند' },
+                  { href: '/waste-types', label: 'چه چیزی تحویل بدهم' },
+                  { href: '/tariff', label: 'قیمت روز' },
+                ].map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none',
+                      padding: '10px 16px', borderRadius: 999,
+                      background: C.bgSubtle, border: `1px solid ${C.border}`,
+                      color: C.textStrong, fontSize: 12.5, fontWeight: 800,
+                    }}
+                  >
+                    {item.label}
+                    <ArrowLeft className="h-3.5 w-3.5" style={{ color: C.green }} aria-hidden />
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* The four steps as one compact column rather than four cards:
+                the same sequence, a fifth of the height. */}
+            <ol style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 10 }}>
+              {STEPS.map((step) => (
+                <li key={step.n} style={{ display: 'flex', alignItems: 'flex-start', gap: 11 }}>
+                  <span
+                    className="ss-fig"
+                    style={{
+                      flexShrink: 0, width: 26, height: 26, borderRadius: '50%', display: 'grid', placeItems: 'center',
+                      background: alpha(C.green, 12), color: C.green, fontSize: 12, fontWeight: 800,
+                      border: `1px solid ${alpha(C.green, 24)}`,
+                    }}
+                  >
+                    {step.n}
+                  </span>
+                  <span style={{ minWidth: 0, fontSize: 13, color: C.text, lineHeight: 1.9, fontWeight: 700 }}>
+                    {step.title}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </div>
         </section>
 
         {/* ── coverage: the country, and the two states a city can be in ── */}
@@ -393,6 +399,67 @@ export default function Landing({ board, cities }: { board: BoardCity[]; cities:
           </section>
         )}
 
+        {/* ── the questions people actually ask ── */}
+        <section style={{ background: C.surface, borderTop: `1px solid ${C.border}` }}>
+          <div className="ss-wrap" style={{ paddingBlock: 'clamp(44px, 6vw, 88px)' }}>
+            <SectionHead
+              eyebrow="پرسش‌های پرتکرار"
+              title="قبل از اینکه شروع کنید"
+              sub="سه پرسش اول دربارهٔ خودِ سامانه است — همان چیزهایی که کسی برای نخستین‌بار می‌پرسد."
+            />
+
+            <div style={{ display: 'grid', gap: S.s2, maxWidth: '76ch' }}>
+              {HOME_FAQS.map((faq) => (
+                // <details> rather than a scripted accordion: it opens without
+                // JavaScript, the keyboard already knows how to use it, and a
+                // crawler reads the answer whether it is open or not.
+                <details key={faq.q} className="ss-card" style={{ padding: `${S.s3}px ${S.s4}px` }}>
+                  <summary style={{ cursor: 'pointer', fontSize: 14, fontWeight: 800, color: C.textStrong, lineHeight: 2 }}>
+                    {faq.q}
+                  </summary>
+                  <p style={{ margin: '10px 0 0', fontSize: 13, color: C.muted, lineHeight: 2.1 }}>{faq.a}</p>
+                </details>
+              ))}
+            </div>
+
+            <Link
+              href="/guide"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: S.s4, fontSize: 13, fontWeight: 800, color: C.green, textDecoration: 'none' }}
+            >
+              راهنمای کامل
+              <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+            </Link>
+          </div>
+        </section>
+
+        {/* ── last word ──
+            «از پسماند شروع کنید» was the closing line on a page five services
+            share, addressed to somebody who may have come for a swimming
+            session. One account opens all of them, which is the thing actually
+            worth saying at the end. */}
+        <section className="ss-wrap" style={{ paddingBlock: 'clamp(44px, 6vw, 80px)', textAlign: 'center' }}>
+          <h2 className="ss-display" style={{ margin: 0, fontSize: 'var(--ss-h2)', color: C.textStrong }}>
+            یک حساب، برای همهٔ خدمات شهرتان.
+          </h2>
+          <p style={{ margin: '14px auto 0', fontSize: S.sm, color: C.muted, lineHeight: 2.1, maxWidth: '48ch' }}>
+            دیدن قیمت‌ها، اماکن و سانس‌ها ثبت‌نام نمی‌خواهد. برای رزرو، ثبت درخواست یا پیگیری نامه
+            یک‌بار با شمارهٔ موبایل وارد می‌شوید — کمتر از یک دقیقه — و هر خدمتی که شهرداری شهرتان بعد
+            از این اضافه کند، با همین حساب در دسترستان است.
+          </p>
+          <Link
+            href={signedIn ? '/' : '/login'}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: S.s2, textDecoration: 'none', marginTop: S.s5,
+              padding: '16px 30px', borderRadius: 16,
+              background: C.green, color: C.onAccent, fontSize: S.base, fontWeight: 800,
+              boxShadow: `0 12px 26px ${alpha(C.green, 30)}`,
+            }}
+          >
+            <LogIn className="h-4 w-4" aria-hidden />
+            {signedIn ? 'ورود به برنامه' : 'ورود شهروندان'}
+          </Link>
+        </section>
+
         {/* ── for the municipalities themselves ── */}
         <section className="ss-wrap" style={{ paddingBottom: 'clamp(44px, 6vw, 88px)' }}>
           <div
@@ -411,6 +478,27 @@ export default function Landing({ board, cities }: { board: BoardCity[]; cities:
                 شهرهای دیگر و زیر نظر مدیر همان شهر. حساب بانکی و تسویهٔ شهروندان هم از حساب خودِ
                 شهرداری انجام می‌شود.
               </p>
+
+              {/* آنچه هر خدمت از روز اول دارد.
+                  This was a section of its own in the middle of the page —
+                  five feature cards, a screen and a third — addressed to
+                  nobody in particular. It is an argument for adopting the
+                  platform, so it belongs to the people being asked to adopt
+                  it, and it fits here in a fraction of the height. */}
+              <ul style={{ listStyle: 'none', margin: `${S.s4}px 0 0`, padding: 0, display: 'grid', gap: 9 }}>
+                {PLATFORM.map((item) => (
+                  <li key={item.title} style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
+                    <span style={{ flexShrink: 0, marginTop: 2, color: 'var(--ss-brass)' }} aria-hidden>
+                      ✦
+                    </span>
+                    <span style={{ minWidth: 0, fontSize: 13, color: 'rgba(233,244,239,0.82)', lineHeight: 1.9 }}>
+                      <strong style={{ color: '#f4f9f6', fontWeight: 800 }}>{item.title}</strong>
+                      {' — '}
+                      {item.body}
+                    </span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <div style={{ display: 'flex', gap: S.s3, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
@@ -440,57 +528,6 @@ export default function Landing({ board, cities }: { board: BoardCity[]; cities:
           </div>
         </section>
 
-        {/* ── the questions people actually ask ── */}
-        <section style={{ background: C.surface, borderTop: `1px solid ${C.border}` }}>
-          <div className="ss-wrap" style={{ paddingBlock: 'clamp(44px, 6vw, 88px)' }}>
-            <SectionHead eyebrow="پرسش‌های پرتکرار" title="قبل از اولین درخواست" />
-
-            <div style={{ display: 'grid', gap: S.s2, maxWidth: '76ch' }}>
-              {GUIDE_FAQS.slice(0, 6).map((faq) => (
-                // <details> rather than a scripted accordion: it opens without
-                // JavaScript, the keyboard already knows how to use it, and a
-                // crawler reads the answer whether it is open or not.
-                <details key={faq.q} className="ss-card" style={{ padding: `${S.s3}px ${S.s4}px` }}>
-                  <summary style={{ cursor: 'pointer', fontSize: 14, fontWeight: 800, color: C.textStrong, lineHeight: 2 }}>
-                    {faq.q}
-                  </summary>
-                  <p style={{ margin: '10px 0 0', fontSize: 13, color: C.muted, lineHeight: 2.1 }}>{faq.a}</p>
-                </details>
-              ))}
-            </div>
-
-            <Link
-              href="/guide"
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: S.s4, fontSize: 13, fontWeight: 800, color: C.green, textDecoration: 'none' }}
-            >
-              راهنمای کامل
-              <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-            </Link>
-          </div>
-        </section>
-
-        {/* ── last word ── */}
-        <section className="ss-wrap" style={{ paddingBlock: 'clamp(44px, 6vw, 80px)', textAlign: 'center' }}>
-          <h2 className="ss-display" style={{ margin: 0, fontSize: 'var(--ss-h2)', color: C.textStrong }}>
-            از پسماند شروع کنید.
-          </h2>
-          <p style={{ margin: '14px auto 0', fontSize: S.sm, color: C.muted, lineHeight: 2.1, maxWidth: '48ch' }}>
-            یک‌بار با شمارهٔ موبایل ثبت‌نام می‌کنید — کمتر از یک دقیقه — و هر خدمتی که شهرداری شهرتان
-            بعد از این اضافه کند، با همین حساب در دسترستان است.
-          </p>
-          <Link
-            href={signedIn ? '/new-request' : '/login'}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: S.s2, textDecoration: 'none', marginTop: S.s5,
-              padding: '16px 30px', borderRadius: 16,
-              background: C.green, color: C.onAccent, fontSize: S.base, fontWeight: 800,
-              boxShadow: `0 12px 26px ${alpha(C.green, 30)}`,
-            }}
-          >
-            <PackagePlus className="h-4 w-4" aria-hidden />
-            شروع کنید
-          </Link>
-        </section>
       </main>
 
       <PublicFooter signedIn={signedIn} />

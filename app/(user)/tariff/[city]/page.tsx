@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 
 import Prices from '@/components/views/Tariff/prices';
 import { JsonLd, SITE_URL, pageMeta } from '@/lib/seo';
-import { getCities, getCityBySlug, getCityMaterials, materialsLd } from '@/lib/publicData';
+import { getCities, getCityBySlug, getCityMaterials, getServices, materialsLd } from '@/lib/publicData';
 
 /**
  * One city's price list, at its own address.
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: { city: string } })
 }
 
 export default async function CityTariff({ params }: { params: { city: string } }) {
-  const [cities, city] = await Promise.all([getCities(), getCityBySlug(params.city)]);
+  const [cities, city, catalogue] = await Promise.all([getCities(), getCityBySlug(params.city), getServices()]);
   if (!city) notFound();
 
   const materials = await getCityMaterials(city._id);
@@ -56,7 +56,7 @@ export default async function CityTariff({ params }: { params: { city: string } 
         }}
       />
 
-      <Prices city={city} cities={cities} materials={materials} />
+      <Prices city={city} cities={cities} materials={materials} catalogue={catalogue} />
     </>
   );
 }

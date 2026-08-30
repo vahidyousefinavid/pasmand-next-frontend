@@ -99,6 +99,11 @@ export const BOOKING_STATUS: Record<string, { label: string; tone: 'wait' | 'wor
   done: { label: 'برگزار شد', tone: 'work' },
 };
 
+/**
+ * Kept only for screens that have not been moved over yet. The catalogue is
+ * served by the API now (`Utils/venueKinds.js`), because which kinds exist is
+ * the platform's answer and a copy here goes stale the moment one is added.
+ */
 export const VENUE_KINDS: Record<string, string> = {
   sports: 'سالن ورزشی',
   hall: 'سالن و فرهنگسرا',

@@ -15,6 +15,14 @@ export const mainSliderImages = [
 
 export const cities = [
   {
+    id: "6a884f8031b82e5dac63ecc6",
+    name: "همدان",
+    code: 1084,
+    icon: "/img/cities/icons/hamedan.png",
+    lat: 34.7992,
+    lng: 48.5146
+  },
+  {
     id: "6750c9b79ff970c1dc84fe4b",
     name: "نهاوند",
     code: 1086,

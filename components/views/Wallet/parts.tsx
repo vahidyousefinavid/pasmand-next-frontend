@@ -594,7 +594,7 @@ export function TopupSheet({ wallet, enabled, onClose }: { wallet: WalletData; e
   const submit = () => {
     setBusy(true);
     setError('');
-    walletApi.topup(amount)
+    walletApi.topup(amount, '/wallet')
       .then((res) => { window.location.assign(res.url); })
       .catch((e) => { setError(errText(e)); setBusy(false); });
   };

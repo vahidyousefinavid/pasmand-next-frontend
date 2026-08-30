@@ -6,7 +6,8 @@ import { Providers } from './providers';
 import { Toaster } from '@/components/ui/toaster';
 import { AuthProvider } from '@/context/auth-context';
 import PushRegister from '@/components/push-register';
-import { CityProvider } from '@/context/data-context';
+import { CityProvider, CityScope } from '@/context/data-context';
+import RouteProgress from '@/components/route-progress';
 import { BRAND_NAMES, CITIES, JsonLd, MUNICIPAL_KEYWORDS, OG_IMAGE, ORGANISATION_LD, SERVICE_KEYWORDS, SITE_URL } from '@/lib/seo';
 
 const APP_NAME = 'شهرشهر';
@@ -68,10 +69,26 @@ export const metadata: Metadata = {
     images: [OG_IMAGE.url],
   },
   robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false, 'max-image-preview': 'large', 'max-snippet': -1 },
   },
+  /**
+   * تأییدیهٔ مالکیت دامنه برای اینماد.
+   *
+   * One of the three verification methods اینماد offers — a meta tag on the
+   * domain's main page — chosen over the other two (a file at the site root,
+   * a temporary page-title change) because it is the only one that touches
+   * nothing a visitor or a crawler reads: no title flicker during the check,
+   * no stray file to remember to remove. Declared on the root layout rather
+   * than only on `/welcome` so it is present at `shahrshahr.ir/` regardless of
+   * which page the auth-gate rewrite serves there.
+   *
+   * Left in place after verification passes — اینماد's own instructions only
+   * say the *title* method must be reverted, not this one, and a meta tag
+   * nobody reads costs nothing to keep.
+   */
+  other: { enamad: '48168053' },
 };
 
 export const viewport: Viewport = {
@@ -97,10 +114,14 @@ export default function RootLayout({
         <JsonLd data={ORGANISATION_LD} />
       </head>
       <body className="font-sans">
+        {/* Outside every provider: the sign that a tap registered must not wait
+            for anything else to be ready. */}
+        <RouteProgress />
         <CityProvider>
           <AuthProvider>
             <Providers>
-              {children}
+              {/* Keyed on the city the server has agreed to — see CityScope. */}
+              <CityScope>{children}</CityScope>
               <PushRegister />
               <Toaster />
             </Providers>

@@ -128,7 +128,8 @@ export const walletApi = {
   transfer: (body: { phone: string; amount: number; note?: string; pin?: string }) =>
     call<{ message: string; wallet: WalletData }>(API.WALLET.TRANSFER, 'post', body),
 
-  topup: (amount: number) => call<{ url: string; authority: string }>(API.WALLET.TOPUP, 'post', { amount }),
+  topup: (amount: number, returnTo = '/wallet') =>
+    call<{ url: string; authority: string }>(API.WALLET.TOPUP, 'post', { amount, returnTo }),
 
   contribute: (body: { amount: number; cause: string; pin?: string }) =>
     call<{ message: string; wallet: WalletData }>(API.WALLET.CONTRIBUTE, 'post', body),

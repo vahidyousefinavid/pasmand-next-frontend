@@ -28,8 +28,16 @@ const PUBLIC_PATHS = [
   '/deceased',
 ];
 
-/** Public families: everything under these is served without a session. */
-const PUBLIC_PREFIXES = ['/tariff/'];
+/**
+ * Public families: everything under these is served without a session.
+ *
+ * `/city/` is the whole per-municipality site — its services, its اماکن and the
+ * calendar of each of them. All of it is information about a public facility,
+ * and putting it behind the cookie is what made رزرو اماکن read as a promise
+ * rather than a service: a citizen could not find out whether the pool is open
+ * on Thursday without first signing up for a waste-collection account.
+ */
+const PUBLIC_PREFIXES = ['/tariff/', '/city/'];
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -57,8 +65,18 @@ export function middleware(request: NextRequest) {
     || PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   if (isPublic) {
-    // A signed-in visitor has no business on the login form.
-    if (token && isLoginPage) return NextResponse.redirect(new URL('/', request.url));
+    /**
+     * A signed-in visitor has no business on the login form — but they may well
+     * have arrived at it from a public page carrying `?next=`, because the
+     * public site does not know whether they have a session. Sending them to
+     * `/` would throw away the session they picked; sending them to `next` is
+     * the login doing its job in zero steps.
+     */
+    if (token && isLoginPage) {
+      const next = request.nextUrl.searchParams.get('next') || '';
+      const onward = next.startsWith('/') && !next.startsWith('//') ? next : '/';
+      return NextResponse.redirect(new URL(onward, request.url));
+    }
     return NextResponse.next();
   }
 

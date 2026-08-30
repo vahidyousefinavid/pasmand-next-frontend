@@ -697,6 +697,131 @@ html[data-theme=dark] .ss-board {
   border-color: color-mix(in srgb, var(--pm-green) 34%, transparent);
 }
 
+/* ── the hero ───────────────────────────────────────────────────────────
+   Two columns where there is room, and the console gets the larger one.
+   Stacked, the headline pushed the services below the fold on a laptop, which
+   is the exact complaint the console was built to answer: a visitor should not
+   have to scroll to find out what their municipality does. Below 1000px it
+   stacks, headline first, and the console still lands inside the first screen
+   because the headline is three short lines. */
+.ss-hero {
+  display: grid;
+  gap: clamp(20px, 2.8vw, 36px);
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1000px) {
+  .ss-hero {
+    grid-template-columns: minmax(260px, 0.78fr) minmax(0, 1.22fr);
+  }
+}
+
+/* Smaller than the site's display scale on purpose: this headline shares its
+   screen with the console, and a 3.5rem line in a 420px column is four lines
+   of shouting above the thing people came for. */
+.ss-hero h1 {
+  font-size: clamp(1.85rem, 1.3rem + 2.1vw, 2.9rem);
+}
+
+/* ── tiles on the board ─────────────────────────────────────────────────
+   The console's own surface. A tile lifts the way a card does, but on a dark
+   field the lift alone is invisible — the ground has to lighten with it. */
+.ss-tile:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--ss-line-strong);
+}
+
+/* A rail of the soonest sessions. Scrolls sideways *inside itself* — the one
+   place on the site where sideways is right, because these are ordered by time
+   and the order is the information. The page body never scrolls with it. */
+.ss-rail {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ss-line-strong) transparent;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ss-rail > * { scroll-snap-align: start; }
+
+.ss-rail::-webkit-scrollbar { height: 6px; }
+.ss-rail::-webkit-scrollbar-track { background: transparent; }
+.ss-rail::-webkit-scrollbar-thumb {
+  background: var(--ss-line-strong);
+  border-radius: 999px;
+}
+
+/* ── a venue card ───────────────────────────────────────────────────────
+   It is a card and not a link — the bookable hours inside it are links of
+   their own — so the lift on hover has to be written here rather than come
+   from `.ss-link-card`. */
+.ss-venue {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.ss-venue:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--pm-shadow-lift);
+  border-color: color-mix(in srgb, var(--pm-green) 34%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ss-venue:hover { transform: none; }
+}
+
+/* ── a session row ──────────────────────────────────────────────────────
+   Two columns where there is room: the hour and its price on one side, the
+   action on the other. On a phone there is not room — a blocked session's
+   reason («رزرو این سانس تا ۲ ساعت پیش از شروع ممکن بود») is a whole sentence,
+   and as an `auto` track it squeezed the hour into a column one digit wide, so
+   «۰۸:۰۰ تا ۱۰:۰۰» came out stacked vertically. Below 640px the row stacks
+   instead, which is what it was always going to do honestly. */
+.ss-session {
+  display: grid;
+  gap: 12px;
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+@media (max-width: 640px) {
+  .ss-session {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+}
+
+/* ── a day, on the public booking pages ─────────────────────────────────
+   Each day of the calendar is a *link*, not a button: the date lives in the
+   URL, so a day is shareable, bookmarkable, indexable, and works before any
+   JavaScript has arrived. This is what one looks like. */
+.ss-day {
+  display: block;
+  min-width: 74px;
+  padding: 10px 12px;
+  border-radius: 15px;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid var(--pm-border);
+  background: var(--pm-surface);
+  color: var(--pm-text);
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.ss-day:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--pm-green) 40%, transparent); }
+
+.ss-day[data-on='true'] {
+  background: var(--pm-green);
+  border-color: var(--pm-green);
+  color: var(--pm-on-accent);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--pm-green) 26%, transparent);
+}
+
+.ss-day[data-closed='true'] {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
 /* ── the one orchestrated moment: the board assembling on load ──────────── */
 @keyframes ssRise {
   from { opacity: 0; transform: translateY(12px); }

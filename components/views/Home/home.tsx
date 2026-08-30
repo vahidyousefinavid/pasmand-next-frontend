@@ -21,8 +21,8 @@ import { Navigation } from '@/components/views/navigation';
 import { TopMenu } from '@/components/views/top-menu';
 import { useAuth } from '@/context/auth-context';
 import { useCity } from '@/context/data-context';
-import { C, S, alpha } from '@/components/ui/tokens';
-import { Screen, Hero, Card, IconBadge, SectionTitle } from '@/components/ui/kit';
+import { C, S, alpha, fa } from '@/components/ui/tokens';
+import { Screen, Hero, Card, IconBadge, SectionTitle, Shimmer } from '@/components/ui/kit';
 import { serviceIcon, useCityServices } from '@/lib/cityServices';
 
 /**
@@ -34,7 +34,15 @@ import { serviceIcon, useCityServices } from '@/lib/cityServices';
  * goes where. The rail says that; a 2×4 grid says the opposite.
  */
 
-const services = [
+/**
+ * The route a request actually takes — and the only thing the dotted rail is
+ * for now. It used to carry eight entries: the four steps of the waste service
+ * *and* the reference pages *and* the account pages, with whatever modules the
+ * city runs appended after all of them. A citizen of نهاوند had to scroll past
+ * eight rows about rubbish to find «رزرو اماکن», which is the module their
+ * municipality actually switched on for them.
+ */
+const JOURNEY = [
   {
     href: '/new-request',
     title: 'درخواست جمع‌آوری',
@@ -45,53 +53,50 @@ const services = [
   },
   {
     href: '/history',
-    title: 'پیگیری و سوابق',
-    description: 'مرحله‌به‌مرحله ببینید درخواست‌تان کجای مسیر است',
+    title: 'پیگیری درخواست‌ها',
+    description: 'مرحله‌به‌مرحله ببینید درخواست پسماندتان کجای مسیر است',
     icon: <FileClock className="h-5 w-5" />,
     color: C.statusInfo,
   },
   {
     href: '/wallet',
     title: 'کیف پول',
-    description: 'موجودی، واریزها و برداشت‌های شما',
+    description: 'مبلغ هر توزین همین‌جا می‌نشیند؛ برداشت به حساب خودتان',
     icon: <Wallet className="h-5 w-5" />,
     color: C.amber,
   },
+];
+
+/**
+ * Reference and account — needed, and needed rarely.
+ *
+ * As full-width cards these four were indistinguishable from the things a
+ * person opens the app to *do*. As a row of chips they are still one tap away
+ * and no longer in the way.
+ */
+/**
+ * If `/api/v1/services` never answers — a restarting API, a phone that lost the
+ * network — the grid still has to be a grid. Waste is the one module every city
+ * on this platform runs, so it is the honest floor: never a promise of a
+ * service this city may not have.
+ */
+const FALLBACK_MODULES = [
   {
-    href: '/tariff',
-    title: 'تعرفهٔ قیمت‌ها',
-    description: 'قیمت روز خرید هر قلم پسماند',
-    icon: <Banknote className="h-5 w-5" />,
+    key: 'waste',
+    title: 'جمع‌آوری پسماند',
+    short: 'خرید پسماند خشک از درِ خانه',
+    icon: 'Recycle',
     color: C.green,
+    href: '/new-request',
   },
-  {
-    href: '/waste-types',
-    title: 'انواع پسماند',
-    description: 'کدام پسماند در کدام دسته می‌گنجد',
-    icon: <Trash2 className="h-5 w-5" />,
-    color: C.violet,
-  },
-  {
-    href: '/addresses',
-    title: 'آدرس‌ها',
-    description: 'آدرس‌های ذخیره‌شده برای جمع‌آوری سریع‌تر',
-    icon: <MapPinned className="h-5 w-5" />,
-    color: C.statusInfo,
-  },
-  {
-    href: '/guide',
-    title: 'راهنمای استفاده',
-    description: 'از ثبت درخواست تا تسویه، قدم به قدم',
-    icon: <HelpCircle className="h-5 w-5" />,
-    color: C.statusNeutral,
-  },
-  {
-    href: '/contact-us',
-    title: 'پشتیبانی',
-    description: 'اگر چیزی مطابق انتظار پیش نرفت، با ما حرف بزنید',
-    icon: <Phone className="h-5 w-5" />,
-    color: C.statusNeutral,
-  },
+];
+
+const EXTRAS = [
+  { href: '/tariff', title: 'تعرفهٔ قیمت‌ها', icon: <Banknote className="h-4 w-4" /> },
+  { href: '/waste-types', title: 'انواع پسماند', icon: <Trash2 className="h-4 w-4" /> },
+  { href: '/addresses', title: 'آدرس‌های من', icon: <MapPinned className="h-4 w-4" /> },
+  { href: '/guide', title: 'راهنما', icon: <HelpCircle className="h-4 w-4" /> },
+  { href: '/contact-us', title: 'پشتیبانی', icon: <Phone className="h-4 w-4" /> },
 ];
 
 const banners = [
@@ -125,30 +130,12 @@ const banners = [
 ];
 
 export default function HomeView() {
-  // The modules this city has switched on, appended to the fixed four below.
-  const { services: cityModules } = useCityServices();
-
   /**
-   * The rail: the fixed parts of the waste service, then whatever else this
-   * city runs. Built here rather than written into the constant below, because
-   * the answer belongs to the municipality and changes without a deploy.
+   * The modules this municipality has switched on — the first thing on the
+   * screen now, and the reason this app is not a waste app.
    */
-  const rail = [
-    ...services,
-    ...cityModules
-      .filter((service) => service.key !== 'waste')
-      .map((service) => {
-        const Icon = serviceIcon(service.icon);
-        return {
-          href: service.href,
-          title: service.title,
-          description: service.short,
-          icon: <Icon className="h-5 w-5" />,
-          color: service.color,
-          primary: false,
-        };
-      }),
-  ];
+  const { services: cityModules, loading: modulesLoading } = useCityServices();
+
   const [mounted, setMounted] = useState(false);
   const [slide, setSlide] = useState(0);
   const { user } = useAuth();
@@ -183,9 +170,14 @@ export default function HomeView() {
           icon={<Leaf className="h-6 w-6" />}
           title={name ? `سلام ${name}` : 'سلام'}
           sub={
+            // Named after what this city actually runs. A greeting about
+            // rubbish is the wrong first sentence in a municipality that also
+            // lets its halls, answers ۱۳۷ and keeps a cartable.
             selectedCity?.name
-              ? `پسماند خانه‌تان را در ${selectedCity.name} بفروشید؛ ما درِ خانه تحویل می‌گیریم.`
-              : 'پسماند خانه‌تان را بفروشید؛ ما درِ خانه تحویل می‌گیریم.'
+              ? cityModules.length > 1
+                ? `خدمات شهرداری ${selectedCity.name}، از همین‌جا.`
+                : `پسماند خانه‌تان را در ${selectedCity.name} بفروشید؛ ما درِ خانه تحویل می‌گیریم.`
+              : 'خدمات شهرداری شهرتان، از همین‌جا.'
           }
           aside={
             <Link href="/new-request" style={{ textDecoration: 'none' }}>
@@ -204,8 +196,63 @@ export default function HomeView() {
           }
         />
 
-        {/* ── rotating notice ── */}
-        <div style={{ position: 'relative', height: 132, marginBottom: S.s2 }}>
+        {/* ── خدمات شهر، پیش از هر چیز دیگر ──
+            What the municipality offers, in a grid rather than threaded onto
+            the rail below it: these are not steps of anything, they are
+            separate services, and a citizen who came to book a hall should not
+            have to read about waste collection to find one. */}
+        <SectionTitle
+          title={selectedCity?.name ? `خدمات شهرداری ${selectedCity.name}` : 'خدمات شهر شما'}
+          action={
+            !modulesLoading && cityModules.length > 0 ? (
+              <span className="tnum" style={{ fontSize: S.xs, color: C.muted, fontWeight: 700 }}>
+                {fa(cityModules.length)} خدمت فعال
+              </span>
+            ) : undefined
+          }
+        />
+
+        <div
+          style={{
+            // 8px between cards read as one block with seams rather than as
+            // separate destinations; the same air the rest of the screen uses
+            // is what makes them countable.
+            display: 'grid', gap: S.s3,
+            // Two on a phone, more where there is room. A module is a
+            // destination, so its tile has to be big enough to be a target.
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 152px), 1fr))',
+          }}
+        >
+          {modulesLoading
+            ? [0, 1, 2, 3].map((i) => <Shimmer key={i} height={116} />)
+            : (cityModules.length ? cityModules : FALLBACK_MODULES).map((service) => {
+              const Icon = serviceIcon(service.icon);
+              return (
+                <Link key={service.key} href={service.href} style={{ textDecoration: 'none' }}>
+                  <Card interactive style={{ height: '100%' }}>
+                    <div style={{ padding: S.s4, display: 'flex', flexDirection: 'column', gap: 9, height: '100%' }}>
+                      <IconBadge color={service.color}>
+                        <Icon className="h-5 w-5" />
+                      </IconBadge>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ margin: 0, fontSize: S.sm, fontWeight: 800, color: C.textStrong, lineHeight: 1.6 }}>
+                          {service.title}
+                        </p>
+                        <p style={{ margin: '4px 0 0', fontSize: 11, color: C.muted, lineHeight: 1.7 }}>
+                          {service.short}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
+                </Link>
+              );
+            })}
+        </div>
+
+        {/* ── rotating notice ──
+            Its own air above it: the services grid ended and this began with
+            nothing between them, so two unrelated things read as one block. */}
+        <div style={{ position: 'relative', height: 132, marginTop: S.s5, marginBottom: S.s2 }}>
           {banners.map((b, i) => (
             <Link
               key={b.title}
@@ -257,13 +304,12 @@ export default function HomeView() {
           ))}
         </div>
 
-        {/* ── services, threaded on a dotted rail ──
-            The four fixed entries are the parts of the waste service every city
-            has. Anything after them is a module this particular municipality
-            switched on, which is why the list is built at render time rather
-            than written out here. */}
+        {/* ── the waste journey, on its dotted rail ──
+            Three entries, and they genuinely are a sequence: a request comes
+            before a collection, which comes before the money. The rail draws
+            that order — which is why the modules above are *not* on it. */}
         <SectionTitle
-          title="خدمات"
+          title="جمع‌آوری پسماند"
           action={
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: S.xs, color: C.muted, fontWeight: 600 }}>
               <Sparkles className="h-3.5 w-3.5" />
@@ -290,7 +336,7 @@ export default function HomeView() {
           />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
-            {rail.map((s, i) => (
+            {JOURNEY.map((s, i) => (
               <div key={s.href} className="pm-fade-up" style={{ position: 'relative', animationDelay: `${i * 45}ms` }}>
                 {/* the node on the rail */}
                 <span
@@ -336,6 +382,25 @@ export default function HomeView() {
           <PackagePlus className="h-4 w-4" />
           ثبت درخواست جمع‌آوری
         </Link>
+
+        {/* ── the rest, as chips ── */}
+        <div style={{ display: 'flex', gap: S.s2, flexWrap: 'wrap', marginTop: S.s5 }}>
+          {EXTRAS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7, textDecoration: 'none',
+                padding: '10px 15px', borderRadius: S.rPill,
+                background: C.surface, border: `1px solid ${C.border}`,
+                color: C.text, fontSize: S.xs, fontWeight: 700,
+              }}
+            >
+              <span style={{ color: C.muted, display: 'inline-flex' }}>{item.icon}</span>
+              {item.title}
+            </Link>
+          ))}
+        </div>
       </Screen>
       <Navigation />
     </>

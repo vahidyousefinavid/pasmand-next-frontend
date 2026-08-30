@@ -2,11 +2,14 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowDownIcon, ArrowUpIcon, Banknote, MapPin, Minus } from 'lucide-react';
+import {
+  ArrowDownIcon, ArrowUpIcon, Banknote, Building2, CalendarCheck, FileText, Flower2,
+  MapPin, Megaphone, Minus, Recycle, type LucideIcon,
+} from 'lucide-react';
 
 import { C, S, alpha, fa } from '@/components/ui/tokens';
 import { Card, EmptyState, Hero, IconBadge, Screen } from '@/components/ui/kit';
-import type { PublicCity, PublicMaterial } from '@/lib/publicData';
+import type { PublicCity, PublicMaterial, PublicService } from '@/lib/publicData';
 
 /**
  * تعرفهٔ قیمت‌ها, for one city at a time.
@@ -32,14 +35,81 @@ const CATEGORY_COLOR: Record<string, string> = {
   شیشه: C.violet,
 };
 
+const SERVICE_ICONS: Record<string, LucideIcon> = {
+  Recycle, Megaphone, FileText, CalendarCheck, Flower2, Building2,
+};
+
+/**
+ * The rest of what this municipality does here.
+ *
+ * A price page is one service's page, and somebody who reached it searching
+ * «قیمت روز ضایعات نهاوند» has no way of knowing that the same city also runs
+ * ۱۳۷ and رزرو اماکن on the same system. The strip says so on the page they
+ * actually landed on, per city, without an account — which is the whole point
+ * of a per-city URL.
+ *
+ * Only what this city runs, and only if it is open: a list of services a
+ * visitor cannot use would be an advertisement, not information.
+ */
+function CityServiceStrip({ city, catalogue }: { city: PublicCity; catalogue: PublicService[] }) {
+  const mine = catalogue.filter((service) => city.services.includes(service.key));
+  if (!city.isActive || mine.length < 2) return null;
+
+  return (
+    <div style={{ marginTop: S.s5 }}>
+      <p style={{ display: 'flex', alignItems: 'center', gap: 6, margin: `0 0 ${S.s3}px`, fontSize: S.xs, fontWeight: 700, color: C.muted }}>
+        <Building2 className="h-3.5 w-3.5" style={{ color: C.green }} aria-hidden />
+        خدمات شهرداری {city.name} روی شهرشهر
+      </p>
+
+      <div style={{ display: 'grid', gap: S.s2, gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))' }}>
+        {mine.map((service) => {
+          const Icon = SERVICE_ICONS[service.icon] || Building2;
+
+          return (
+            <Link
+              key={service.key}
+              // Only the cemetery register opens without an account; the rest
+              // begin at the login, which is where they actually begin.
+              href={service.isPublic ? service.href : '/login'}
+              style={{
+                display: 'flex', alignItems: 'center', gap: S.s3, textDecoration: 'none',
+                padding: `${S.s3}px ${S.s3}px`, borderRadius: S.r2,
+                background: C.surface, border: `1px solid ${C.border}`,
+              }}
+            >
+              <span
+                style={{
+                  width: 36, height: 36, borderRadius: 12, display: 'grid', placeItems: 'center', flexShrink: 0,
+                  background: alpha(service.color, 12), color: service.color,
+                  border: `1px solid ${alpha(service.color, 24)}`,
+                }}
+              >
+                <Icon className="h-4 w-4" aria-hidden />
+              </span>
+              <span style={{ minWidth: 0 }}>
+                <span style={{ display: 'block', fontSize: S.sm, fontWeight: 800, color: C.textStrong }}>{service.title}</span>
+                <span style={{ display: 'block', marginTop: 2, fontSize: S.xs, color: C.muted }}>{service.short}</span>
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function Prices({
   city,
   cities,
   materials,
+  catalogue = [],
 }: {
   city: PublicCity | null;
   cities: PublicCity[];
   materials: PublicMaterial[];
+  /** خدمات شهرشهر — empty when the API did not answer, which hides the strip. */
+  catalogue?: PublicService[];
 }) {
   const [category, setCategory] = useState('همه');
   const [sortBy, setSortBy] = useState<'pricePerUnit' | 'change'>('pricePerUnit');
@@ -234,6 +304,8 @@ export default function Prices({
           })}
         </div>
       )}
+
+      {city && <CityServiceStrip city={city} catalogue={catalogue} />}
 
       <p style={{ margin: `${S.s5}px 0 0`, fontSize: S.xs, color: C.subtle, textAlign: 'center', lineHeight: 1.9 }}>
         قیمت‌ها میانگین و تقریبی‌اند و بسته به کیفیت و مقدار اقلام تغییر می‌کنند.

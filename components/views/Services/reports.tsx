@@ -14,7 +14,7 @@ import { useCity } from '@/context/data-context';
 import { C, S, alpha, fa } from '@/components/ui/tokens';
 import { Btn, Card, EmptyState, Field, Hero, IconBadge, Modal, Screen, Shimmer } from '@/components/ui/kit';
 import { REPORT_CATEGORIES, REPORT_STATUS } from '@/lib/cityServices';
-import { jalaliDateTime, relative } from '@/lib/when';
+import { faDigits, jalaliDateTime, relative } from '@/lib/when';
 
 /**
  * سامانهٔ ۱۳۷ — the citizen's side.
@@ -163,7 +163,7 @@ export default function ReportsPage() {
                               {report.title}
                             </p>
                             <p className="tnum" style={{ margin: '4px 0 0', fontSize: S.xs, color: C.muted }}>
-                              <span dir="ltr">{fa(report.code)}</span> · {relative(report.createdAt)}
+                              <span dir="ltr">{faDigits(report.code)}</span> · {relative(report.createdAt)}
                             </p>
                           </div>
 
@@ -432,7 +432,7 @@ function ReportSheet({
           </span>
           <p style={{ margin: `${S.s2}px 0 0`, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>{report.title}</p>
           <p className="tnum" style={{ margin: '5px 0 0', fontSize: S.xs, color: C.muted }}>
-            شمارهٔ پیگیری <span dir="ltr">{fa(report.code)}</span> · {jalaliDateTime(report.createdAt)}
+            شمارهٔ پیگیری <span dir="ltr">{faDigits(report.code)}</span> · {jalaliDateTime(report.createdAt)}
           </p>
         </div>
 

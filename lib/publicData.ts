@@ -29,6 +29,41 @@ export interface PublicCity {
   /** Where it actually is, for the coverage map. */
   lat: number;
   lng: number;
+  /**
+   * The service modules this municipality has switched on, as keys into the
+   * catalogue. A city that has not opened yet may still carry keys — its panel
+   * is configured before its citizens arrive — so the pages must read this
+   * together with `isActive` and never on its own.
+   */
+  services: string[];
+  /**
+   * What the municipality itself has written for its citizens — shown on the
+   * city's own page, above anything the platform says about it.
+   */
+  announcement?: string;
+}
+
+/**
+ * One entry of خدمات شهرشهر, exactly as the API defines it.
+ *
+ * The catalogue is not duplicated here: which services exist, what each is
+ * called and what it says are the platform's answer, and a copy in the front
+ * end is a copy that goes stale the day a module is added. The only thing this
+ * side adds is the drawing of the icon each `icon` names.
+ */
+export interface PublicService {
+  key: string;
+  title: string;
+  /** A line, for a card. */
+  short: string;
+  /** A sentence, for somebody deciding whether it is what they need. */
+  description: string;
+  icon: string;
+  color: string;
+  /** Where a citizen starts using it, once they are signed in. */
+  href: string;
+  /** Usable without an account — today only the cemetery register. */
+  isPublic: boolean;
 }
 
 export interface PublicMaterial {
@@ -76,6 +111,40 @@ async function get<T>(path: string): Promise<T | null> {
 }
 
 /**
+ * The one call both halves of the city question come from.
+ *
+ * `/api/v1/cities` answers with the cities *and* the service catalogue, so the
+ * coverage map and «خدمات این شهر» are built from a single response — and,
+ * because `get()` is cached per path, from a single fetch however many
+ * components ask.
+ */
+const getCityPayload = () =>
+  get<{ cities: any[]; services?: any[] }>('/api/v1/cities?includeInactive=true');
+
+/**
+ * خدمات شهرشهر — the catalogue, in catalogue order.
+ *
+ * Empty is a state the pages must survive: an API that is restarting takes the
+ * services section off the front page and leaves the rest of it standing.
+ */
+export async function getServices(): Promise<PublicService[]> {
+  const payload = await getCityPayload();
+
+  return (payload?.services || [])
+    .map((service) => ({
+      key: String(service?.key || ''),
+      title: String(service?.title || ''),
+      short: String(service?.short || ''),
+      description: String(service?.description || ''),
+      icon: String(service?.icon || ''),
+      color: String(service?.color || '#12805c'),
+      href: String(service?.href || '/login'),
+      isPublic: service?.isPublic === true,
+    }))
+    .filter((service) => service.key && service.title);
+}
+
+/**
  * Every city the panel knows, running first.
  *
  * Not only the active ones: the public price list offers a choice of city, and
@@ -89,7 +158,7 @@ export async function getCities(): Promise<PublicCity[]> {
     // list them as «به‌زودی», which is the honest answer to somebody in ملایر
     // looking for their city. The app's own picker asks without this flag and
     // still sees only the ones that are running.
-    get<{ cities: any[] }>('/api/v1/cities?includeInactive=true'),
+    getCityPayload(),
     getMaterials(),
   ]);
 
@@ -105,6 +174,8 @@ export async function getCities(): Promise<PublicCity[]> {
         materialCount: materials.filter((m) => m.city === id).length,
         lat: Number(c.lat),
         lng: Number(c.lng),
+        services: Array.isArray(c.services) ? c.services.map(String) : [],
+        announcement: String(c.announcement || ''),
       };
     })
     .filter((c) => c.name)

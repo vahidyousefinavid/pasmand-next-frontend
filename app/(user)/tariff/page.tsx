@@ -1,6 +1,6 @@
 import Prices from '@/components/views/Tariff/prices';
 import { CITIES, JsonLd, SITE_URL, cityKeywords, pageMeta } from '@/lib/seo';
-import { getCities, getPricedCity, materialsLd } from '@/lib/publicData';
+import { getCities, getPricedCity, getServices, materialsLd } from '@/lib/publicData';
 
 export const metadata = pageMeta({
   title: 'قیمت روز خرید ضایعات و پسماند خشک',
@@ -32,7 +32,7 @@ export const metadata = pageMeta({
 export const dynamic = 'force-dynamic';
 
 export default async function Tariff() {
-  const cities = await getCities();
+  const [cities, catalogue] = await Promise.all([getCities(), getServices()]);
   const { city, materials } = await getPricedCity(cities);
   const cityName = city?.name || CITIES[0];
 
@@ -50,7 +50,7 @@ export default async function Tariff() {
         }}
       />
 
-      <Prices city={city} cities={cities} materials={materials} />
+      <Prices city={city} cities={cities} materials={materials} catalogue={catalogue} />
     </>
   );
 }

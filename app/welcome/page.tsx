@@ -1,7 +1,8 @@
 import Landing from '@/components/views/Welcome/landing';
-import { getCities, loadBoard } from '@/lib/publicData';
+import { getCities, getServices, loadBoard } from '@/lib/publicData';
+import { getVenueHighlights } from '@/lib/publicVenues';
 import { JsonLd, SITE_URL, pageMeta, MUNICIPAL_KEYWORDS, SERVICE_KEYWORDS, cityKeywords, BRAND_NAMES } from '@/lib/seo';
-import { GUIDE_FAQS } from '@/lib/faq';
+import { HOME_FAQS } from '@/lib/faq';
 
 /**
  * The public home page.
@@ -20,8 +21,10 @@ export const dynamic = 'force-dynamic';
 export const metadata = {
   ...pageMeta({
     title: 'شهر شهر | سامانهٔ خدمات شهری — شهروند سبز',
+    // Named services rather than one service, because there are five of them
+    // now and each city chooses its own — which is also what the page shows.
     description:
-      'شهرشهر (شهر شهر) سامانهٔ خدمات شهری است؛ خدمات شهرداری را از تلفن همراه به شهروندان می‌رساند. خدمت فعال امروز: جمع‌آوری و خرید پسماند خشک از درِ خانه، توزین در محل و پرداخت به کیف پول — در نهاوند، ملایر و اصفهان.',
+      'شهرشهر (شهر شهر) سامانهٔ خدمات شهری است؛ خدمات شهرداری را از تلفن همراه به شهروندان می‌رساند: جمع‌آوری و خرید پسماند خشک از درِ خانه، سامانهٔ ۱۳۷، کارتابل شهروندی، رزرو اماکن و جست‌وجوی درگذشتگان — خدمات فعالِ هر شهر را بدون ثبت‌نام ببینید.',
     path: '/',
     keywords: [...MUNICIPAL_KEYWORDS, ...SERVICE_KEYWORDS, ...cityKeywords(['خدمات شهری', 'خرید ضایعات'])],
   }),
@@ -52,7 +55,9 @@ const LD = {
       // lands on, so the answer can be shown without a second click.
       '@type': 'FAQPage',
       '@id': `${SITE_URL}/#home-faq`,
-      mainEntity: GUIDE_FAQS.slice(0, 4).map((f) => ({
+      // The same questions the page renders — markup that answers something
+      // the visitor cannot see is not a rich result, it is a mismatch.
+      mainEntity: HOME_FAQS.map((f) => ({
         '@type': 'Question',
         name: f.q,
         acceptedAnswer: { '@type': 'Answer', text: f.a },
@@ -64,12 +69,50 @@ const LD = {
 export default async function Welcome() {
   // The board can only show cities that have published prices; the coverage map
   // has to show the ones that have not opened yet as well.
-  const [board, cities] = await Promise.all([loadBoard(), getCities()]);
+  const [board, cities, catalogue, highlights] = await Promise.all([
+    loadBoard(),
+    getCities(),
+    getServices(),
+    // The console's live rail. Its own fallback is an empty list, which takes
+    // the rail off the board and leaves every other part of it standing.
+    getVenueHighlights(),
+  ]);
+
+  /**
+   * Each city's services, as structured data.
+   *
+   * `areaServed` per service, listed once per city that actually runs it — a
+   * service that is switched off in a city is not published for that city at
+   * all, because the markup and the page have to say the same thing. Only
+   * running cities appear: describing a service in a city nobody can use it in
+   * would be a false claim in the one place that is read by machines.
+   */
+  const servicesLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'خدمات شهری فعال شهرشهر به تفکیک شهر',
+    itemListElement: cities
+      .filter((city) => city.isActive)
+      .flatMap((city) =>
+        catalogue
+          .filter((service) => city.services.includes(service.key))
+          .map((service) => ({
+            '@type': 'Service',
+            name: `${service.title} — ${city.name}`,
+            description: service.description,
+            serviceType: service.title,
+            areaServed: { '@type': 'City', name: city.name },
+            provider: { '@id': `${SITE_URL}/#organization` },
+          })),
+      )
+      .map((item, index) => ({ '@type': 'ListItem', position: index + 1, item })),
+  };
 
   return (
     <>
       <JsonLd data={LD} />
-      <Landing board={board} cities={cities} />
+      {servicesLd.itemListElement.length > 0 && <JsonLd data={servicesLd} />}
+      <Landing board={board} cities={cities} catalogue={catalogue} highlights={highlights} />
     </>
   );
 }
