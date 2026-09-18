@@ -1,0 +1,18 @@
+# Without this, `COPY . ./` ships the build host's node_modules into the image
+# — on top of the ones `npm install` just built for Alpine, which is how a
+# native binary compiled for the wrong libc ends up in production — plus a
+# stale `.next` and the whole git history. The context was about 1.1 GB.
+node_modules
+.next
+.git
+.gitignore
+
+# Dev-only tooling for the redesign: the screenshot and audit runners and the
+# review page. None of it is served.
+audit.mjs
+shots.mjs
+design-review.html
+
+npm-debug.log*
+.env.local
+.DS_Store

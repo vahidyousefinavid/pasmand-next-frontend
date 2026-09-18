@@ -6,6 +6,13 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 import { C, S } from '@/components/ui/tokens';
+import { ruleFor, type LegendRule, type Layer } from './city-map-legend';
+
+// Re-exported so the canvas stays the one import site for anything that is
+// already client-only; server-rendered code must import from
+// `./city-map-legend` instead, or Leaflet lands in the server bundle.
+export { ruleFor };
+export type { LegendRule, Layer };
 
 /**
  * لایه‌های نقشهٔ شهر روی نقشه.
@@ -20,29 +27,6 @@ import { C, S } from '@/components/ui/tokens';
  * by the legend rules the panel defined — so «مسکونی» is the colour that city
  * chose for it, on the map and in the legend, from one definition.
  */
-
-export interface LegendRule {
-  label: string;
-  property?: string;
-  match?: string;
-  color: string;
-  fillColor?: string;
-  fillOpacity?: number;
-  weight?: number;
-  note?: string;
-}
-
-export interface Layer {
-  _id: string;
-  key: string;
-  title: string;
-  kind: string;
-  property?: string;
-  legend?: LegendRule[];
-  center?: { lat: number; lng: number; zoom?: number };
-  source?: string;
-  geojson?: any;
-}
 
 /**
  * The default Leaflet marker loads its icon from a relative path that Next's
@@ -78,18 +62,6 @@ function Recentre({ center, zoom }: { center: [number, number]; zoom: number }) 
   return null;
 }
 
-/** The rule a feature is drawn with — the first whose `match` fits, else the default. */
-export function ruleFor(layer: Layer, properties: Record<string, any> | undefined): LegendRule | null {
-  const rules = layer.legend || [];
-  if (!rules.length) return null;
-  for (const rule of rules) {
-    if (!rule.match) continue;
-    const key = rule.property || layer.property;
-    if (!key) continue;
-    if (String(properties?.[key] ?? '') === String(rule.match)) return rule;
-  }
-  return rules.find((r) => !r.match) || null;
-}
 
 export default function CityMapCanvas({
   layer,

@@ -8,8 +8,10 @@ import { axiosService } from '@/lib/axiosService';
 import { C, S, alpha, fa } from '@/components/ui/tokens';
 import { Card, Chip, EmptyState, Shimmer, Btn } from '@/components/ui/kit';
 import { featuresAt, boundsOf } from './geo';
-import { ruleFor } from './city-map-canvas';
-import type { Layer } from './city-map-canvas';
+// Not from './city-map-canvas': that module imports Leaflet, which reads
+// `window` on import, and this file is rendered on the server.
+import { ruleFor } from './city-map-legend';
+import type { Layer } from './city-map-legend';
 
 /**
  * نقشهٔ شهر — the published plan, for anybody.
