@@ -118,7 +118,7 @@ export default function WelcomeView() {
           </span>
           <span style={{ flex: 1, minWidth: 0 }}>
             <span style={{ display: 'block', fontSize: S.base, fontWeight: 800 }}>شهرشهر</span>
-            <span style={{ display: 'block', fontSize: 10, color: C.onHeroMuted }}>سامانهٔ خدمات شهری</span>
+            <span style={{ display: 'block', fontSize: 11.5, color: C.onHeroMuted }}>سامانهٔ خدمات شهری</span>
           </span>
           <Link
             href={signedIn ? '/' : '/login'}

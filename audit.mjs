@@ -96,6 +96,7 @@ async function audit(paths, { authed }) {
        * every gradient here is the lighter end and therefore the harder case.
        */
       const behind = (el) => {
+        const rect = el.getBoundingClientRect();
         let node = el;
         while (node && node !== document.documentElement) {
           const cs = getComputedStyle(node);
@@ -105,6 +106,29 @@ async function audit(paths, { authed }) {
             const stop = cs.backgroundImage.match(/rgba?\([^)]+\)/);
             const c = stop && parse(stop[0]);
             if (c && c.a > 0.85) return c;
+          }
+          /**
+           * A hero paints its ground with an absolutely-positioned overlay
+           * *beside* the text, not above it in the tree — a photograph with a
+           * dark wash over it. Walking only up the ancestors finds the page
+           * ground instead and reports white-on-dark-photo as 1.16:1.
+           */
+          for (const sib of node.children) {
+            if (sib === el || sib.contains(el)) continue;
+            const scs = getComputedStyle(sib);
+            if (scs.position !== 'absolute' && scs.position !== 'fixed') continue;
+            const r = sib.getBoundingClientRect();
+            const covers = r.left <= rect.left + 1 && r.right >= rect.right - 1
+              && r.top <= rect.top + 1 && r.bottom >= rect.bottom - 1;
+            if (!covers) continue;
+            const sbg = parse(scs.backgroundColor);
+            if (sbg && sbg.a > 0.7) return sbg;
+            if (scs.backgroundImage && scs.backgroundImage.includes('gradient')) {
+              const stops = scs.backgroundImage.match(/rgba?\([^)]+\)/g) || [];
+              // The lightest stop is the hardest case for white text.
+              const parsed = stops.map(parse).filter((c) => c && c.a > 0.7);
+              if (parsed.length) return parsed.sort((x, y) => lum(y) - lum(x))[0];
+            }
           }
           node = node.parentElement;
         }

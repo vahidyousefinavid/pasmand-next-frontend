@@ -128,7 +128,7 @@ export function DayLink({
       <span className="ss-fig" style={{ display: 'block', marginTop: 3, fontSize: 20, lineHeight: 1.15 }}>
         {fa(day.jd)}
       </span>
-      <span style={{ display: 'block', marginTop: 2, fontSize: 10, opacity: 0.75 }}>
+      <span style={{ display: 'block', marginTop: 2, fontSize: 11.5, opacity: 0.75 }}>
         {day.monthName}
       </span>
       <span style={{ display: 'block', marginTop: 5, fontSize: 11, fontWeight: 700, opacity: on ? 0.9 : 0.7 }}>
