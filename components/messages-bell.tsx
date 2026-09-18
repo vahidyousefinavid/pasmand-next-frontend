@@ -45,8 +45,8 @@ export default function MessagesBell() {
       style={{
         position: 'relative', width: 38, height: 38, borderRadius: 13, flexShrink: 0,
         display: 'grid', placeItems: 'center', textDecoration: 'none',
-        background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.22)',
-        color: 'var(--pm-on-hero)',
+        background: 'transparent', border: '1px solid var(--pm-border)',
+        color: 'var(--pm-text)',
       }}
     >
       <MessagesSquare className="h-5 w-5" />
@@ -58,7 +58,7 @@ export default function MessagesBell() {
             minWidth: 18, height: 18, paddingInline: 4, borderRadius: 999,
             display: 'grid', placeItems: 'center',
             background: C.statusDanger, color: C.onAccent,
-            fontSize: 10, fontWeight: 800,
+            fontSize: 11, fontWeight: 700,
           }}
         >
           {new Intl.NumberFormat('fa-IR').format(Math.min(unread, 99))}

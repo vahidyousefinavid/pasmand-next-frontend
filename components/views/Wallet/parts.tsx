@@ -58,7 +58,7 @@ export function Pill({ color, children }: { color: string; children: React.React
     <span
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap',
-        fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: S.rPill,
+        fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: S.r1,
         background: alpha(color, 12), color, border: `1px solid ${alpha(color, 24)}`,
       }}
     >
@@ -230,7 +230,7 @@ export function AccountRow({ account, onDefault, onDelete, busy }: {
               onClick={onDefault}
               disabled={busy}
               style={{
-                fontFamily: 'inherit', fontSize: 10, fontWeight: 800, padding: '5px 10px', borderRadius: S.rPill,
+                fontFamily: 'inherit', fontSize: 11, fontWeight: 700, padding: '5px 10px', borderRadius: S.r1,
                 cursor: 'pointer', background: alpha(C.green, 10), color: C.green, border: `1px solid ${alpha(C.green, 22)}`,
               }}
             >
@@ -243,7 +243,8 @@ export function AccountRow({ account, onDefault, onDelete, busy }: {
             disabled={busy}
             aria-label="حذف حساب"
             style={{
-              display: 'grid', placeItems: 'center', width: 30, height: 30, borderRadius: 10, cursor: 'pointer',
+              // 44px: deleting a bank account is a thumb-sized decision.
+              display: 'grid', placeItems: 'center', width: 44, height: 44, borderRadius: S.r1, cursor: 'pointer',
               background: alpha(C.statusDanger, 8), color: C.statusDanger, border: `1px solid ${alpha(C.statusDanger, 20)}`,
               marginInlineStart: 'auto',
             }}

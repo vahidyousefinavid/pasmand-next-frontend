@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ChevronDown, ChevronUp, Recycle, PackagePlus } from 'lucide-react';
 import { WASTE_TYPES } from '@/lib/wasteTypes';
 import { C, S, alpha } from '@/components/ui/tokens';
-import { Screen, Hero, Card, IconBadge } from '@/components/ui/kit';
+import { Screen, Plaque, Card, IconBadge } from '@/components/ui/kit';
 
 /**
  * انواع پسماند — the same dotted rail as home, but each node opens.
@@ -22,10 +22,12 @@ export default function WasteTypesView() {
   // here as well would stack two headers on the same screen.
   return (
     <Screen>
-        <Hero
+        <Plaque
+          section="پسماند"
+          tone={C.waste}
           icon={<Recycle className="h-6 w-6" />}
-          title="انواع پسماند"
-          sub="هر چیزی که تحویل می‌دهید در یکی از این شش دسته می‌گنجد. دسته را درست انتخاب کنید تا جمع‌آور با خودرو و تجهیزات مناسب بیاید."
+          city="انواع پسماند"
+          note="هر چیزی که تحویل می‌دهید در یکی از این شش دسته می‌گنجد. دسته را درست انتخاب کنید تا جمع‌آور با خودرو و تجهیزات مناسب بیاید."
         />
 
         <div style={{ position: 'relative', paddingInlineStart: 34 }}>
@@ -102,7 +104,7 @@ export default function WasteTypesView() {
                             <span
                               key={ex}
                               style={{
-                                fontSize: S.xs, fontWeight: 700, padding: '6px 11px', borderRadius: S.rPill,
+                                fontSize: S.xs, fontWeight: 700, padding: '6px 11px', borderRadius: S.r1,
                                 background: alpha(w.color, 10), color: w.color, border: `1px solid ${alpha(w.color, 22)}`,
                               }}
                             >

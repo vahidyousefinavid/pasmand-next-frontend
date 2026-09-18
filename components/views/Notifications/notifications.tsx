@@ -10,7 +10,7 @@ import {
 
 import { axiosService } from '@/lib/axiosService';
 import { C, S, alpha, fa } from '@/components/ui/tokens';
-import { Btn, Card, EmptyState, Hero, IconBadge, Modal, Screen, Shimmer } from '@/components/ui/kit';
+import { Btn, Card, EmptyState, Plaque, IconBadge, Modal, Screen, Shimmer } from '@/components/ui/kit';
 import { jalaliDateTime, relative } from '@/lib/when';
 
 /**
@@ -145,10 +145,11 @@ export default function NotificationsPage() {
   return (
     <>
       <Screen>
-        <Hero
+        <Plaque
+          section="شهرداری"
           icon={<Bell className="h-6 w-6" />}
-          title="اعلان‌ها"
-          sub="هر چیزی که دربارهٔ درخواست‌ها، پیام‌ها و کیف پول شما اتفاق افتاده است."
+          city="اعلان‌ها"
+          note="هر چیزی که دربارهٔ درخواست‌ها، پیام‌ها و کیف پول شما اتفاق افتاده است."
           aside={
             <div style={{ textAlign: 'start' }}>
               <p style={{ margin: 0, fontSize: S.xs, color: C.onHeroMuted, fontWeight: 600 }}>خوانده‌نشده</p>
@@ -170,7 +171,7 @@ export default function NotificationsPage() {
                 type="button"
                 onClick={() => setKind(f.value)}
                 style={{
-                  flexShrink: 0, padding: '8px 14px', borderRadius: S.rPill, cursor: 'pointer', fontFamily: 'inherit',
+                  flexShrink: 0, padding: '8px 14px', borderRadius: S.r1, cursor: 'pointer', fontFamily: 'inherit',
                   fontSize: S.xs, fontWeight: 800, whiteSpace: 'nowrap',
                   background: on ? color : alpha(color, 10),
                   color: on ? C.onAccent : color,
@@ -188,7 +189,7 @@ export default function NotificationsPage() {
             type="button"
             onClick={() => setUnreadOnly((v) => !v)}
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: S.rPill,
+              display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: S.r1,
               cursor: 'pointer', fontFamily: 'inherit', fontSize: S.xs, fontWeight: 800,
               background: unreadOnly ? alpha(C.statusInfo, 14) : C.surface,
               color: unreadOnly ? C.statusInfo : C.muted,
@@ -204,7 +205,7 @@ export default function NotificationsPage() {
               onClick={readAll}
               disabled={busy}
               style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: S.rPill,
+                display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: S.r1,
                 cursor: 'pointer', fontFamily: 'inherit', fontSize: S.xs, fontWeight: 800,
                 background: alpha(C.green, 10), color: C.green, border: `1px solid ${alpha(C.green, 22)}`,
                 marginInlineStart: 'auto',
@@ -268,7 +269,7 @@ export default function NotificationsPage() {
                         >
                           {note.body}
                         </p>
-                        <p style={{ margin: '5px 0 0', fontSize: 10, color: C.subtle }}>{relative(note.createdAt)}</p>
+                        <p style={{ margin: '5px 0 0', fontSize: 11, color: C.subtle }}>{relative(note.createdAt)}</p>
                       </div>
                     </div>
                   </Card>

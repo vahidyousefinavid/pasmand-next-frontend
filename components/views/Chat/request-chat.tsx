@@ -163,7 +163,7 @@ export default function RequestChat({
               display: 'inline-flex', alignItems: 'center', gap: 6,
               background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.3)',
               color: 'inherit', textDecoration: 'none',
-              padding: '10px 14px', borderRadius: S.rPill, fontSize: S.xs, fontWeight: 800,
+              padding: '10px 14px', borderRadius: S.r1, fontSize: S.xs, fontWeight: 800,
             }}
           >
             <PhoneCall className="h-4 w-4" />
@@ -213,7 +213,7 @@ export default function RequestChat({
                     <p
                       className="tnum"
                       style={{
-                        margin: '5px 0 0', fontSize: 10, textAlign: 'end',
+                        margin: '5px 0 0', fontSize: 11, textAlign: 'end',
                         color: mine ? 'rgba(255,255,255,0.75)' : C.subtle,
                       }}
                     >

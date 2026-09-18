@@ -9,7 +9,7 @@ import { axiosService } from '@/lib/axiosService';
 import { API } from '@/services/const';
 import { useToast } from '@/hooks/use-toast';
 import { C, S, alpha } from '@/components/ui/tokens';
-import { Screen, Hero, Card, IconBadge, Btn, EmptyState, Modal, Field, Shimmer } from '@/components/ui/kit';
+import { Screen, Plaque, Card, IconBadge, Btn, EmptyState, Modal, Field, Shimmer } from '@/components/ui/kit';
 
 const MapWithNoSSR = dynamic(() => import('@/components/views/Components/map'), {
   ssr: false,
@@ -155,10 +155,11 @@ export default function AddressesPage() {
   return (
     <>
       <Screen>
-        <Hero
+        <Plaque
+          section="حساب"
           icon={<MapPin className="h-6 w-6" />}
-          title="آدرس‌های من"
-          sub="آدرس‌های ذخیره‌شده، ثبت درخواست بعدی را کوتاه‌تر می‌کند."
+          city="آدرس‌های من"
+          note="آدرس‌های ذخیره‌شده، ثبت درخواست بعدی را کوتاه‌تر می‌کند."
           aside={
             <button
               type="button"
@@ -166,7 +167,7 @@ export default function AddressesPage() {
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', fontFamily: 'inherit',
                 background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.3)',
-                color: C.onHero, padding: '11px 17px', borderRadius: S.rPill,
+                color: C.onHero, padding: '11px 17px', borderRadius: S.r1,
                 fontSize: S.sm, fontWeight: 800, whiteSpace: 'nowrap',
               }}
             >
@@ -215,7 +216,7 @@ export default function AddressesPage() {
                           disabled={deletingId === address._id}
                           style={{
                             flexShrink: 0, cursor: 'pointer', background: 'transparent',
-                            border: `1px solid ${C.border}`, borderRadius: S.rPill, padding: 8,
+                            border: `1px solid ${C.border}`, borderRadius: S.r1, padding: 8,
                             color: C.statusDanger, display: 'grid', placeItems: 'center',
                           }}
                         >

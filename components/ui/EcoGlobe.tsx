@@ -147,8 +147,11 @@ export default function EcoGlobe({ size = 210, className }: Props) {
     let theme = readTheme();
     function readTheme() {
       return {
-        accent: cssVar('--pm-green', '#12805c'),
-        soft: cssVar('--pm-green-soft', '#35b98a'),
+        // The emblem is the first thing a new citizen sees; it wears the
+        // city's own colours — enamel and the فیروزه of the tile — not the
+        // waste service's green.
+        accent: cssVar('--sh-enamel', '#0f3f6b'),
+        soft: cssVar('--sh-tile', '#1b93a4'),
         dot: cssVar('--pm-text-strong', '#10231c'),
       };
     }

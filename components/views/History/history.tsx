@@ -15,7 +15,7 @@ import { API } from '@/services/const';
 import { toast } from '@/hooks/use-toast';
 import { WASTE_TYPES, wasteMeta } from '@/lib/wasteTypes';
 import { C, S, alpha, STATUS_THEME, fa, type RequestStatus } from '@/components/ui/tokens';
-import { Screen, Hero, Card, IconBadge, Btn, Stat, StepRail, EmptyState, Modal, type Step } from '@/components/ui/kit';
+import { Screen, Plaque, Card, IconBadge, Btn, Stat, StepRail, EmptyState, Modal, type Step } from '@/components/ui/kit';
 import RequestChat from '@/components/views/Chat/request-chat';
 
 const MapWithNoSSR = dynamic(() => import('@/components/views/Components/map'), {
@@ -282,10 +282,12 @@ export default function HistoryPage() {
   return (
     <>
       <Screen>
-        <Hero
+        <Plaque
+          section="پسماند"
+          tone={C.waste}
           icon={<FileClock className="h-6 w-6" />}
-          title="پیگیری درخواست‌ها"
-          sub={
+          city="پیگیری درخواست‌ها"
+          note={
             openCount > 0
               ? `${fa(openCount)} درخواست در جریان دارید. هر کارت مسیر کامل آن درخواست را نشان می‌دهد.`
               : 'هر کارت، مسیر کامل یک درخواست را از ثبت تا تسویه نشان می‌دهد.'
@@ -298,7 +300,7 @@ export default function HistoryPage() {
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 7,
                 background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.3)',
-                color: C.onHero, padding: '10px 16px', borderRadius: S.rPill,
+                color: C.onHero, padding: '10px 16px', borderRadius: S.r1,
                 fontSize: S.xs, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
@@ -410,7 +412,7 @@ export default function HistoryPage() {
                         <span
                           style={{
                             flexShrink: 0, fontSize: S.xs, fontWeight: 800, whiteSpace: 'nowrap',
-                            padding: '6px 12px', borderRadius: S.rPill,
+                            padding: '6px 12px', borderRadius: S.r1,
                             background: alpha(theme.color, 12), color: theme.color,
                             border: `1px solid ${alpha(theme.color, 26)}`,
                           }}
@@ -465,8 +467,10 @@ export default function HistoryPage() {
                             type="button"
                             onClick={() => setExpanded(isOpen ? null : item._id)}
                             style={{
-                              background: 'transparent', border: 'none', padding: 0, cursor: 'pointer',
-                              fontFamily: 'inherit', fontSize: S.xs, fontWeight: 800, color: C.green,
+                              background: 'transparent', border: 'none', cursor: 'pointer',
+                              // A real target: this was an 18px-high line of text.
+                              minHeight: 40, padding: '8px 2px',
+                              fontFamily: 'inherit', fontSize: S.xs, fontWeight: 700, color: C.enamelInk,
                             }}
                           >
                             {isOpen ? 'بستن اقلام' : `مشاهدهٔ اقلام (${fa(item.items.length)})`}
@@ -515,10 +519,10 @@ export default function HistoryPage() {
                                 className="tnum"
                                 aria-label={`${unread[item._id]} پیام خوانده‌نشده`}
                                 style={{
-                                  minWidth: 20, height: 20, paddingInline: 5, borderRadius: 999,
+                                  minWidth: 20, height: 20, paddingInline: 5, borderRadius: S.r1,
                                   display: 'grid', placeItems: 'center',
                                   background: C.statusDanger, color: C.onAccent,
-                                  fontSize: 10, fontWeight: 800,
+                                  fontSize: 11, fontWeight: 700,
                                 }}
                               >
                                 {fa(unread[item._id])}
@@ -733,7 +737,7 @@ function FilterChip({ label, count, active, color, onClick }: { label: string; c
       onClick={onClick}
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', flexShrink: 0,
-        padding: '9px 14px', borderRadius: S.rPill, cursor: 'pointer', fontFamily: 'inherit',
+        padding: '9px 14px', borderRadius: S.r1, cursor: 'pointer', fontFamily: 'inherit',
         fontSize: S.xs, fontWeight: 800,
         background: active ? color : C.surface,
         color: active ? C.onAccent : C.muted,
@@ -745,9 +749,11 @@ function FilterChip({ label, count, active, color, onClick }: { label: string; c
       <span
         className="tnum"
         style={{
-          fontSize: 10, padding: '1px 6px', borderRadius: 999,
+          fontSize: 11, padding: '1px 6px', borderRadius: S.r1,
           background: active ? 'rgba(255,255,255,0.22)' : C.bgSubtle,
-          color: active ? C.onAccent : C.subtle,
+          // On the wall-coloured chip, `subtle` fell to 3.9:1 — a count is
+          // information, not decoration.
+          color: active ? C.onAccent : C.text,
         }}
       >
         {fa(count)}

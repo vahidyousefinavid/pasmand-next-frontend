@@ -127,8 +127,8 @@ export function DateStrip({
           onClick={() => setCalendarOpen(true)}
           style={{
             marginInlineStart: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5,
-            padding: '6px 12px', borderRadius: S.rPill, cursor: 'pointer', fontFamily: 'inherit',
-            fontSize: 11, fontWeight: 800,
+            padding: '6px 12px', borderRadius: S.r1, cursor: 'pointer', fontFamily: 'inherit',
+            fontSize: 11, fontWeight: 700,
             background: alpha(C.green, 8), color: C.green, border: `1px solid ${alpha(C.green, 26)}`,
           }}
         >
@@ -157,7 +157,7 @@ export function DateStrip({
                 opacity: day.closed && !on ? 0.75 : 1,
               }}
             >
-              <span style={{ fontSize: 10, opacity: 0.85, fontWeight: 700 }}>{dayLabel(day)}</span>
+              <span style={{ fontSize: 11, opacity: 0.85, fontWeight: 700 }}>{dayLabel(day)}</span>
               <span className="tnum" style={{ fontSize: S.md, fontWeight: 800, lineHeight: 1.2 }}>
                 {fa(day.jd)}
               </span>
@@ -168,7 +168,7 @@ export function DateStrip({
               <span className="tnum" style={{ fontSize: 9.5, opacity: 0.9, fontWeight: 700 }}>
                 {day.monthName} {faYear(day.jy)}
               </span>
-              <span style={{ fontSize: 9, opacity: 0.82 }}>
+              <span style={{ fontSize: 11, opacity: 0.82 }}>
                 {day.closed ? 'تعطیل' : `${fa(day.sessionCount)} سانس`}
               </span>
             </button>
@@ -187,8 +187,8 @@ export function DateStrip({
             }}
           >
             <CalendarDays className="h-4 w-4" aria-hidden />
-            <span style={{ fontSize: 10, fontWeight: 800 }}>روزهای بعد</span>
-            <span className="tnum" style={{ fontSize: 9, opacity: 0.9 }}>
+            <span style={{ fontSize: 11, fontWeight: 700 }}>روزهای بعد</span>
+            <span className="tnum" style={{ fontSize: 11, opacity: 0.9 }}>
               تا {fa(days.length - 1)} روز
             </span>
           </button>
@@ -323,7 +323,7 @@ function MonthSheet({
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 6 }}>
           {WEEK.map((w) => (
-            <span key={w} style={{ textAlign: 'center', fontSize: 10, fontWeight: 800, color: C.subtle }}>
+            <span key={w} style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: C.subtle }}>
               {w}
             </span>
           ))}

@@ -50,9 +50,9 @@ const KIND: Record<Note['kind'], { icon: React.ReactNode; color: string }> = {
   request_status: { icon: <Info className="h-4 w-4" />, color: 'var(--pm-amber)' },
   wallet: { icon: <Wallet className="h-4 w-4" />, color: 'var(--pm-status-ok)' },
   // خدمات شهر, in the catalogue's own colours.
-  report: { icon: <Megaphone className="h-4 w-4" />, color: '#c2790b' },
-  letter: { icon: <FileText className="h-4 w-4" />, color: '#2563eb' },
-  booking: { icon: <CalendarCheck className="h-4 w-4" />, color: '#7c4dcc' },
+  report: { icon: <Megaphone className="h-4 w-4" />, color: 'var(--sh-reports)' },
+  letter: { icon: <FileText className="h-4 w-4" />, color: 'var(--sh-cartable)' },
+  booking: { icon: <CalendarCheck className="h-4 w-4" />, color: 'var(--sh-venues)' },
 };
 
 function when(iso: string) {
@@ -191,8 +191,8 @@ export default function NotificationCenter() {
         style={{
           position: 'relative', width: 38, height: 38, borderRadius: 13, flexShrink: 0,
           display: 'grid', placeItems: 'center', cursor: 'pointer',
-          background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.22)',
-          color: 'var(--pm-on-hero)',
+          background: 'transparent', border: '1px solid var(--pm-border)',
+          color: 'var(--pm-text)',
         }}
       >
         <Bell className="h-5 w-5" />
@@ -204,7 +204,7 @@ export default function NotificationCenter() {
               minWidth: 18, height: 18, paddingInline: 4, borderRadius: 999,
               display: 'grid', placeItems: 'center',
               background: C.statusDanger, color: C.onAccent,
-              fontSize: 10, fontWeight: 800,
+              fontSize: 11, fontWeight: 700,
             }}
           >
             {new Intl.NumberFormat('fa-IR').format(Math.min(unread, 99))}
@@ -321,7 +321,7 @@ export default function NotificationCenter() {
                       <span style={{ flex: 1, minWidth: 0 }}>
                         <span style={{ display: 'block', fontSize: S.sm, fontWeight: 800, color: C.textStrong }}>{n.title}</span>
                         <span style={{ display: 'block', marginTop: 3, fontSize: S.xs, color: C.muted, lineHeight: 1.8 }}>{n.body}</span>
-                        <span style={{ display: 'block', marginTop: 5, fontSize: 10, color: C.subtle }}>{when(n.createdAt)}</span>
+                        <span style={{ display: 'block', marginTop: 5, fontSize: 11, color: C.subtle }}>{when(n.createdAt)}</span>
                       </span>
                     </button>
                   );

@@ -14,7 +14,7 @@ import { axiosService } from '@/lib/axiosService';
 import { useCity } from '@/context/data-context';
 import { wasteMeta } from '@/lib/wasteTypes';
 import { C, S, alpha } from '@/components/ui/tokens';
-import { Screen, Hero, Card, IconBadge, Btn, StepRail, type Step } from '@/components/ui/kit';
+import { Screen, Plaque, Card, IconBadge, Btn, StepRail, type Step } from '@/components/ui/kit';
 
 interface RequestData {
   wasteType?: string;
@@ -89,10 +89,12 @@ export default function NewRequestView() {
   // The header and tab bar are rendered once by app/(user)/layout.tsx.
   return (
     <Screen>
-        <Hero
+        <Plaque
+          section="پسماند"
+          tone={C.waste}
           icon={<PackagePlus className="h-6 w-6" />}
-          title="درخواست جمع‌آوری"
-          sub={
+          city="درخواست جمع‌آوری"
+          note={
             step === 'success'
               ? 'درخواست شما ثبت شد و وارد صف بررسی شده است.'
               : 'در چهار قدم مشخص می‌کنید چه چیزی، کجا و چه زمانی تحویل داده می‌شود.'
@@ -286,7 +288,7 @@ function Row({
         onClick={onEdit}
         style={{
           flexShrink: 0, background: 'transparent', border: `1px solid ${C.border}`,
-          borderRadius: S.rPill, padding: '6px 13px', fontSize: S.xs, fontWeight: 700,
+          borderRadius: S.r1, padding: '6px 13px', fontSize: S.xs, fontWeight: 700,
           color: C.muted, cursor: 'pointer', fontFamily: 'inherit',
         }}
       >

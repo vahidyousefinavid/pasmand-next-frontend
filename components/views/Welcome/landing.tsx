@@ -371,7 +371,7 @@ export default function Landing({
                           aria-hidden
                           style={{
                             width: 9, height: 9, borderRadius: '50%', flexShrink: 0,
-                            background: city.isActive ? '#4ade9f' : 'transparent',
+                            background: city.isActive ? '#3fb3c2' : 'transparent',
                             border: city.isActive ? 'none' : '1.5px dashed #e3ad55',
                             boxShadow: city.isActive ? '0 0 10px rgba(74,222,159,0.8)' : 'none',
                           }}
@@ -379,7 +379,7 @@ export default function Landing({
                         <span style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 800, color: '#eef5f1' }}>
                           {city.name}
                         </span>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: city.isActive ? '#4ade9f' : '#e3ad55' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: city.isActive ? '#63cddb' : '#d9a24e' }}>
                           {city.isActive ? 'فعال' : 'به‌زودی'}
                         </span>
                       </Link>

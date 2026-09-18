@@ -12,7 +12,8 @@ const config: Config = {
       // `font-sans` sits on <body>, so pointing it at the self-hosted IRANSans
       // is what makes every shadcn component inherit the Persian face too.
       fontFamily: {
-        sans: ['IRANSans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Estedad', 'IRANSans', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Lalezar', 'Estedad', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

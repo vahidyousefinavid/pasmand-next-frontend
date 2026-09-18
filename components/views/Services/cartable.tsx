@@ -6,7 +6,7 @@ import { AlertCircle, FileText, Landmark } from 'lucide-react';
 
 import { axiosService } from '@/lib/axiosService';
 import { C, S, alpha, fa } from '@/components/ui/tokens';
-import { Card, EmptyState, Hero, IconBadge, Modal, Screen, Shimmer, Btn } from '@/components/ui/kit';
+import { Card, EmptyState, Plaque, IconBadge, Modal, Screen, Shimmer, Btn } from '@/components/ui/kit';
 import { LETTER_STATUS } from '@/lib/cityServices';
 import { jalaliDateTime, relative } from '@/lib/when';
 
@@ -67,10 +67,12 @@ export default function CartablePage() {
   return (
     <>
       <Screen>
-        <Hero
+        <Plaque
+          section="خدمات شهر"
+          tone={C.cartable}
           icon={<FileText className="h-6 w-6" />}
-          title="کارتابل شهروندی"
-          sub="آخرین وضعیت نامه‌ها و درخواست‌های اداری شما در شهرداری."
+          city="کارتابل شهروندی"
+          note="آخرین وضعیت نامه‌ها و درخواست‌های اداری شما در شهرداری."
           aside={
             <div style={{ textAlign: 'start' }}>
               <p style={{ margin: 0, fontSize: S.xs, color: C.onHeroMuted, fontWeight: 600 }}>در انتظار اقدام شما</p>
@@ -122,13 +124,13 @@ export default function CartablePage() {
                       <span style={{ textAlign: 'start', flexShrink: 0 }}>
                         <span
                           style={{
-                            display: 'inline-block', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: S.rPill,
+                            display: 'inline-block', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: S.r1,
                             background: alpha(colour, 12), color: colour, border: `1px solid ${alpha(colour, 24)}`,
                           }}
                         >
                           {status.label}
                         </span>
-                        <span style={{ display: 'block', marginTop: 5, fontSize: 10, color: C.subtle }}>
+                        <span style={{ display: 'block', marginTop: 5, fontSize: 11, color: C.subtle }}>
                           {relative(letter.updatedAt)}
                         </span>
                       </span>
@@ -156,7 +158,7 @@ function LetterSheet({ letter, onClose }: { letter: Letter; onClose: () => void 
         <div>
           <span
             style={{
-              display: 'inline-block', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: S.rPill,
+              display: 'inline-block', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: S.r1,
               background: alpha(colour, 12), color: colour, border: `1px solid ${alpha(colour, 24)}`,
             }}
           >
@@ -204,7 +206,7 @@ function LetterSheet({ letter, onClose }: { letter: Letter; onClose: () => void 
                     {step.note && (
                       <span style={{ display: 'block', marginTop: 4, fontSize: S.xs, color: C.muted, lineHeight: 1.9 }}>{step.note}</span>
                     )}
-                    <span className="tnum" style={{ display: 'block', marginTop: 4, fontSize: 10, color: C.subtle }}>
+                    <span className="tnum" style={{ display: 'block', marginTop: 4, fontSize: 11, color: C.subtle }}>
                       {jalaliDateTime(step.at)}{step.byName ? ` · ${step.byName}` : ''}
                     </span>
                   </span>

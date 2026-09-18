@@ -398,7 +398,7 @@ export default function SecondStep({ onNext, onBack }: SecondStepProps) {
               style={{
                 position: 'absolute', top: 12, insetInlineStart: 12, zIndex: 1000,
                 display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '9px 14px', borderRadius: S.rPill,
+                padding: '9px 14px', borderRadius: S.r1,
                 background: C.surface, color: C.green,
                 border: `1px solid ${alpha(C.green, 26)}`, boxShadow: C.shadowCard,
                 fontSize: S.xs, fontWeight: 800, fontFamily: 'inherit', cursor: 'pointer',

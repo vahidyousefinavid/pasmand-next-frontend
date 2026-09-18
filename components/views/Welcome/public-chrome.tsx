@@ -224,7 +224,7 @@ export function PublicFooter({ signedIn }: { signedIn: boolean }) {
       </div>
 
       <div className="ss-wrap" style={{ paddingBottom: S.s5 }}>
-        <p style={{ margin: 0, paddingTop: S.s4, borderTop: `1px solid ${C.border}`, fontSize: 11, color: C.subtle, lineHeight: 2 }}>
+        <p style={{ margin: 0, paddingTop: S.s4, borderTop: `1px solid ${C.border}`, fontSize: 11, color: C.muted, lineHeight: 2 }}>
           شهرشهر — شهروند سبز · خدمات شهری هر شهر زیر نظر شهرداری همان شهر ارائه می‌شود.
         </p>
       </div>

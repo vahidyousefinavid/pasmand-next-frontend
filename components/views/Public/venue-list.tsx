@@ -124,7 +124,7 @@ export default function PublicVenueList({
                 <span
                   style={{
                     position: 'absolute', insetInlineStart: 10, top: 10,
-                    fontSize: 10.5, fontWeight: 800, padding: '4px 10px', borderRadius: 999,
+                    fontSize: 11.5, fontWeight: 800, padding: '4px 10px', borderRadius: 999,
                     background: C.surface, color: tone, border: `1px solid ${alpha(tone, 30)}`,
                   }}
                 >
@@ -138,7 +138,7 @@ export default function PublicVenueList({
                   <span
                     style={{
                       position: 'absolute', insetInlineEnd: 10, top: 10,
-                      fontSize: 10.5, fontWeight: 800, padding: '4px 10px', borderRadius: 999,
+                      fontSize: 11.5, fontWeight: 800, padding: '4px 10px', borderRadius: 999,
                       background: C.green, color: C.onAccent,
                     }}
                   >

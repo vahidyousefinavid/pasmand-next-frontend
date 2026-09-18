@@ -180,7 +180,7 @@ export default function IranMap({ cities }: { cities: MapCity[] }) {
 
     points.forEach(({ city, x, y }) => {
       const live = city.isActive;
-      const colour = live ? '#4ade9f' : '#e3ad55';
+      const colour = live ? '#3fb3c2' : '#d9a24e';
 
       if (live) {
         // A halo that breathes: the one place on this page where motion says
@@ -308,7 +308,7 @@ export default function IranMap({ cities }: { cities: MapCity[] }) {
           }}
         >
           {hover.city.name}
-          <span style={{ marginInlineStart: 7, fontWeight: 700, color: hover.city.isActive ? '#4ade9f' : '#e3ad55' }}>
+          <span style={{ marginInlineStart: 7, fontWeight: 700, color: hover.city.isActive ? '#63cddb' : '#d9a24e' }}>
             {hover.city.isActive ? 'فعال' : 'به‌زودی'}
           </span>
         </div>

@@ -8,7 +8,7 @@ import {
 
 import { Chat } from '@/components/ui/chat';
 import { C, S, alpha } from '@/components/ui/tokens';
-import { Screen, Hero, Card, IconBadge } from '@/components/ui/kit';
+import { Screen, Plaque, Card, IconBadge } from '@/components/ui/kit';
 
 /**
  * پشتیبانی.
@@ -78,10 +78,11 @@ export default function ContactUsView() {
   return (
     <>
       <Screen>
-        <Hero
+        <Plaque
+          section="پشتیبانی"
           icon={<Headphones className="h-6 w-6" />}
-          title="پشتیبانی"
-          sub="اگر چیزی مطابق انتظار پیش نرفت، از یکی از این راه‌ها با ما حرف بزنید."
+          city="پشتیبانی"
+          note="اگر چیزی مطابق انتظار پیش نرفت، از یکی از این راه‌ها با ما حرف بزنید."
         />
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: S.s3 }}>
@@ -188,7 +189,7 @@ export default function ContactUsView() {
               rel="noreferrer noopener"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 7, flexShrink: 0, textDecoration: 'none',
-                padding: '10px 16px', borderRadius: S.rPill,
+                padding: '10px 16px', borderRadius: S.r1,
                 background: C.surface, border: `1px solid ${C.border}`, color: C.text,
                 fontSize: S.xs, fontWeight: 700, whiteSpace: 'nowrap',
               }}

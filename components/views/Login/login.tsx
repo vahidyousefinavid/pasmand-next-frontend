@@ -393,7 +393,7 @@ export default function LoginPage() {
           </div>
         </Card>
 
-        <p style={{ margin: 0, fontSize: S.xs, color: C.subtle, textAlign: 'center', lineHeight: 1.9 }}>
+        <p style={{ margin: 0, fontSize: S.xs, color: C.muted, textAlign: 'center', lineHeight: 1.9 }}>
           با ورود، شرایط استفاده از سامانهٔ خدمات شهری شهرشهر را می‌پذیرید.
         </p>
       </div>
