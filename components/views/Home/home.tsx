@@ -401,7 +401,7 @@ export default function HomeView() {
                       <td className="tnum" style={{ textAlign: 'end', padding: `${S.s3}px ${S.s4}px`, whiteSpace: 'nowrap' }}>
                         <span style={{ fontSize: S.md, fontWeight: 700, color: C.brass }}>{fa(p.pricePerUnit)}</span>
                         <span style={{ fontSize: S.xs, color: C.muted, marginInlineStart: 5 }}>تومان / کیلو</span>
-                        {Number(p.change) !== 0 && (
+                        {Number.isFinite(Number(p.change)) && Number(p.change) !== 0 && (
                           <span
                             style={{
                               marginInlineStart: 8, fontSize: S.xs, fontWeight: 700,

@@ -186,5 +186,10 @@ export const STATUS_THEME: Record<RequestStatus, { label: string; color: string 
 /** Persian digits everywhere a number is read rather than computed with. */
 export function fa(n: number | string | undefined | null): string {
   if (n === undefined || n === null) return '—';
-  return Number(n).toLocaleString('fa-IR');
+  const value = Number(n);
+  // `Number(undefined).toLocaleString('fa-IR')` is «ناعدد», which shipped to
+  // production in a price column the day the API turned out not to send the
+  // field at all. A missing number is a dash, not a word.
+  if (!Number.isFinite(value)) return '—';
+  return value.toLocaleString('fa-IR');
 }

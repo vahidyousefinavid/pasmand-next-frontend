@@ -64,8 +64,8 @@ for (const [phone, width] of [['phone', 390], ['wide', 1280]]) {
     try { localStorage.setItem('pm-push-dismissed', '1'); } catch {}
   });
   await context.addCookies([
-    { name: 'auth_token', value: 'dev-token', domain: '127.0.0.1', path: '/' },
-    { name: 'city', value: 'nahavand', domain: '127.0.0.1', path: '/' },
+    { name: 'auth_token', value: 'dev-token', domain: new URL(BASE).hostname, path: '/' },
+    { name: 'city', value: 'nahavand', domain: new URL(BASE).hostname, path: '/' },
   ]);
 
   for (const [name, path, kind] of SCREENS) {
