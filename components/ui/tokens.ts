@@ -84,10 +84,31 @@ export const SERVICE_COLOR: Record<string, string> = {
   reports:   'var(--sh-reports)',
   cartable:  'var(--sh-cartable)',
   memorials: 'var(--sh-memorials)',
+  // The panel and the API do not spell every module the same way — ۱۳۷ is
+  // `report137` there and `reports` here, and the cemetery register answers to
+  // both of its names.
+  report137: 'var(--sh-reports)',
+  report:    'var(--sh-reports)',
+  venue:     'var(--sh-venues)',
+  booking:   'var(--sh-venues)',
+  deceased:  'var(--sh-memorials)',
+  letter:    'var(--sh-cartable)',
 };
 
+/** The hue of a known service, or nothing — see `serviceColor` below. */
+export const serviceHue = (key?: string): string | undefined =>
+  (key && SERVICE_COLOR[key]) || undefined;
+
+/**
+ * The hue to mark a service with, falling back to enamel.
+ *
+ * Only for *marks* — a rule, an icon tint, a bar. Never as text on an unknown
+ * key: enamel is a dark surface colour, and in the night theme it lands at
+ * 1.47:1 on a dark panel. Text should use `serviceHue` and keep whatever the
+ * API sent when the key is one this build does not know.
+ */
 export const serviceColor = (key?: string): string =>
-  (key && SERVICE_COLOR[key]) || 'var(--sh-enamel)';
+  serviceHue(key) || 'var(--sh-enamel)';
 
 /** The two faces. Lalezar paints plaques; Estedad does everything else. */
 export const F = {

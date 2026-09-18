@@ -1113,9 +1113,12 @@ html[data-theme=dark] .ss-board {
 }
 
 .ss-cta-primary {
-  background: var(--pm-green);
+  /* Enamel, not `--pm-green`: the primary is a filled button with white on it,
+     and `--pm-green` lightens in the night theme, which left white text at
+     3.1:1. Enamel is the one fill that stays dark in both. */
+  background: var(--sh-enamel);
   color: #fff;
-  border: 1px solid var(--pm-green);
+  border: 1px solid var(--sh-enamel);
   /* Tinted with the brand, not black, so it belongs to the photograph. */
   box-shadow: 0 12px 28px rgba(6, 60, 42, .42);
 }
@@ -1179,8 +1182,10 @@ html[data-theme=dark] .ss-board {
 .ss-city-pill:hover { border-color: var(--pm-green); color: var(--pm-green); }
 .ss-city-pill:active { transform: scale(.97); }
 .ss-city-pill[data-on='true'] {
-  background: var(--pm-green);
-  border-color: var(--pm-green);
+  /* The chosen city is painted enamel — a fill that carries white in both
+     themes; `--pm-green` lightens at night and took the label to 3.1:1. */
+  background: var(--sh-enamel);
+  border-color: var(--sh-enamel);
   color: #fff;
 }
 

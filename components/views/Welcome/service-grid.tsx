@@ -7,7 +7,7 @@ import {
   ArrowLeft, Lock, Check,
 } from 'lucide-react';
 
-import { alpha, serviceColor } from '@/components/ui/tokens';
+import { alpha, serviceHue } from '@/components/ui/tokens';
 import type { PublicCity, PublicService } from '@/lib/publicData';
 
 /**
@@ -227,10 +227,10 @@ function ServiceCard({
          * token now — resolved by key, with whatever the API sent as the
          * fallback for a module this build has never heard of.
          */
-        ['--svc' as any]: serviceColor(service.key) || service.color,
-        ['--svc-wash' as any]: alpha(serviceColor(service.key) || service.color, 8),
-        ['--svc-line' as any]: alpha(serviceColor(service.key) || service.color, 26),
-        ['--svc-glow' as any]: alpha(serviceColor(service.key) || service.color, 18),
+        ['--svc' as any]: serviceHue(service.key) || service.color,
+        ['--svc-wash' as any]: alpha(serviceHue(service.key) || service.color, 8),
+        ['--svc-line' as any]: alpha(serviceHue(service.key) || service.color, 26),
+        ['--svc-glow' as any]: alpha(serviceHue(service.key) || service.color, 18),
         animationDelay: `${Math.min(index, 6) * 55}ms`,
       }}
     >
