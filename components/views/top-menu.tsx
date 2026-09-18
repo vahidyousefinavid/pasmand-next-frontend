@@ -19,6 +19,7 @@ import InstallButton from './InstallButton';
 import { C, S, alpha } from '@/components/ui/tokens';
 import NotificationCenter from '@/components/notification-center';
 import { serviceIcon, useCityServices } from '@/lib/cityServices';
+import { SKINS, useSkin } from '@/context/skin-context';
 import MessagesBell from '@/components/messages-bell';
 
 /**
@@ -87,6 +88,7 @@ export function TopMenu() {
   // Whatever this city runs beyond the waste service — the drawer is where
   // somebody goes looking for a service they were told about.
   const { services: cityModules } = useCityServices();
+  const { skin, setSkin } = useSkin();
   const pathname = usePathname();
 
   /**
@@ -304,6 +306,48 @@ export function TopMenu() {
 
                 {/* ── footer ── */}
                 <div style={{ padding: `${S.s4}px`, borderTop: `1px dashed ${C.border}`, display: 'flex', flexDirection: 'column', gap: S.s3 }}>
+                  {/* The colour of the city's signs, where somebody will
+                      actually come across it. The full choice — including
+                      روشن/تاریک — is one tap further on, in تنظیمات. */}
+                  <div>
+                    <p style={{ margin: `0 0 ${S.s2}px`, fontSize: S.xs, fontWeight: 600, color: C.muted }}>رنگ شهر</p>
+                    <div role="radiogroup" aria-label="رنگ شهر" style={{ display: 'flex', gap: S.s2 }}>
+                      {SKINS.map((option) => {
+                        const on = skin === option.key;
+                        return (
+                          <button
+                            key={option.key}
+                            type="button"
+                            role="radio"
+                            aria-checked={on}
+                            aria-label={option.title}
+                            title={option.title}
+                            onClick={() => setSkin(option.key)}
+                            style={{
+                              flex: 1, minHeight: 44, cursor: 'pointer', padding: 5,
+                              borderRadius: S.r1, background: C.surface,
+                              border: `1.5px solid ${on ? C.enamelInk : C.border}`,
+                            }}
+                          >
+                            <span
+                              aria-hidden
+                              style={{
+                                display: 'grid', placeItems: 'center', height: 26, borderRadius: 5,
+                                background: `linear-gradient(180deg, ${option.swatch}, ${option.swatchDeep})`,
+                                color: '#fff',
+                              }}
+                            >
+                              {on && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
+                            </span>
+                            <span style={{ display: 'block', marginTop: 4, fontSize: 11, fontWeight: on ? 800 : 600, color: on ? C.textStrong : C.muted }}>
+                              {option.title}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
                   <InstallButton />
                   {!isAuthenticated && (
                     <Link

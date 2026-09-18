@@ -14,6 +14,8 @@ import { mkdirSync } from 'node:fs';
 const OUT = process.argv[2] || 'shots';
 const ONLY = process.argv[3] || '';
 const BASE = process.env.BASE || 'http://127.0.0.1:3020';
+/** Which skin to shoot — the plaque's colour. Green is the default. */
+const SKIN = process.env.SKIN || 'green';
 
 const SCREENS = [
   ['welcome', '/welcome', 'public'],
@@ -37,6 +39,7 @@ const SCREENS = [
   ['profile', '/profile', 'app'],
   ['addresses', '/addresses', 'app'],
   ['contact-us', '/contact-us', 'app'],
+  ['settings', '/settings', 'app'],
 ];
 
 mkdirSync(OUT, { recursive: true });
@@ -60,9 +63,13 @@ for (const [phone, width] of [['phone', 390], ['wide', 1280]]) {
   // The push-permission prompt is a fixed banner; in a full-page screenshot it
   // lands in the middle of the image and hides whatever is behind it. It has
   // its own dismissal flag, so set it rather than screenshotting around it.
-  await context.addInitScript(() => {
-    try { localStorage.setItem('pm-push-dismissed', '1'); } catch {}
-  });
+  await context.addInitScript((skin) => {
+    try {
+      localStorage.setItem('pm-push-dismissed', '1');
+      localStorage.setItem('shahrshahr-skin', skin);
+      if (skin !== 'green') document.documentElement.setAttribute('data-skin', skin);
+    } catch {}
+  }, SKIN);
   await context.addCookies([
     { name: 'auth_token', value: 'dev-token', domain: new URL(BASE).hostname, path: '/' },
     { name: 'city', value: 'nahavand', domain: new URL(BASE).hostname, path: '/' },

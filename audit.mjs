@@ -11,6 +11,8 @@
 import { chromium } from '/root/.claude/skills/playwright-skill/node_modules/playwright/index.mjs';
 
 const THEME = process.argv[2] || 'light';
+/** Which skin to audit — the plaque's colour. Green is the default. */
+const SKIN = process.env.SKIN || 'green';
 /** Optional comma-separated paths, for re-running what a crashed run missed. */
 const ONLY = (process.argv[3] || '').split(',').filter(Boolean);
 const BASE = process.env.BASE || 'http://127.0.0.1:3020';
@@ -32,12 +34,15 @@ async function audit(paths, { authed }) {
     deviceScaleFactor: 2,
     locale: 'fa-IR',
   });
-  await context.addInitScript((theme) => {
+  await context.addInitScript(({ theme, skin }) => {
     try {
       localStorage.setItem('pm-push-dismissed', '1');
+      localStorage.setItem('shahrshahr-skin', skin);
+      localStorage.setItem('theme', theme);
       if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+      if (skin !== 'green') document.documentElement.setAttribute('data-skin', skin);
     } catch {}
-  }, THEME);
+  }, { theme: THEME, skin: SKIN });
   if (authed) {
     const host = new URL(BASE).hostname;
     await context.addCookies([{ name: 'auth_token', value: 'dev-token', domain: host, path: '/' }]);
@@ -54,17 +59,19 @@ async function audit(paths, { authed }) {
     // provider can overwrite it after hydration — set it again once the page
     // has settled.
     try {
-      await page.evaluate((theme) => {
+      await page.evaluate(({ theme, skin }) => {
         if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-      }, THEME);
+        if (skin !== 'green') document.documentElement.setAttribute('data-skin', skin);
+      }, { theme: THEME, skin: SKIN });
     } catch {
       // A middleware redirect lands here on the production build — /login with
       // a session goes to /. Let the page settle and carry on.
       await page.waitForTimeout(1500);
       try {
-        await page.evaluate((theme) => {
+        await page.evaluate(({ theme, skin }) => {
           if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-        }, THEME);
+          if (skin !== 'green') document.documentElement.setAttribute('data-skin', skin);
+        }, { theme: THEME, skin: SKIN });
       } catch {}
     }
     await page.waitForTimeout(700);
@@ -76,10 +83,23 @@ async function audit(paths, { authed }) {
 
       out.overflow = document.documentElement.scrollWidth - document.documentElement.clientWidth;
 
+      /**
+       * Chrome computes `color-mix(...)` — which is how a skin-following
+       * overlay is written — into `color(srgb 0.04 0.29 0.21 / 0.88)`, with
+       * channels in 0..1. A parser that only knew `rgb()` read those as
+       * "no background" and reported white-on-dark-photograph as 1.16:1.
+       */
       const parse = (c) => {
+        if (!c) return null;
+        const srgb = c.match(/color\(srgb\s+([^)]+)\)/);
+        if (srgb) {
+          const [rgb, alpha] = srgb[1].split('/');
+          const [r, g, b] = rgb.trim().split(/\s+/).map((n) => parseFloat(n) * 255);
+          return { r, g, b, a: alpha === undefined ? 1 : parseFloat(alpha) };
+        }
         const m = c.match(/rgba?\(([^)]+)\)/);
         if (!m) return null;
-        const [r, g, b, a] = m[1].split(',').map((n) => parseFloat(n));
+        const [r, g, b, a] = m[1].split(/[,\s/]+/).filter(Boolean).map((n) => parseFloat(n));
         return { r, g, b, a: a === undefined ? 1 : a };
       };
       const lum = ({ r, g, b }) => {
@@ -103,7 +123,7 @@ async function audit(paths, { authed }) {
           const bg = parse(cs.backgroundColor);
           if (bg && bg.a > 0.85) return bg;
           if (cs.backgroundImage && cs.backgroundImage.includes('gradient')) {
-            const stop = cs.backgroundImage.match(/rgba?\([^)]+\)/);
+            const stop = cs.backgroundImage.match(/(?:rgba?|color)\([^)]+\)/);
             const c = stop && parse(stop[0]);
             if (c && c.a > 0.85) return c;
           }
@@ -124,7 +144,7 @@ async function audit(paths, { authed }) {
             const sbg = parse(scs.backgroundColor);
             if (sbg && sbg.a > 0.7) return sbg;
             if (scs.backgroundImage && scs.backgroundImage.includes('gradient')) {
-              const stops = scs.backgroundImage.match(/rgba?\([^)]+\)/g) || [];
+              const stops = scs.backgroundImage.match(/(?:rgba?|color)\([^)]+\)/g) || [];
               // The lightest stop is the hardest case for white text.
               const parsed = stops.map(parse).filter((c) => c && c.a > 0.7);
               if (parsed.length) return parsed.sort((x, y) => lum(y) - lum(x))[0];
@@ -200,5 +220,5 @@ await audit(AUTHED, { authed: true });
 await audit(ANON, { authed: false });
 await browser.close();
 
-console.log(`\n--- ${THEME}: ${problems.length} problems ---`);
+console.log(`\n--- ${SKIN}/${THEME}: ${problems.length} problems ---`);
 console.log(problems.join('\n'));

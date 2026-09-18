@@ -159,7 +159,12 @@ export default function Landing({
             style={{
               position: 'absolute', inset: 0, zIndex: -1,
               background:
-                'linear-gradient(to left, rgba(10,45,78,.35) 0%, rgba(10,45,78,.88) 55%, rgba(10,45,78,.96) 100%)',
+                // The wash over the photograph is the skin's own dark, so the
+                // hero changes colour with the rest of the product.
+                'linear-gradient(to left,'
+                + ' color-mix(in srgb, var(--sh-enamel-deep) 35%, transparent) 0%,'
+                + ' color-mix(in srgb, var(--sh-enamel-deep) 88%, transparent) 55%,'
+                + ' color-mix(in srgb, var(--sh-enamel-deep) 96%, transparent) 100%)',
             }}
           />
 

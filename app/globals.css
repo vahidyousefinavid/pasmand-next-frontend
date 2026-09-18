@@ -297,10 +297,26 @@
    whole app. `--sh-*` are the names added for what the old palette had no word
    for.
    ────────────────────────────────────────────────────────────────────────── */
+/* ── Skins ─────────────────────────────────────────────────────────────────
+   The language does not change: the plaque, its inset keyline, the code plate,
+   one hue per service. What a skin changes is the colour of the sign itself,
+   the way a municipality picks the colour its own plaques are enamelled in.
+
+       سبز       the green this product was built in — the default
+       لاجوردی   cobalt, the colour of a street name-plate
+       زغالی     cast iron with a brass keyline
+
+   The default block below is «سبز», so a citizen who never opens settings gets
+   the green they already know. `html[data-skin='…']` overrides only the seven
+   values a skin owns; everything else — the wall, the brass, the five service
+   hues, every status colour — is shared, because those mean the same thing
+   whichever colour the sign is painted.
+   ────────────────────────────────────────────────────────────────────────── */
 :root {
-  --sh-enamel:      #0f3f6b;
-  --sh-enamel-deep: #0a2d4e;
-  --sh-enamel-lit:  #2e6fb7;
+  --sh-enamel:      #0f6a4c;
+  --sh-enamel-deep: #0a4a36;
+  --sh-enamel-lit:  #1d9c70;
+  --sh-enamel-ink:  #0c5b41;
   --sh-tile:        #1b93a4;
   --sh-tile-deep:   #14707e;
   --sh-brass:       #8a5e18;
@@ -310,11 +326,6 @@
   --sh-panel:       #ffffff;
   --sh-keyline:     rgba(255, 255, 255, 0.72);
 
-  /* Enamel as a *surface* is always dark; enamel as *text* has to flip with
-     the theme, or the brand and every link painted in it disappears into the
-     night ground. Two names, because they are two different jobs. */
-  --sh-enamel-ink:  #0f3f6b;
-
   /* The five services. Each hue belongs to its own module and nothing else. */
   --sh-waste:      #1c7049;
   --sh-venues:     #2a63a4;
@@ -322,24 +333,26 @@
   --sh-cartable:   #63449e;
   --sh-memorials:  #276b64;
 
-  /* Mapped onto the names the screens already use. */
-  --pm-green:      #0f3f6b;  /* the app's primary is the enamel now */
-  --pm-green-dark: #0a2d4e;
-  --pm-green-soft: #2e6fb7;
-  --pm-amber:      #8a5e18;
+  /* Mapped onto the names the screens already use. Every one of these is
+     derived from the skin above rather than repeated, so a skin is seven
+     values and not fifty. */
+  --pm-green:      var(--sh-enamel);
+  --pm-green-dark: var(--sh-enamel-deep);
+  --pm-green-soft: var(--sh-enamel-lit);
+  --pm-amber:      var(--sh-brass);
   --pm-red:        #b3382f;
-  --pm-blue:       #2a63a4;
-  --pm-violet:     #63449e;
+  --pm-blue:       var(--sh-venues);
+  --pm-violet:     var(--sh-cartable);
 
-  --pm-bg:         #f1eee8;
-  --pm-bg-subtle:  #e7e2d8;
-  --pm-surface:    #ffffff;
+  --pm-bg:         var(--sh-wall);
+  --pm-bg-subtle:  var(--sh-wall-deep);
+  --pm-surface:    var(--sh-panel);
   --pm-surface-2:  #faf8f4;
 
-  --pm-hero-start: #0f3f6b;
-  --pm-hero-end:   #0a2d4e;
+  --pm-hero-start: var(--sh-enamel);
+  --pm-hero-end:   var(--sh-enamel-deep);
   --pm-on-hero:       #ffffff;
-  --pm-on-hero-muted: rgba(240, 246, 252, 0.82);
+  --pm-on-hero-muted: rgba(244, 248, 246, 0.84);
 
   --pm-text-strong: #14202b;
   --pm-text:        #2a3a48;
@@ -353,7 +366,7 @@
   /* Panels are mounted flat on the wall; only what floats casts anything. */
   --pm-shadow-card:  0 1px 0 rgba(20, 32, 43, 0.03);
   --pm-shadow-lift:  0 2px 8px rgba(20, 32, 43, 0.08), 0 16px 36px rgba(20, 32, 43, 0.10);
-  --pm-shadow-hero:  0 10px 26px rgba(10, 45, 78, 0.22);
+  --pm-shadow-hero:  0 10px 26px rgba(16, 40, 32, 0.22);
   --pm-shadow-sheet: 0 -8px 40px rgba(20, 32, 43, 0.2);
 
   --pm-status-ok:      #1c7049;
@@ -370,21 +383,46 @@
   --pm-waste-construction: #8f4718;
 }
 
+/* لاجوردی — the street name-plate. */
+html[data-skin='enamel'] {
+  --sh-enamel:      #0f3f6b;
+  --sh-enamel-deep: #0a2d4e;
+  --sh-enamel-lit:  #2e6fb7;
+  --sh-enamel-ink:  #0f3f6b;
+  --pm-on-hero-muted: rgba(240, 246, 252, 0.82);
+  --pm-shadow-hero: 0 10px 26px rgba(10, 45, 78, 0.22);
+}
+
+/* زغالی — cast iron, where the brass keyline does the talking. */
+html[data-skin='ink'] {
+  --sh-enamel:      #303b47;
+  --sh-enamel-deep: #1e2730;
+  --sh-enamel-lit:  #5a6b7d;
+  --sh-enamel-ink:  #333f4b;
+  --sh-keyline:     rgba(230, 201, 138, 0.62);
+  --pm-on-hero-muted: rgba(244, 244, 242, 0.82);
+  --pm-shadow-hero: 0 10px 26px rgba(30, 39, 48, 0.24);
+}
+
 html[data-theme='dark'] {
-  /* Night in the same town: the wall goes to slate, and the plaque stays
-     enamel — a lit sign does not change colour after dark. */
+  /* Night in the same town: the wall goes to slate and the plaque keeps its
+     enamel — a lit sign does not change colour after dark. The skin-owned
+     values are re-stated per skin below; everything here is shared. */
   --sh-wall:        #101820;
   --sh-wall-deep:   #16202a;
   --sh-panel:       #18232e;
-  --sh-enamel:      #123f68;
-  --sh-enamel-deep: #0b2a46;
   --sh-tile:        #3fb3c2;
   --sh-brass:       #c79a4a;
+
+  /* The default skin, «سبز», at night. */
+  --sh-enamel:      #10583f;
+  --sh-enamel-deep: #08382a;
+  --sh-enamel-lit:  #35a97c;
+  --sh-enamel-ink:  #63c79e;
 
   /* Everything that carries *words* lightens, because the ground it is read
      against has flipped: enamel-as-text, the five service hues and the
      statuses. The plaque's field is not in this list — it stays enamel. */
-  --sh-enamel-ink:  #7ab5e6;
   --sh-waste:       #4fb387;
   --sh-venues:      #6aa8e8;
   --sh-reports:     #dd9a4e;
@@ -415,15 +453,15 @@ html[data-theme='dark'] {
   --pm-subtle:      #8d99a5;
   --pm-on-hero-muted: rgba(240, 246, 252, 0.88);
 
-  --pm-bg:         #101820;
-  --pm-bg-subtle:  #16202a;
-  --pm-surface:    #18232e;
   --pm-surface-2:  #1e2b37;
 
-  --pm-green:      #4f96d8;
-  --pm-green-dark: #2e6fb7;
-  --pm-green-soft: #7db4e4;
-  --pm-amber:      #c79a4a;
+  /* `--pm-green` is what the screens call "the primary", and at night it is
+     read as *text* far more often than painted as a fill — so it takes the
+     skin's ink, not its field. */
+  --pm-green:      var(--sh-enamel-ink);
+  --pm-green-dark: var(--sh-enamel);
+  --pm-green-soft: var(--sh-enamel-lit);
+  --pm-amber:      var(--sh-brass);
 
   --pm-text-strong: #f2f5f8;
   --pm-text:        #dbe3ea;
@@ -434,6 +472,47 @@ html[data-theme='dark'] {
 
   --pm-shadow-card: 0 1px 0 rgba(0, 0, 0, 0.4);
   --pm-shadow-lift: 0 2px 8px rgba(0, 0, 0, 0.45), 0 18px 44px rgba(0, 0, 0, 0.5);
+
+  /* The shadcn tokens, which every untouched screen and every dialog still
+     reads. They used to live in a `.dark` class block, and next-themes wrote
+     that class — it writes `data-theme` now, so without these `body` and every
+     shadcn surface stayed white while the rest of the app went dark. */
+  --background: 209 33% 9%;
+  --foreground: 210 27% 96%;
+  --card: 209 32% 14%;
+  --card-foreground: 210 27% 96%;
+  --popover: 209 32% 14%;
+  --popover-foreground: 210 27% 96%;
+  --primary: 210 27% 96%;
+  --primary-foreground: 209 33% 9%;
+  --secondary: 209 30% 17%;
+  --secondary-foreground: 210 27% 96%;
+  --muted: 209 30% 17%;
+  --muted-foreground: 206 15% 64%;
+  --accent: 209 30% 17%;
+  --accent-foreground: 210 27% 96%;
+  --success: 156 40% 50%;
+  --success-foreground: 209 33% 9%;
+  --destructive: 6 59% 44%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 210 25% 20%;
+  --input: 210 25% 20%;
+  --ring: 188 57% 51%;
+}
+
+html[data-theme='dark'][data-skin='enamel'] {
+  --sh-enamel:      #123f68;
+  --sh-enamel-deep: #0b2a46;
+  --sh-enamel-lit:  #4f96d8;
+  --sh-enamel-ink:  #7ab5e6;
+}
+
+html[data-theme='dark'][data-skin='ink'] {
+  --sh-enamel:      #2b3541;
+  --sh-enamel-deep: #1a222b;
+  --sh-enamel-lit:  #64768a;
+  --sh-enamel-ink:  #aab9c8;
+  --sh-keyline:     rgba(230, 201, 138, 0.55);
 }
 
 /* The fonts this project bundled were declared in layout.tsx but never applied
@@ -666,12 +745,11 @@ textarea.pm-field {
 }
 
 .ss {
-  /* The board's field, and the ink the headline is set in. */
-  /* The board is an enamel object now, like every other dark surface in this
-     product — it used to be forest green, which after the palette change left
-     the landing page arguing with its own buttons. */
-  --ss-ink: #0a2d4e;
-  --ss-ink-soft: #123f68;
+  /* The board's field, and the ink the headline is set in — the same dark
+     surface the plaque is made of, so the public site changes colour with the
+     app when a citizen picks a different skin. */
+  --ss-ink: var(--sh-enamel-deep);
+  --ss-ink-soft: var(--sh-enamel);
 
   /* Brass — the colour of the metals this page is about. Two of them, because
      a value that reads on a dark board is unreadable on a light ground. */
@@ -747,7 +825,21 @@ html[data-theme=dark] .ss-board {
 }
 
 .ss-board {
-  background: linear-gradient(168deg, var(--ss-ink-soft), var(--ss-ink) 62%);
+  /* Always a dark object, so the brass on it is the *light* brass — the dark
+     one is for a light ground. With the green skin its field is lighter than
+     cobalt was, and the figures on it fell to 2.9:1. */
+  /* Lalezar has one weight — 400 — so however heavy the figures look, the
+     4.5:1 floor for normal text applies to them. The brass on the board is
+     lifted towards white until they clear it. */
+  --ss-brass: color-mix(in srgb, #d9a24e 78%, white);
+  --ss-brass-ink: var(--ss-brass);
+  /* The gradient's *light* end is what the top rows of figures are read
+     against, so it is mixed back towards the deep end rather than being the
+     skin's full-strength enamel: with «سبز» the brass numerals sat at 2.9:1 on
+     it, where cobalt had been dark enough to pass by luck. */
+  background: linear-gradient(168deg,
+    color-mix(in srgb, var(--ss-ink-soft) 40%, var(--ss-ink)),
+    var(--ss-ink) 62%);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 26px;
   color: #eef5f1;

@@ -112,6 +112,17 @@ export default function RootLayout({
         {/* Who runs this site, what it does and where — stated once, in the form
             Google reads directly instead of inferring from the copy. */}
         <JsonLd data={ORGANISATION_LD} />
+        {/* The chosen skin has to be on <html> *before* the first paint, or a
+            citizen who picked لاجوردی watches the green one flash past on every
+            navigation. Same trick next-themes uses for روشن/تاریک, and the same
+            reason it has to be inline and synchronous. Green is the default and
+            carries no attribute. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var s=localStorage.getItem('shahrshahr-skin');`
+              + `if(s==='enamel'||s==='ink')document.documentElement.setAttribute('data-skin',s);}catch(e){}})();`,
+          }}
+        />
       </head>
       <body className="font-sans">
         {/* Outside every provider: the sign that a tap registered must not wait
