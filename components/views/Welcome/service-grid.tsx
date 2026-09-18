@@ -7,7 +7,7 @@ import {
   ArrowLeft, Lock, Check,
 } from 'lucide-react';
 
-import { alpha } from '@/components/ui/tokens';
+import { alpha, serviceColor } from '@/components/ui/tokens';
 import type { PublicCity, PublicService } from '@/lib/publicData';
 
 /**
@@ -220,10 +220,17 @@ function ServiceCard({
         // One hue per card, used for the wash, the rule, the icon and the
         // shadow — so the colour reads as the service's identity rather than
         // as decoration applied on top of a white box.
-        ['--svc' as any]: service.color,
-        ['--svc-wash' as any]: alpha(service.color, 8),
-        ['--svc-line' as any]: alpha(service.color, 22),
-        ['--svc-glow' as any]: alpha(service.color, 18),
+        /**
+         * The catalogue still carries the hexes the old palette was built on
+         * (`#12805c`, `#7c4dcc`…), which are the waste service's green and a
+         * violet that belong to nothing here any more. Each service's hue is a
+         * token now — resolved by key, with whatever the API sent as the
+         * fallback for a module this build has never heard of.
+         */
+        ['--svc' as any]: serviceColor(service.key) || service.color,
+        ['--svc-wash' as any]: alpha(serviceColor(service.key) || service.color, 8),
+        ['--svc-line' as any]: alpha(serviceColor(service.key) || service.color, 26),
+        ['--svc-glow' as any]: alpha(serviceColor(service.key) || service.color, 18),
         animationDelay: `${Math.min(index, 6) * 55}ms`,
       }}
     >
