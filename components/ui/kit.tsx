@@ -9,8 +9,8 @@
  */
 
 import { ReactNode, CSSProperties, useEffect } from 'react';
-import { Check, X } from 'lucide-react';
-import { C, S, alpha } from './tokens';
+import { Check, ChevronLeft, X } from 'lucide-react';
+import { C, S, F, alpha } from './tokens';
 
 /* ── page chrome ─────────────────────────────────────────────────────────── */
 
@@ -18,6 +18,7 @@ export function Screen({ children, style }: { children: ReactNode; style?: CSSPr
   return (
     <div
       dir="rtl"
+      className="sh-wall"
       style={{
         minHeight: '100vh',
         background: C.bg,
@@ -41,69 +42,200 @@ export function Screen({ children, style }: { children: ReactNode; style?: CSSPr
 }
 
 /**
- * The green slab at the top of a screen. It carries the title so the page has a
- * single obvious subject, and an optional read-out on the opposite side.
+ * The plaque — the one object this design is built around.
+ *
+ * It is the enamel name-plate off an Iranian street corner: a deep field, a
+ * white keyline set in from the edge, the name painted in a sign-writer's hand.
+ * Every screen opens with one, so a citizen always knows which city they are
+ * in and which part of it they are looking at, in the idiom the municipality
+ * already uses on every wall in town.
+ *
+ * `onClick` makes it the city switcher (home), which is the honest thing for it
+ * to be: changing the city on the plaque re-scopes the whole app underneath.
  */
-export function Hero({
-  title,
-  sub,
+export function Plaque({
+  city,
+  section,
+  note,
+  tone = C.enamel,
   icon,
   aside,
+  onClick,
+  large,
 }: {
-  title: string;
-  sub?: string;
+  /** The city, painted large. On a screen with no city, its own name. */
+  city: string;
+  /** Which part of the system this screen belongs to. */
+  section?: string;
+  /** One line under the section — what this screen is for. */
+  note?: string;
+  /** The service's hue, when the screen belongs to one. */
+  tone?: string;
   icon?: ReactNode;
   aside?: ReactNode;
+  onClick?: () => void;
+  large?: boolean;
 }) {
+  const Tag = onClick ? 'button' : 'section';
   return (
-    <section
-      className="pm-fade-up"
+    <Tag
+      type={onClick ? 'button' : undefined}
+      onClick={onClick}
+      className="sh-plaque"
+      aria-label={onClick ? `${city} — تغییر شهر` : undefined}
       style={{
         position: 'relative',
-        overflow: 'hidden',
-        background: `linear-gradient(135deg, ${C.heroStart}, ${C.heroEnd})`,
-        borderRadius: S.r4,
-        padding: `${S.s5}px ${S.s5}px`,
-        boxShadow: C.shadowHero,
+        display: 'block',
+        width: '100%',
+        textAlign: 'start',
+        font: 'inherit',
         color: C.onHero,
-        marginBottom: S.s5,
+        /**
+         * The field is enamel on every screen.
+         *
+         * It used to take the service's hue, which made ۱۳۷ an ochre plaque and
+         * اماکن a blue one — and in the dark theme, where those hues lighten so
+         * they can be read as text, white on ochre fell to 2.4:1. It was also
+         * wrong about the product: a street plaque in a town is always the same
+         * blue, and what changes is the name on it. The service marks itself
+         * with its rule, the way every panel below does.
+         */
+        background: `linear-gradient(180deg, ${C.enamel}, ${C.enamelDeep})`,
+        borderRadius: S.r3,
+        padding: large ? `${S.s5}px ${S.s5}px ${S.s4}px` : `${S.s4}px ${S.s4}px`,
+        marginBottom: S.s4,
+        boxShadow: C.shadowHero,
+        cursor: onClick ? 'pointer' : undefined,
+        border: 'none',
+        overflow: 'hidden',
       }}
     >
-      {/* Two soft discs, well outside the text column — depth without noise. */}
-      <span aria-hidden style={{ position: 'absolute', insetInlineStart: -60, top: -70, width: 190, height: 190, borderRadius: '50%', background: 'rgba(255,255,255,0.09)' }} />
-      <span aria-hidden style={{ position: 'absolute', insetInlineEnd: -40, bottom: -80, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
+      {/* The keyline. A real plaque has its border painted inside the edge, not
+          at it — that inset is most of why the object reads as enamel. */}
+      <span
+        aria-hidden
+        style={{
+          position: 'absolute', inset: 6, borderRadius: S.r2,
+          border: `1.5px solid ${C.keyline}`, opacity: 0.55, pointerEvents: 'none',
+        }}
+      />
 
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: S.s4, flexWrap: 'wrap' }}>
+      {/* Which service this screen belongs to: the same rule that heads that
+          service's panels, run down the plaque's start edge. */}
+      {tone !== C.enamel && (
+        <span
+          aria-hidden
+          style={{
+            position: 'absolute', insetInlineStart: 0, insetBlock: 0, width: 4,
+            background: tone,
+          }}
+        />
+      )}
+
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: S.s3 }}>
         {icon && (
           <span
+            aria-hidden
             style={{
-              width: 52, height: 52, borderRadius: 18, flexShrink: 0,
-              display: 'grid', placeItems: 'center',
-              background: 'rgba(255,255,255,0.16)',
-              border: '1px solid rgba(255,255,255,0.22)',
+              width: large ? 46 : 38, height: large ? 46 : 38, flexShrink: 0,
+              borderRadius: S.r1, display: 'grid', placeItems: 'center',
+              background: 'rgba(255,255,255,0.14)',
+              border: '1px solid rgba(255,255,255,0.24)',
             }}
           >
             {icon}
           </span>
         )}
-        <div style={{ flex: '1 1 220px', minWidth: 0 }}>
-          <h1 style={{ margin: 0, fontSize: S.xl, fontWeight: 800, letterSpacing: '-0.01em' }}>{title}</h1>
-          {sub && (
-            <p style={{ margin: `${S.s2}px 0 0`, fontSize: S.sm, lineHeight: 1.8, color: C.onHeroMuted, maxWidth: '46ch' }}>
-              {sub}
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {section && (
+            <p style={{
+              margin: 0, fontSize: S.xs, fontWeight: 600,
+              color: 'rgba(255,255,255,0.74)',
+            }}>
+              {section}
+            </p>
+          )}
+          <h1 style={{
+            margin: section ? '2px 0 0' : 0,
+            fontFamily: F.display,
+            fontWeight: 400,
+            fontSize: large ? S.xxl : S.xl,
+            lineHeight: 1.45,
+            letterSpacing: 0,
+          }}>
+            {city}
+          </h1>
+          {note && (
+            <p style={{
+              margin: `${S.s2}px 0 0`, fontSize: S.sm, lineHeight: 1.85,
+              color: C.onHeroMuted, maxWidth: '44ch',
+            }}>
+              {note}
             </p>
           )}
         </div>
+
         {aside}
+        {onClick && <ChevronLeft size={18} aria-hidden style={{ opacity: 0.7, flexShrink: 0 }} />}
       </div>
-    </section>
+    </Tag>
   );
 }
 
-export function SectionTitle({ title, action }: { title: string; action?: ReactNode }) {
+/** Kept so screens written against the old chrome keep compiling. */
+export function Hero({ title, sub, icon, aside }: { title: string; sub?: string; icon?: ReactNode; aside?: ReactNode }) {
+  return <Plaque city={title} note={sub} icon={icon} aside={aside} />;
+}
+
+/**
+ * A tracking number, as an object.
+ *
+ * Every piece of municipal business here has one, and it is what a citizen
+ * reads down the telephone — so it is set in brass on its own plate rather
+ * than tucked into grey small print. Digits only get the tracking; Persian
+ * letters must never be letter-spaced, it breaks the joins.
+ */
+export function Code({ children, tone = C.brass }: { children: ReactNode; tone?: string }) {
+  const text = String(children ?? '');
+  const digitsOnly = /^[۰-۹٠-٩0-9\s./-]+$/.test(text);
   return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: S.s3, margin: `${S.s6}px 0 ${S.s3}px` }}>
-      <h2 style={{ margin: 0, fontSize: S.md, fontWeight: 800, color: C.textStrong }}>{title}</h2>
+    <span
+      className="tnum"
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 5,
+        padding: '3px 8px', borderRadius: S.r1,
+        border: `1px solid ${alpha(tone, 34)}`,
+        background: alpha(tone, 9),
+        color: tone,
+        fontSize: S.xs, fontWeight: 700, lineHeight: 1.7,
+        letterSpacing: digitsOnly ? '0.04em' : undefined,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      <bdi>{children}</bdi>
+    </span>
+  );
+}
+
+export function SectionTitle({ title, action, tone }: { title: string; action?: ReactNode; tone?: string }) {
+  return (
+    <div
+      /* `.sh-action` gives whatever is passed as `action` a real target: these
+         are one- and two-word links and they were 18px tall. */
+      className="sh-head"
+      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: S.s3, margin: `${S.s6}px 0 ${S.s3}px` }}
+    >
+      <h2 style={{
+        margin: 0, fontSize: S.md, fontWeight: 800, color: C.textStrong,
+        display: 'flex', alignItems: 'center', gap: S.s2,
+      }}>
+        {/* A short rule in the section's own colour: the same mark that runs
+            across the top of that service's panels, so the heading and the
+            things under it are visibly the same family. */}
+        <span aria-hidden style={{ width: 3, height: '1.05em', borderRadius: 2, background: tone || C.enamel, flexShrink: 0 }} />
+        {title}
+      </h2>
       {action}
     </div>
   );
@@ -117,19 +249,23 @@ export function Card({
   onClick,
   style,
   interactive,
+  className,
 }: {
   children: ReactNode;
-  /** Draws a 3px hairline across the top in this colour. */
+  /** Draws a 3px rule across the top in this colour — see DESIGN.md. */
   accent?: string;
   onClick?: () => void;
   style?: CSSProperties;
   interactive?: boolean;
+  /** For the stagger (`sh-rise`), which a list sets per item. */
+  className?: string;
 }) {
   const Tag = onClick ? 'button' : 'div';
   return (
     <Tag
       onClick={onClick}
       type={onClick ? 'button' : undefined}
+      className={['sh-panel', className].filter(Boolean).join(' ')}
       style={{
         display: 'block',
         width: '100%',
@@ -137,16 +273,20 @@ export function Card({
         background: C.surface,
         border: `1px solid ${C.border}`,
         borderRadius: S.r3,
+        // A panel is mounted flat on the wall; only things that genuinely
+        // float — the tab bar, a modal — are allowed to cast anything.
         boxShadow: C.shadowCard,
         overflow: 'hidden',
         cursor: onClick || interactive ? 'pointer' : undefined,
-        transition: 'box-shadow .22s ease, transform .22s ease, border-color .22s ease',
+        transition: 'border-color .16s ease, background .16s ease',
         font: 'inherit',
         color: 'inherit',
         ...style,
       }}
     >
-      {accent && <span style={{ display: 'block', height: 3, background: `linear-gradient(90deg, ${accent}, ${alpha(accent, 20)})` }} />}
+      {/* The rule says which service this panel belongs to. Solid, not faded:
+          it is a label, and half of a label is not a label. */}
+      {accent && <span aria-hidden style={{ display: 'block', height: 3, background: accent }} />}
       {children}
     </Tag>
   );
@@ -156,10 +296,10 @@ export function IconBadge({ color, size = 44, children }: { color: string; size?
   return (
     <span
       style={{
-        width: size, height: size, borderRadius: size / 3, flexShrink: 0,
+        width: size, height: size, borderRadius: S.r1, flexShrink: 0,
         display: 'grid', placeItems: 'center',
-        background: alpha(color, 12),
-        border: `1px solid ${alpha(color, 22)}`,
+        background: alpha(color, 10),
+        border: `1px solid ${alpha(color, 26)}`,
         color,
       }}
     >
@@ -187,12 +327,14 @@ export function Chip({
       style={{
         display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap',
         fontSize: S.xs, fontWeight: 700, lineHeight: 1,
-        padding: '8px 13px', borderRadius: S.rPill,
-        background: active ? color : alpha(color, 10),
-        color: active ? C.onAccent : color,
-        border: `1px solid ${active ? color : alpha(color, 24)}`,
+        // Tall enough to hit with a thumb, and squared off like everything else
+        // in this language rather than rounded into a lozenge.
+        minHeight: 34, padding: '9px 12px', borderRadius: S.r1,
+        background: active ? color : 'transparent',
+        color: active ? C.onAccent : C.muted,
+        border: `1px solid ${active ? color : C.border}`,
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'background .18s ease, color .18s ease',
+        transition: 'background .16s ease, color .16s ease, border-color .16s ease',
         fontFamily: 'inherit',
       }}
     >
@@ -226,23 +368,24 @@ export function Btn({
     variant === 'primary'
       ? { background: color, color: C.onAccent, border: `1px solid ${color}` }
       : variant === 'soft'
-        ? { background: alpha(color, 12), color, border: `1px solid ${alpha(color, 24)}` }
-        : { background: 'transparent', color: C.muted, border: `1px solid ${C.border}` };
+        ? { background: alpha(color, 10), color, border: `1px solid ${alpha(color, 30)}` }
+        : { background: 'transparent', color: C.text, border: `1px solid ${C.borderStrong}` };
 
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
+      className="sh-press"
       style={{
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: S.s2,
         width: full ? '100%' : undefined,
+        minHeight: 48,
         padding: '13px 20px', borderRadius: S.r2,
-        fontSize: S.base, fontWeight: 800, fontFamily: 'inherit',
+        fontSize: S.base, fontWeight: 700, fontFamily: 'inherit',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-        transition: 'filter .18s ease, opacity .18s ease',
-        boxShadow: variant === 'primary' && !disabled ? `0 8px 20px ${alpha(color, 28)}` : undefined,
+        opacity: disabled ? 0.45 : 1,
+        transition: 'background .16s ease, opacity .16s ease, transform .12s ease',
         ...palette,
         ...style,
       }}
@@ -295,7 +438,7 @@ export function ProgressRing({ value, size = 74, label, color = C.green }: { val
           <div className="tnum" style={{ fontSize: S.base, fontWeight: 800, color: C.textStrong, lineHeight: 1 }}>
             {Math.round(pct)}٪
           </div>
-          {label && <div style={{ fontSize: 9, color: C.muted, marginTop: 3 }}>{label}</div>}
+          {label && <div style={{ fontSize: 11, color: C.muted, marginTop: 3 }}>{label}</div>}
         </div>
       </div>
     </div>
@@ -514,11 +657,12 @@ export function Segmented<T extends string>({
   return (
     <div
       style={{
-        display: 'grid', gridTemplateColumns: `repeat(${options.length}, 1fr)`, gap: 4,
-        background: C.bgSubtle, border: `1px solid ${C.border}`, borderRadius: S.r2, padding: 4,
+        display: 'grid', gridTemplateColumns: `repeat(${options.length}, 1fr)`, gap: 0,
+        background: C.surface, border: `1px solid ${C.border}`, borderRadius: S.r2,
+        padding: 0, overflow: 'hidden',
       }}
     >
-      {options.map((o) => {
+      {options.map((o, i) => {
         const on = o.value === value;
         return (
           <button
@@ -526,12 +670,15 @@ export function Segmented<T extends string>({
             type="button"
             onClick={() => onChange(o.value)}
             style={{
-              padding: '10px 8px', borderRadius: S.r1, border: 'none', cursor: 'pointer',
-              fontFamily: 'inherit', fontSize: S.sm, fontWeight: 800,
-              background: on ? C.surface : 'transparent',
-              color: on ? C.green : C.muted,
-              boxShadow: on ? C.shadowCard : 'none',
-              transition: 'background .18s ease, color .18s ease',
+              minHeight: 44, padding: '11px 8px', cursor: 'pointer',
+              border: 'none',
+              borderInlineStart: i ? `1px solid ${C.border}` : 'none',
+              // The chosen one is painted enamel: a selected state that is a
+              // colour change, not a floating white pill on a grey tray.
+              fontFamily: 'inherit', fontSize: S.sm, fontWeight: 700,
+              background: on ? C.enamel : 'transparent',
+              color: on ? C.onHero : C.muted,
+              transition: 'background .16s ease, color .16s ease',
             }}
           >
             {o.label}

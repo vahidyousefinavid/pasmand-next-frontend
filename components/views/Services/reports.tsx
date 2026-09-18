@@ -12,7 +12,7 @@ import { axiosService } from '@/lib/axiosService';
 import { useToast } from '@/hooks/use-toast';
 import { useCity } from '@/context/data-context';
 import { C, S, alpha, fa } from '@/components/ui/tokens';
-import { Btn, Card, EmptyState, Field, Hero, IconBadge, Modal, Screen, Shimmer } from '@/components/ui/kit';
+import { Btn, Card, EmptyState, Field, Plaque, IconBadge, Modal, Screen, Shimmer , Code } from '@/components/ui/kit';
 import { REPORT_CATEGORIES, REPORT_STATUS } from '@/lib/cityServices';
 import { faDigits, jalaliDateTime, relative } from '@/lib/when';
 
@@ -101,10 +101,12 @@ export default function ReportsPage() {
   return (
     <>
       <Screen>
-        <Hero
+        <Plaque
+          section="خدمات شهر"
+          tone={C.reports}
           icon={<Megaphone className="h-6 w-6" />}
-          title="سامانهٔ ۱۳۷"
-          sub="هر مشکلی در شهر دیدید این‌جا ثبت کنید — با عکس و محل دقیق. تا رفع شدن، پیگیری‌اش همین‌جاست."
+          city="سامانهٔ ۱۳۷"
+          note="هر مشکلی در شهر دیدید این‌جا ثبت کنید — با عکس و محل دقیق. تا رفع شدن، پیگیری‌اش همین‌جاست."
           aside={
             <div style={{ textAlign: 'start' }}>
               <p style={{ margin: 0, fontSize: S.xs, color: C.onHeroMuted, fontWeight: 600 }}>در حال پیگیری</p>
@@ -162,14 +164,15 @@ export default function ReportsPage() {
                             <p style={{ margin: 0, fontSize: S.sm, fontWeight: 800, color: C.textStrong, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {report.title}
                             </p>
-                            <p className="tnum" style={{ margin: '4px 0 0', fontSize: S.xs, color: C.muted }}>
-                              <span dir="ltr">{faDigits(report.code)}</span> · {relative(report.createdAt)}
+                            <p style={{ margin: '6px 0 0', display: 'flex', gap: 7, alignItems: 'center', flexWrap: 'wrap' }}>
+                              <Code>{faDigits(report.code)}</Code>
+                              <span style={{ fontSize: S.xs, color: C.muted }}>{relative(report.createdAt)}</span>
                             </p>
                           </div>
 
                           <span
                             style={{
-                              flexShrink: 0, fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: S.rPill,
+                              flexShrink: 0, fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: S.r1,
                               background: alpha(colour, 12), color: colour, border: `1px solid ${alpha(colour, 24)}`,
                             }}
                           >
@@ -291,7 +294,7 @@ function ReportForm({
                   type="button"
                   onClick={() => setCategory(item.key)}
                   style={{
-                    flexShrink: 0, padding: '9px 15px', borderRadius: S.rPill, cursor: 'pointer',
+                    flexShrink: 0, padding: '9px 15px', borderRadius: S.r1, cursor: 'pointer',
                     fontFamily: 'inherit', fontSize: S.xs, fontWeight: 800, whiteSpace: 'nowrap',
                     background: on ? C.green : C.surface2,
                     color: on ? C.onAccent : C.muted,
@@ -424,7 +427,7 @@ function ReportSheet({
         <div>
           <span
             style={{
-              display: 'inline-block', fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: S.rPill,
+              display: 'inline-block', fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: S.r1,
               background: alpha(colour, 12), color: colour, border: `1px solid ${alpha(colour, 24)}`,
             }}
           >
@@ -470,7 +473,7 @@ function ReportSheet({
               {report.responses.map((response) => (
                 <div key={response._id} style={{ padding: S.s3, borderRadius: S.r2, background: C.surface2, border: `1px solid ${C.border}` }}>
                   <p style={{ margin: 0, fontSize: S.sm, color: C.text, lineHeight: 2 }}>{response.text}</p>
-                  <p className="tnum" style={{ margin: '6px 0 0', fontSize: 10, color: C.subtle }}>
+                  <p className="tnum" style={{ margin: '6px 0 0', fontSize: 11, color: C.subtle }}>
                     {response.byName} · {jalaliDateTime(response.at)}
                   </p>
                 </div>

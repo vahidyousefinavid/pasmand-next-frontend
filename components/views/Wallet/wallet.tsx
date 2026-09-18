@@ -8,7 +8,7 @@ import {
 
 import { useToast } from '@/hooks/use-toast';
 import { C, S, alpha, fa } from '@/components/ui/tokens';
-import { Btn, Card, EmptyState, Hero, IconBadge, Screen, SectionTitle, Segmented, Shimmer, Stat } from '@/components/ui/kit';
+import { Btn, Card, EmptyState, Plaque, IconBadge, Screen, SectionTitle, Segmented, Shimmer, Stat } from '@/components/ui/kit';
 
 import type { Contribution, WalletData, WalletTransaction } from './api';
 import { errText, walletApi } from './api';
@@ -166,10 +166,12 @@ export default function WalletPage() {
   return (
     <>
       <Screen>
-        <Hero
+        <Plaque
+          section="مالی"
+          tone={C.brass}
           icon={<WalletIcon className="h-6 w-6" />}
-          title="کیف پول"
-          sub="هر جمع‌آوری پس از توزین، به‌صورت اعتبار همین‌جا می‌نشیند."
+          city="کیف پول"
+          note="هر جمع‌آوری پس از توزین، به‌صورت اعتبار همین‌جا می‌نشیند."
           aside={
             <div style={{ textAlign: 'start' }}>
               <p style={{ margin: 0, fontSize: S.xs, color: C.onHeroMuted, fontWeight: 600 }}>موجودی قابل برداشت</p>
@@ -210,7 +212,7 @@ export default function WalletPage() {
               }}
             >
               <IconBadge color={action.color} size={40}>{action.icon}</IconBadge>
-              <span style={{ fontSize: 11, fontWeight: 800, color: C.textStrong, textAlign: 'center' }}>{action.label}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: C.textStrong, textAlign: 'center' }}>{action.label}</span>
             </button>
           ))}
         </div>
@@ -225,7 +227,7 @@ export default function WalletPage() {
                 onClick={() => setSheet('account')}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 5, cursor: 'pointer', fontFamily: 'inherit',
-                  fontSize: S.xs, fontWeight: 800, padding: '7px 13px', borderRadius: S.rPill,
+                  fontSize: S.xs, fontWeight: 800, padding: '7px 13px', borderRadius: S.r1,
                   background: alpha(C.green, 10), color: C.green, border: `1px solid ${alpha(C.green, 22)}`,
                 }}
               >

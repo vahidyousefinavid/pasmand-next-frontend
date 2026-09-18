@@ -50,7 +50,7 @@ export function AudienceTag({ catalogue, audience }: { catalogue: VenueCatalogue
   return (
     <span
       style={{
-        fontSize: 10.5, fontWeight: 800, padding: '3px 9px', borderRadius: S.rPill, whiteSpace: 'nowrap',
+        fontSize: 11.5, fontWeight: 800, padding: '3px 9px', borderRadius: S.rPill, whiteSpace: 'nowrap',
         background: alpha(found.color, 14), color: found.color, border: `1px solid ${alpha(found.color, 30)}`,
       }}
     >
@@ -122,7 +122,7 @@ export function DayLink({
       aria-current={on ? 'date' : undefined}
       style={{ flex: '0 0 auto' }}
     >
-      <span style={{ display: 'block', fontSize: 10.5, fontWeight: 700, opacity: 0.82 }}>
+      <span style={{ display: 'block', fontSize: 11.5, fontWeight: 700, opacity: 0.82 }}>
         {day.isToday ? 'امروز' : day.ahead === 1 ? 'فردا' : day.weekdayName}
       </span>
       <span className="ss-fig" style={{ display: 'block', marginTop: 3, fontSize: 20, lineHeight: 1.15 }}>
@@ -131,7 +131,7 @@ export function DayLink({
       <span style={{ display: 'block', marginTop: 2, fontSize: 10, opacity: 0.75 }}>
         {day.monthName}
       </span>
-      <span style={{ display: 'block', marginTop: 5, fontSize: 9.5, fontWeight: 700, opacity: on ? 0.9 : 0.7 }}>
+      <span style={{ display: 'block', marginTop: 5, fontSize: 11, fontWeight: 700, opacity: on ? 0.9 : 0.7 }}>
         {day.closed ? 'تعطیل' : `${fa(day.sessionCount)} سانس`}
       </span>
     </Link>
@@ -225,7 +225,7 @@ export function MonthGrid({
 
       <div style={{ display: 'grid', gap: 4, gridTemplateColumns: 'repeat(7, 1fr)', marginTop: S.s3 }}>
         {WEEKDAYS.map((name) => (
-          <span key={name} style={{ fontSize: 10.5, fontWeight: 800, color: skin.weekday, textAlign: 'center', padding: '2px 0' }}>
+          <span key={name} style={{ fontSize: 11.5, fontWeight: 800, color: skin.weekday, textAlign: 'center', padding: '2px 0' }}>
             {name}
           </span>
         ))}

@@ -7,7 +7,7 @@ import { FileClock, MapPin, MessagesSquare, PhoneCall, Truck } from 'lucide-reac
 
 import { axiosService } from '@/lib/axiosService';
 import { C, S, STATUS_THEME, alpha, fa, type RequestStatus } from '@/components/ui/tokens';
-import { Card, EmptyState, Hero, IconBadge, Screen, Segmented, Shimmer } from '@/components/ui/kit';
+import { Card, EmptyState, Plaque, IconBadge, Screen, Segmented, Shimmer } from '@/components/ui/kit';
 import RequestChat from '@/components/views/Chat/request-chat';
 import { relative } from '@/lib/when';
 
@@ -84,10 +84,11 @@ export default function MessagesPage() {
   return (
     <>
       <Screen>
-        <Hero
+        <Plaque
+          section="گفتگو"
           icon={<MessagesSquare className="h-6 w-6" />}
-          title="پیام‌ها"
-          sub="گفتگوی شما با جمع‌آورانی که درخواست‌هایتان را پذیرفته‌اند."
+          city="پیام‌ها"
+          note="گفتگوی شما با جمع‌آورانی که درخواست‌هایتان را پذیرفته‌اند."
           aside={
             <div style={{ textAlign: 'start' }}>
               <p style={{ margin: 0, fontSize: S.xs, color: C.onHeroMuted, fontWeight: 600 }}>پیام خوانده‌نشده</p>
@@ -156,7 +157,7 @@ export default function MessagesPage() {
                               {thread.contact?.name || 'جمع‌آور'}
                             </span>
                             {thread.lastMessage && (
-                              <span style={{ fontSize: 10, color: C.subtle, whiteSpace: 'nowrap' }}>
+                              <span style={{ fontSize: 11, color: C.subtle, whiteSpace: 'nowrap' }}>
                                 {relative(thread.lastMessage.at)}
                               </span>
                             )}
@@ -181,9 +182,9 @@ export default function MessagesPage() {
                             className="tnum"
                             aria-label={`${thread.unread} پیام خوانده‌نشده`}
                             style={{
-                              minWidth: 22, height: 22, paddingInline: 6, borderRadius: 999, flexShrink: 0,
+                              minWidth: 22, height: 22, paddingInline: 6, borderRadius: S.r1, flexShrink: 0,
                               display: 'grid', placeItems: 'center',
-                              background: C.statusDanger, color: C.onAccent, fontSize: 11, fontWeight: 800,
+                              background: C.statusDanger, color: C.onAccent, fontSize: 11, fontWeight: 700,
                             }}
                           >
                             {fa(thread.unread)}
@@ -201,7 +202,7 @@ export default function MessagesPage() {
                       >
                         <span
                           style={{
-                            fontSize: 10, fontWeight: 800, padding: '3px 9px', borderRadius: S.rPill,
+                            fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: S.r1,
                             background: alpha(status.color, 12), color: status.color,
                             border: `1px solid ${alpha(status.color, 24)}`, whiteSpace: 'nowrap',
                           }}

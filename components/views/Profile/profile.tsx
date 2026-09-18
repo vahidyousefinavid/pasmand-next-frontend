@@ -10,7 +10,7 @@ import { API } from '@/services/const';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/auth-context';
 import { C, S, alpha, fa } from '@/components/ui/tokens';
-import { Screen, Hero, Card, IconBadge, Btn, Field, Shimmer } from '@/components/ui/kit';
+import { Screen, Plaque, Card, IconBadge, Btn, Field, Shimmer } from '@/components/ui/kit';
 
 interface UserProfile {
   first_name: string;
@@ -77,9 +77,10 @@ export default function ProfilePage() {
     <Screen>
       {/* No `icon` here: the avatar in `aside` is already the picture of the
           account, and two person glyphs in one header read as a bug. */}
-      <Hero
-        title={fullName || 'حساب کاربری'}
-        sub={profile.phone ? `شمارهٔ همراه: ${profile.phone}` : 'اطلاعات شما برای هماهنگی جمع‌آوری استفاده می‌شود.'}
+      <Plaque
+        section="حساب"
+        city={fullName || 'حساب کاربری'}
+        note={profile.phone ? `شمارهٔ همراه: ${profile.phone}` : 'اطلاعات شما برای هماهنگی جمع‌آوری استفاده می‌شود.'}
         aside={
           <span
             style={{
@@ -111,7 +112,7 @@ export default function ProfilePage() {
                 onClick={() => { setEditedProfile(profile); setIsEditing(true); }}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontFamily: 'inherit',
-                  padding: '7px 14px', borderRadius: S.rPill, fontSize: S.xs, fontWeight: 800,
+                  padding: '7px 14px', borderRadius: S.r1, fontSize: S.xs, fontWeight: 800,
                   background: alpha(C.green, 10), color: C.green, border: `1px solid ${alpha(C.green, 22)}`,
                 }}
               >

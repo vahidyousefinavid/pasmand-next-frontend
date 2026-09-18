@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 import { C, S, alpha, fa } from '@/components/ui/tokens';
-import { Card, EmptyState, Hero, IconBadge, Screen } from '@/components/ui/kit';
+import { Card, EmptyState, Plaque, IconBadge, Screen } from '@/components/ui/kit';
 import type { PublicCity, PublicMaterial, PublicService } from '@/lib/publicData';
 
 /**
@@ -137,10 +137,12 @@ export default function Prices({
 
   return (
     <Screen>
-      <Hero
+      <Plaque
+        section="پسماند"
+        tone={C.waste}
         icon={<Banknote className="h-6 w-6" />}
-        title="تعرفهٔ قیمت‌ها"
-        sub={
+        city="تعرفهٔ قیمت‌ها"
+        note={
           city
             ? `قیمت روز خرید اقلام بازیافتی در ${city.name}. مبلغ نهایی پس از توزین در محل محاسبه می‌شود.`
             : 'قیمت روز خرید اقلام بازیافتی. مبلغ نهایی پس از توزین در محل محاسبه می‌شود.'
@@ -165,7 +167,7 @@ export default function Prices({
                   aria-current={on ? 'page' : undefined}
                   style={{
                     flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 7,
-                    padding: '9px 15px', borderRadius: S.rPill, textDecoration: 'none',
+                    padding: '9px 15px', borderRadius: S.r1, textDecoration: 'none',
                     fontSize: S.xs, fontWeight: 800, whiteSpace: 'nowrap',
                     background: on ? C.green : C.surface,
                     color: on ? C.onAccent : open ? C.text : C.subtle,
@@ -176,7 +178,7 @@ export default function Prices({
                   {!open && (
                     <span
                       style={{
-                        fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999,
+                        fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: S.r1,
                         background: on ? 'rgba(255,255,255,0.2)' : alpha(C.amber, 14),
                         color: on ? C.onAccent : C.amber,
                       }}
@@ -203,7 +205,7 @@ export default function Prices({
                   type="button"
                   onClick={() => setCategory(name)}
                   style={{
-                    flexShrink: 0, padding: '9px 16px', borderRadius: S.rPill, cursor: 'pointer',
+                    flexShrink: 0, padding: '9px 16px', borderRadius: S.r1, cursor: 'pointer',
                     fontFamily: 'inherit', fontSize: S.xs, fontWeight: 800, whiteSpace: 'nowrap',
                     background: on ? color : C.surface,
                     color: on ? C.onAccent : C.muted,
@@ -282,13 +284,13 @@ export default function Prices({
                     <div style={{ textAlign: 'start', flexShrink: 0 }}>
                       <p className="tnum" style={{ margin: 0, fontSize: S.base, fontWeight: 800, color: C.textStrong, whiteSpace: 'nowrap' }}>
                         {fa(item.pricePerUnit)}
-                        <span style={{ fontSize: 10, fontWeight: 600, color: C.muted, marginInlineStart: 4 }}>تومان</span>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: C.muted, marginInlineStart: 4 }}>تومان</span>
                       </p>
                       <span
                         className="tnum"
                         style={{
                           display: 'inline-flex', alignItems: 'center', gap: 3, marginTop: 5,
-                          fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: S.rPill,
+                          fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: S.r1,
                           background: alpha(changeColor, 12), color: changeColor,
                           border: `1px solid ${alpha(changeColor, 22)}`,
                         }}
@@ -307,7 +309,7 @@ export default function Prices({
 
       {city && <CityServiceStrip city={city} catalogue={catalogue} />}
 
-      <p style={{ margin: `${S.s5}px 0 0`, fontSize: S.xs, color: C.subtle, textAlign: 'center', lineHeight: 1.9 }}>
+      <p style={{ margin: `${S.s5}px 0 0`, fontSize: S.xs, color: C.muted, textAlign: 'center', lineHeight: 1.9 }}>
         قیمت‌ها میانگین و تقریبی‌اند و بسته به کیفیت و مقدار اقلام تغییر می‌کنند.
       </p>
     </Screen>

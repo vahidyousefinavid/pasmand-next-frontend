@@ -18,6 +18,28 @@ export const C = {
   blue:      'var(--pm-blue)',
   violet:    'var(--pm-violet)',
 
+  /* «تابلوی شهر» — see DESIGN.md. The enamel of a street plaque, the فیروزه of
+     the tile behind it, and the brass of a municipal door plate. */
+  enamel:     'var(--sh-enamel)',
+  /** Enamel where it is *text* rather than a surface — flips with the theme. */
+  enamelInk:  'var(--sh-enamel-ink)',
+  enamelDeep: 'var(--sh-enamel-deep)',
+  enamelLit:  'var(--sh-enamel-lit)',
+  tile:       'var(--sh-tile)',
+  tileDeep:   'var(--sh-tile-deep)',
+  brass:      'var(--sh-brass)',
+  brassLit:   'var(--sh-brass-lit)',
+  wall:       'var(--sh-wall)',
+  wallDeep:   'var(--sh-wall-deep)',
+  keyline:    'var(--sh-keyline)',
+
+  /* The five modules, for the screens that belong to one. */
+  waste:      'var(--sh-waste)',
+  venues:     'var(--sh-venues)',
+  reports:    'var(--sh-reports)',
+  cartable:   'var(--sh-cartable)',
+  memorials:  'var(--sh-memorials)',
+
   bg:        'var(--pm-bg)',
   bgSubtle:  'var(--pm-bg-subtle)',
   surface:   'var(--pm-surface)',
@@ -49,6 +71,30 @@ export const C = {
   statusNeutral: 'var(--pm-status-neutral)',
 } as const;
 
+/**
+ * One hue per service module, and nowhere else.
+ *
+ * A service's colour marks its own things — its plaque, the rule at the top of
+ * its panels, its icon — so that a citizen learns «نارنجی یعنی ۱۳۷» without
+ * being told. It is never used to tint a surface for decoration.
+ */
+export const SERVICE_COLOR: Record<string, string> = {
+  waste:     'var(--sh-waste)',
+  venues:    'var(--sh-venues)',
+  reports:   'var(--sh-reports)',
+  cartable:  'var(--sh-cartable)',
+  memorials: 'var(--sh-memorials)',
+};
+
+export const serviceColor = (key?: string): string =>
+  (key && SERVICE_COLOR[key]) || 'var(--sh-enamel)';
+
+/** The two faces. Lalezar paints plaques; Estedad does everything else. */
+export const F = {
+  display: "'Lalezar', 'Estedad', system-ui, sans-serif",
+  body:    "'Estedad', 'IRANSans', system-ui, sans-serif",
+} as const;
+
 /** One hue per waste type — see --pm-waste-* in globals.css. */
 export const WASTE_COLOR = {
   household:    'var(--pm-waste-household)',
@@ -64,9 +110,12 @@ export const WASTE_COLOR = {
  * to a desktop without a breakpoint for every size.
  */
 export const S = {
-  xs:   'clamp(0.68rem, 0.64rem + 0.18vw, 0.76rem)',
-  sm:   'clamp(0.78rem, 0.74rem + 0.2vw, 0.88rem)',
-  base: 'clamp(0.88rem, 0.84rem + 0.22vw, 0.98rem)',
+  /* Persian loses its dots below ~12px, and these are labels a grandmother
+     reads on a bus. The floors are raised so that even a 360px phone renders
+     nothing under 12px. */
+  xs:   'clamp(0.76rem, 0.72rem + 0.18vw, 0.82rem)',
+  sm:   'clamp(0.86rem, 0.82rem + 0.2vw, 0.94rem)',
+  base: 'clamp(0.95rem, 0.9rem + 0.22vw, 1.04rem)',
   md:   'clamp(1rem, 0.94rem + 0.3vw, 1.14rem)',
   lg:   'clamp(1.14rem, 1.04rem + 0.45vw, 1.36rem)',
   xl:   'clamp(1.34rem, 1.18rem + 0.7vw, 1.7rem)',
@@ -80,10 +129,17 @@ export const S = {
   s6: 30,
   s7: 42,
 
-  r1: 12,
-  r2: 16,
-  r3: 20,
-  r4: 26,
+  /**
+   * Radii, tightened.
+   *
+   * The old set (12/16/20/26) rounded everything into soft lozenges, which is
+   * the house style of every consumer app and says nothing about a
+   * municipality. A plaque is a rectangle with its corners just taken off.
+   */
+  r1: 8,
+  r2: 10,
+  r3: 14,
+  r4: 18,
   rPill: 999,
 } as const;
 

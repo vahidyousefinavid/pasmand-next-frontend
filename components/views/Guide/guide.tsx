@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 import { C, S, alpha, fa } from '@/components/ui/tokens';
-import { Screen, Hero, Card, IconBadge } from '@/components/ui/kit';
+import { Screen, Plaque, Card, IconBadge } from '@/components/ui/kit';
 import { GUIDE_FAQS as FAQS } from '@/lib/faq';
 
 /**
@@ -78,10 +78,11 @@ export default function GuideView() {
 
   return (
     <Screen>
-      <Hero
+      <Plaque
+        section="راهنما"
         icon={<BookOpen className="h-6 w-6" />}
-        title="راهنمای استفاده"
-        sub="از ثبت درخواست تا واریز مبلغ، پنج قدم — همان مسیری که در صفحهٔ پیگیری دنبال می‌کنید."
+        city="راهنمای استفاده"
+        note="از ثبت درخواست تا واریز مبلغ، پنج قدم — همان مسیری که در صفحهٔ پیگیری دنبال می‌کنید."
       />
 
       <div style={{ position: 'relative', paddingInlineStart: 34 }}>
@@ -113,7 +114,7 @@ export default function GuideView() {
                     background: isOpen ? step.color : C.bg,
                     color: isOpen ? C.onAccent : step.color,
                     border: `2px solid ${step.color}`,
-                    fontSize: 11, fontWeight: 800,
+                    fontSize: 11, fontWeight: 700,
                     boxShadow: isOpen ? `0 0 0 5px ${alpha(step.color, 14)}` : undefined,
                     transition: 'background .22s ease, color .22s ease',
                   }}

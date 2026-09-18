@@ -7,7 +7,7 @@ import { CalendarCheck, Loader2, MapPin, Ticket, Users, Wallet } from 'lucide-re
 import { axiosService } from '@/lib/axiosService';
 import { useToast } from '@/hooks/use-toast';
 import { C, S, alpha, fa } from '@/components/ui/tokens';
-import { Btn, Card, EmptyState, Hero, IconBadge, Modal, Screen, Segmented, Shimmer } from '@/components/ui/kit';
+import { Btn, Card, EmptyState, Plaque, IconBadge, Modal, Screen, Segmented, Shimmer , Code } from '@/components/ui/kit';
 import { BOOKING_STATUS } from '@/lib/cityServices';
 import { faDigits } from '@/lib/when';
 import { DateStrip, type CalendarDay } from './venue-calendar';
@@ -81,12 +81,19 @@ function AudienceTag({ audience, size = 'sm' }: { audience: Audience; size?: 'sm
   return (
     <span
       style={{
-        fontSize: size === 'sm' ? 10 : 9, fontWeight: 800, padding: size === 'sm' ? '3px 9px' : '2px 7px',
-        borderRadius: S.rPill, whiteSpace: 'nowrap',
-        background: alpha(audience.color, 12), color: audience.color,
-        border: `1px solid ${alpha(audience.color, 26)}`,
+        // «بانوان» at 9px is unreadable, and this chip is the one thing on the
+        // card that says whether the session is for you.
+        fontSize: size === 'sm' ? 12 : 11, fontWeight: 700, padding: size === 'sm' ? '4px 10px' : '3px 8px',
+        borderRadius: S.r1, whiteSpace: 'nowrap',
+        // The colour comes from the panel, where nobody is checking contrast
+        // ratios, so the label is set in ink and the hue is carried by the
+        // border and the dot instead.
+        background: alpha(audience.color, 8), color: C.text,
+        border: `1px solid ${alpha(audience.color, 45)}`,
+        display: 'inline-flex', alignItems: 'center', gap: 5,
       }}
     >
+      <span aria-hidden style={{ width: 6, height: 6, borderRadius: 999, background: audience.color, flexShrink: 0 }} />
       {audience.short || audience.title}
     </span>
   );
@@ -197,10 +204,12 @@ export default function VenuesPage() {
   return (
     <>
       <Screen>
-        <Hero
+        <Plaque
+          section="خدمات شهر"
+          tone={C.venues}
           icon={<CalendarCheck className="h-6 w-6" />}
-          title="رزرو اماکن"
-          sub="استخر، سالن ورزشی، فرهنگسرا و غرفهٔ بازارچه — سانس خالی را ببینید و همان‌جا رزرو کنید."
+          city="رزرو اماکن"
+          note="استخر، سالن ورزشی، فرهنگسرا و غرفهٔ بازارچه — سانس خالی را ببینید و همان‌جا رزرو کنید."
           aside={
             <div style={{ textAlign: 'start' }}>
               <p style={{ margin: 0, fontSize: S.xs, color: C.onHeroMuted, fontWeight: 600 }}>رزرو پیشِ رو</p>
@@ -236,7 +245,7 @@ export default function VenuesPage() {
                       type="button"
                       onClick={() => setGroup(g.key)}
                       style={{
-                        flexShrink: 0, padding: '7px 14px', borderRadius: S.rPill, cursor: 'pointer',
+                        flexShrink: 0, padding: '7px 14px', borderRadius: S.r1, cursor: 'pointer',
                         fontFamily: 'inherit', fontSize: S.xs, fontWeight: 800,
                         background: on ? g.color : C.surface2,
                         color: on ? C.onAccent : C.text,
@@ -288,11 +297,11 @@ export default function VenuesPage() {
                                 <AudienceTag key={key} audience={audienceOf(key)} size="xs" />
                               ))}
                               {venue.nextOpen ? (
-                                <span className="tnum" style={{ fontSize: 10, color: C.green, fontWeight: 700 }}>
+                                <span className="tnum" style={{ fontSize: 11, color: C.green, fontWeight: 700 }}>
                                   نزدیک‌ترین روز باز: {venue.nextOpen.weekdayName} {venue.nextOpen.date}
                                 </span>
                               ) : (
-                                <span style={{ fontSize: 10, color: C.subtle, fontWeight: 700 }}>فعلاً روز بازی ندارد</span>
+                                <span style={{ fontSize: 11, color: C.subtle, fontWeight: 700 }}>فعلاً روز بازی ندارد</span>
                               )}
                             </div>
                           </div>
@@ -300,7 +309,7 @@ export default function VenuesPage() {
                             <span style={{ display: 'block', fontSize: S.sm, fontWeight: 800, color: C.textStrong }}>
                               {venue.price ? fa(venue.price) : 'رایگان'}
                             </span>
-                            {!!venue.price && <span style={{ display: 'block', fontSize: 10, color: C.muted }}>تومان / سانس</span>}
+                            {!!venue.price && <span style={{ display: 'block', fontSize: 11, color: C.muted }}>تومان / سانس</span>}
                           </span>
                         </div>
                       </Card>
@@ -411,18 +420,16 @@ function BookingRow({
           <div style={{ display: 'flex', gap: 5, marginTop: 6, flexWrap: 'wrap', alignItems: 'center' }}>
             <AudienceTag audience={audience} size="xs" />
             {booking.sessionLabel && (
-              <span style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>{booking.sessionLabel}</span>
+              <span style={{ fontSize: 11, color: C.muted, fontWeight: 700 }}>{booking.sessionLabel}</span>
             )}
-            <span className="tnum" style={{ fontSize: 10, color: C.subtle, fontWeight: 700 }}>
-              کد <span dir="ltr">{booking.codeText || faDigits(booking.code)}</span>
-            </span>
+            <Code tone={C.venues}>{booking.codeText || faDigits(booking.code)}</Code>
           </div>
         </div>
 
         <div style={{ flexShrink: 0, display: 'grid', gap: 5, justifyItems: 'end' }}>
           <span
             style={{
-              fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: S.rPill,
+              fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: S.r1,
               background: alpha(colour, 12), color: colour, border: `1px solid ${alpha(colour, 24)}`,
             }}
           >
@@ -430,7 +437,7 @@ function BookingRow({
           </span>
           {/* «۲ روز دیگر» is the thing a person actually wants off this list. */}
           {soon && (
-            <span className="tnum" style={{ fontSize: 10, fontWeight: 800, color: ahead <= 1 ? C.green : C.muted }}>
+            <span className="tnum" style={{ fontSize: 11, fontWeight: 700, color: ahead <= 1 ? C.green : C.muted }}>
               {ahead === 0 ? 'امروز' : ahead === 1 ? 'فردا' : `${fa(ahead)} روز دیگر`}
             </span>
           )}
@@ -585,7 +592,7 @@ function ReserveSheet({
               <span
                 key={item}
                 style={{
-                  fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: S.rPill,
+                  fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: S.r1,
                   background: C.surface2, color: C.muted, border: `1px solid ${C.border}`,
                 }}
               >
@@ -652,15 +659,15 @@ function ReserveSheet({
                         <AudienceTag audience={audience} />
                       </span>
                       <span style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5, flexWrap: 'wrap' }}>
-                        {item.label && <span style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>{item.label}</span>}
+                        {item.label && <span style={{ fontSize: 11, color: C.muted, fontWeight: 700 }}>{item.label}</span>}
                         {item.capacity > 1 && (
-                          <span className="tnum" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 10, color: item.left ? C.muted : C.statusDanger, fontWeight: 700 }}>
+                          <span className="tnum" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: item.left ? C.muted : C.statusDanger, fontWeight: 700 }}>
                             <Users className="h-3 w-3" />
                             {item.left ? `${fa(item.left)} جای خالی از ${fa(item.capacity)}` : 'تکمیل'}
                           </span>
                         )}
                         {!item.available && item.blockedReason && (
-                          <span style={{ fontSize: 10, color: C.statusDanger, fontWeight: 700 }}>{item.blockedReason}</span>
+                          <span style={{ fontSize: 11, color: C.statusDanger, fontWeight: 700 }}>{item.blockedReason}</span>
                         )}
                       </span>
                     </span>
@@ -715,7 +722,7 @@ function ReserveSheet({
               </span>
               <AudienceTag audience={audienceOf(session.audience)} size="xs" />
               {session.capacity > 1 && (
-                <span className="tnum" style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>
+                <span className="tnum" style={{ fontSize: 11, color: C.muted, fontWeight: 700 }}>
                   {fa(session.left)} جای خالی
                 </span>
               )}

@@ -76,7 +76,7 @@ function Row({ icon, label, value, tone }: { icon: React.ReactNode; label: strin
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: S.s3 }}>
       <span style={{ color: tone || C.green, flexShrink: 0, marginTop: 2 }}>{icon}</span>
       <span style={{ minWidth: 0, flex: 1 }}>
-        <span style={{ display: 'block', fontSize: 10, color: C.subtle, fontWeight: 700 }}>{label}</span>
+        <span style={{ display: 'block', fontSize: 11, color: C.subtle, fontWeight: 700 }}>{label}</span>
         <span style={{ display: 'block', marginTop: 2, fontSize: S.sm, color: C.textStrong, fontWeight: 700, lineHeight: 1.8 }}>
           {value}
         </span>
@@ -160,7 +160,7 @@ export default function BookingSheet({
             </div>
             <span
               style={{
-                flexShrink: 0, fontSize: 10, fontWeight: 800, padding: '5px 11px', borderRadius: S.rPill,
+                flexShrink: 0, fontSize: 11, fontWeight: 700, padding: '5px 11px', borderRadius: S.r1,
                 background: alpha(colour, 12), color: colour, border: `1px solid ${alpha(colour, 24)}`,
               }}
             >
@@ -180,7 +180,7 @@ export default function BookingSheet({
                   <>
                     {booking.say || booking.date}
                     {booking.ahead !== undefined && (
-                      <span style={{ marginInlineStart: 8, fontSize: 10, fontWeight: 800, color: booking.ahead >= 0 ? C.green : C.subtle }}>
+                      <span style={{ marginInlineStart: 8, fontSize: 11, fontWeight: 700, color: booking.ahead >= 0 ? C.green : C.subtle }}>
                         {whenText(booking.ahead)}
                       </span>
                     )}
@@ -205,7 +205,7 @@ export default function BookingSheet({
                 value={
                   <span className="tnum">
                     {booking.amount ? `${fa(booking.amount)} تومان` : 'رایگان'}
-                    <span style={{ marginInlineStart: 8, fontSize: 10, fontWeight: 700, color: C.muted }}>
+                    <span style={{ marginInlineStart: 8, fontSize: 11, fontWeight: 700, color: C.muted }}>
                       {booking.amount
                         ? booking.payment === 'wallet'
                           ? 'پرداخت‌شده از کیف پول'
@@ -221,7 +221,7 @@ export default function BookingSheet({
             <div style={{ position: 'relative', height: 1, background: `repeating-linear-gradient(90deg, ${C.border} 0 6px, transparent 6px 12px)` }} />
 
             <div style={{ padding: `${S.s3}px ${S.s4}px ${S.s4}px`, textAlign: 'center' }}>
-              <p style={{ margin: 0, fontSize: 10, color: C.subtle, fontWeight: 700 }}>کد پیگیری</p>
+              <p style={{ margin: 0, fontSize: 11, color: C.subtle, fontWeight: 700 }}>کد پیگیری</p>
               <p
                 className="tnum"
                 dir="ltr"
@@ -229,7 +229,7 @@ export default function BookingSheet({
               >
                 {booking.codeText || faDigits(booking.code)}
               </p>
-              <p style={{ margin: '6px 0 0', fontSize: 10, color: C.muted }}>
+              <p style={{ margin: '6px 0 0', fontSize: 11, color: C.muted }}>
                 این کد را هنگام ورود اعلام کنید.
               </p>
             </div>
@@ -304,7 +304,7 @@ export default function BookingSheet({
                     <Check className="h-3 w-3" />
                   </span>
                   <span style={{ fontSize: S.xs, color: C.text, fontWeight: 700 }}>{step.title}</span>
-                  <span className="tnum" style={{ marginInlineStart: 'auto', fontSize: 10, color: C.subtle }}>
+                  <span className="tnum" style={{ marginInlineStart: 'auto', fontSize: 11, color: C.subtle }}>
                     {jalaliDateTime(step.at)}
                   </span>
                 </div>

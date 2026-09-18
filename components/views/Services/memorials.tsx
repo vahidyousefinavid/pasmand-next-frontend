@@ -6,7 +6,7 @@ import { Flower2, Landmark, MapPin, Search, X, ChevronLeft, ChevronRight, Clock 
 import { axiosService } from '@/lib/axiosService';
 import { faDigits } from '@/lib/when';
 import { C, S, alpha } from '@/components/ui/tokens';
-import { Card, EmptyState, Hero, Screen, SectionTitle, Shimmer } from '@/components/ui/kit';
+import { Card, EmptyState, Plaque, Screen, SectionTitle, Shimmer } from '@/components/ui/kit';
 
 /**
  * یادبود — the city's memorial page.
@@ -297,7 +297,7 @@ function StoryViewer({
             <span
               style={{
                 display: 'inline-block', marginBottom: S.s3, padding: '4px 12px',
-                borderRadius: S.rPill, background: alpha('#fff', 14),
+                borderRadius: S.r1, background: alpha('#fff', 14),
                 fontSize: S.xs, fontWeight: 800,
               }}
             >
@@ -394,7 +394,7 @@ function PersonCard({ person }: { person: Person }) {
             <span
               style={{
                 display: 'inline-block', marginTop: S.s2, padding: '3px 9px',
-                borderRadius: S.rPill, fontSize: S.xs, fontWeight: 700,
+                borderRadius: S.r1, fontSize: S.xs, fontWeight: 700,
                 color: C.textStrong,
                 background: alpha(here ? C.amber : C.muted, 12),
                 border: `1px solid ${alpha(here ? C.amber : C.muted, 26)}`,
@@ -634,10 +634,12 @@ export default function MemorialsPage() {
 
   return (
     <Screen>
-      <Hero
+      <Plaque
+        section="آرامستان شهر"
+        tone={C.memorials}
         icon={<Flower2 className="h-6 w-6" />}
-        title={cityName ? `یادبود ${cityName}` : 'یادبود'}
-        sub="مشاهیر و مفاخر شهر، اطلاعیه‌های مراسم، و یادبود درگذشتگان."
+        city={cityName ? `یادبود ${cityName}` : 'یادبود'}
+        note="مشاهیر و مفاخر شهر، اطلاعیه‌های مراسم، و یادبود درگذشتگان."
       />
 
       {storyAt !== null && (
@@ -658,7 +660,7 @@ export default function MemorialsPage() {
             key={t.key}
             onClick={() => setTab(t.key)}
             style={{
-              padding: '7px 14px', borderRadius: S.rPill, cursor: 'pointer',
+              padding: '7px 14px', borderRadius: S.r1, cursor: 'pointer',
               fontFamily: 'inherit', fontSize: S.xs, fontWeight: 800,
               background: tab === t.key ? C.green : alpha(C.muted, 10),
               color: tab === t.key ? C.onAccent : C.text,
@@ -712,7 +714,7 @@ export default function MemorialsPage() {
       </>
       )}
 
-      <p style={{ margin: `${S.s5}px 0 0`, fontSize: S.xs, color: C.subtle, textAlign: 'center', lineHeight: 1.9 }}>
+      <p style={{ margin: `${S.s5}px 0 0`, fontSize: S.xs, color: C.text, textAlign: 'center', lineHeight: 1.9 }}>
         اطلاعات مشاهیر از منابع عمومی گردآوری شده است. برای اصلاح یا افزودن یادبود با شهرداری تماس بگیرید.
       </p>
     </Screen>

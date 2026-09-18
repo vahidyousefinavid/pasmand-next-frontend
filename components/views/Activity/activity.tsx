@@ -9,7 +9,7 @@ import {
 
 import { axiosService } from '@/lib/axiosService';
 import { C, S, alpha, fa } from '@/components/ui/tokens';
-import { Card, EmptyState, Hero, IconBadge, Screen, Shimmer } from '@/components/ui/kit';
+import { Card, EmptyState, Plaque, IconBadge, Screen, Shimmer } from '@/components/ui/kit';
 import { faDigits } from '@/lib/when';
 
 /**
@@ -58,10 +58,13 @@ const TONE: Record<Item['tone'], string> = {
 };
 
 const KIND: Record<Item['kind'], { icon: LucideIcon; color: string; title: string; module: string }> = {
-  waste: { icon: Recycle, color: C.green, title: 'جمع‌آوری پسماند', module: 'waste' },
-  booking: { icon: CalendarCheck, color: C.violet, title: 'رزرو اماکن', module: 'venues' },
-  report: { icon: Megaphone, color: C.amber, title: 'گزارش ۱۳۷', module: 'report137' },
-  letter: { icon: FileText, color: C.blue, title: 'کارتابل', module: 'cartable' },
+  // Each kind wears its own service's hue — the same one that marks that
+  // service on the home screen and at the top of its own screens, so a citizen
+  // can pick their ۱۳۷ report out of this list before reading a word of it.
+  waste: { icon: Recycle, color: C.waste, title: 'جمع‌آوری پسماند', module: 'waste' },
+  booking: { icon: CalendarCheck, color: C.venues, title: 'رزرو اماکن', module: 'venues' },
+  report: { icon: Megaphone, color: C.reports, title: 'گزارش ۱۳۷', module: 'report137' },
+  letter: { icon: FileText, color: C.cartable, title: 'کارتابل', module: 'cartable' },
 };
 
 /** «فردا»، «۳ روز دیگر»، «دیروز» — what a person would actually say. */
@@ -123,10 +126,11 @@ export default function ActivityPage() {
 
   return (
     <Screen>
-      <Hero
+      <Plaque
+        section="پیگیری"
         icon={<ListChecks className="h-6 w-6" />}
-        title="کارهای من"
-        sub="هر چیزی که در شهر در جریان دارید — درخواست، رزرو، گزارش و نامه — در یک فهرست."
+        city="کارهای من"
+        note="هر چیزی که در شهر در جریان دارید — درخواست، رزرو، گزارش و نامه — در یک فهرست."
         aside={
           <div style={{ textAlign: 'start' }}>
             <p style={{ margin: 0, fontSize: S.xs, color: C.onHeroMuted, fontWeight: 600 }}>در جریان</p>
@@ -153,7 +157,7 @@ export default function ActivityPage() {
                     onClick={() => setFilter(chip.key)}
                     style={{
                       flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 6,
-                      padding: '8px 14px', borderRadius: S.rPill, cursor: 'pointer',
+                      padding: '8px 14px', borderRadius: S.r1, cursor: 'pointer',
                       fontFamily: 'inherit', fontSize: S.xs, fontWeight: 800,
                       background: on ? C.green : C.surface2,
                       color: on ? C.onAccent : C.text,
@@ -224,19 +228,19 @@ export default function ActivityPage() {
                             <div style={{ display: 'flex', gap: 6, marginTop: 7, flexWrap: 'wrap', alignItems: 'center' }}>
                               <span
                                 style={{
-                                  fontSize: 10, fontWeight: 800, padding: '4px 10px', borderRadius: S.rPill,
+                                  fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: S.r1,
                                   background: alpha(colour, 12), color: colour, border: `1px solid ${alpha(colour, 24)}`,
                                 }}
                               >
                                 {item.label}
                               </span>
                               {item.code && (
-                                <span className="tnum" style={{ fontSize: 10, color: C.subtle, fontWeight: 700 }}>
+                                <span className="tnum" style={{ fontSize: 11, color: C.subtle, fontWeight: 700 }}>
                                   کد <span dir="ltr">{item.code}</span>
                                 </span>
                               )}
                               {!!item.amount && (
-                                <span className="tnum" style={{ fontSize: 10, color: C.muted, fontWeight: 700 }}>
+                                <span className="tnum" style={{ fontSize: 11, color: C.muted, fontWeight: 700 }}>
                                   {fa(item.amount)} تومان
                                 </span>
                               )}

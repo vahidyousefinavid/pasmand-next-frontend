@@ -142,13 +142,16 @@ export default function PushRegister() {
         position: 'fixed',
         insetInlineStart: S.s4,
         insetInlineEnd: S.s4,
-        bottom: `calc(104px + env(safe-area-inset-bottom))`,
+        // Just clear of the tab bar, which is a 60px rail now rather than a
+        // floating pill with air under it.
+        bottom: `calc(70px + env(safe-area-inset-bottom))`,
         zIndex: 900,
         maxWidth: 520,
         marginInline: 'auto',
         background: C.surface,
-        border: `1px solid ${alpha(C.green, 30)}`,
-        borderRadius: S.r3,
+        border: `1px solid ${C.borderStrong}`,
+        borderTop: `3px solid ${C.brass}`,
+        borderRadius: S.r2,
         boxShadow: C.shadowLift,
         padding: S.s4,
         display: 'flex',
@@ -158,8 +161,8 @@ export default function PushRegister() {
     >
       <span
         style={{
-          width: 40, height: 40, borderRadius: 14, flexShrink: 0, display: 'grid', placeItems: 'center',
-          background: alpha(C.green, 12), border: `1px solid ${alpha(C.green, 22)}`, color: C.green,
+          width: 40, height: 40, borderRadius: S.r1, flexShrink: 0, display: 'grid', placeItems: 'center',
+          background: alpha(C.brass, 10), border: `1px solid ${alpha(C.brass, 26)}`, color: C.brass,
         }}
       >
         <BellRing className="h-4 w-4" />
@@ -177,9 +180,9 @@ export default function PushRegister() {
           onClick={enable}
           disabled={busy}
           style={{
-            marginTop: S.s3, padding: '10px 18px', borderRadius: S.r1, border: 'none',
-            background: C.green, color: C.onAccent, fontFamily: 'inherit',
-            fontSize: S.xs, fontWeight: 800, cursor: busy ? 'wait' : 'pointer',
+            marginTop: S.s3, minHeight: 44, padding: '11px 18px', borderRadius: S.r1, border: 'none',
+            background: C.enamel, color: C.onHero, fontFamily: 'inherit',
+            fontSize: S.sm, fontWeight: 700, cursor: busy ? 'wait' : 'pointer',
           }}
         >
           {busy ? 'در حال فعال‌سازی…' : 'فعال کردن اعلان'}

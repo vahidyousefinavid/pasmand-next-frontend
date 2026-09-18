@@ -3,20 +3,37 @@
 @tailwind utilities;
 
 /* ── Type ──
-   IRANSans, served from this origin — the same web build the admin panel of
-   this very product uses (pasmand-panel-react-frontend/public/fonts/woff2), so
-   the citizen app and the panel are now set in one typeface.
-
    Nothing is fetched from fonts.googleapis.com or a CDN. An import costs a DNS
    lookup, a TLS handshake and a CSS round trip to a third party before a single
    glyph can be requested — the slowest part of first paint on an Iranian mobile
    connection — and those hosts are reachable from Iran only unreliably, so when
    one stalls the page renders in a fallback with no Persian design at all.
 
-   Three weights, ~88 KB total, which is every weight the interface asks for:
-   400 for body, 500 for secondary labels, and one bold face declared across
-   600–900 so the 700s and 800s in the design resolve to a *real* bold instead
-   of a synthetic one smeared on by the browser. */
+   IRANSans stays declared below as a fallback for anything still asking for it
+   by name. */
+/* ── The two faces of «تابلوی شهر» ──
+   Estedad (variable, 100–900, OFL) sets the interface, and Lalezar (OFL) —
+   the sign-writer's face — paints the plaques. Both are served from this
+   origin: see the note below on why nothing here may come from a CDN.
+   170 KB for the pair, against 88 KB for the three IRANSans weights they
+   replace, and one variable file covers every weight the design asks for. */
+@font-face {
+  font-family: 'Estedad';
+  src: url('/fonts/estedad/Estedad-var.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Lalezar';
+  /* The Arabic subset only — the plaques never carry Latin. */
+  src: url('/fonts/lalezar/Lalezar.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @font-face {
   font-family: 'IRANSans';
   src: url('/fonts/iransans/IRANSansWeb.woff2') format('woff2');
@@ -269,73 +286,154 @@
    Light is the base because the rest of the app is light; the dark block is
    opt-in via `html[data-theme="dark"]` and touches nothing else.
    ────────────────────────────────────────────────────────────────────────── */
+/* ── «تابلوی شهر» ──────────────────────────────────────────────────────────
+   The palette comes from the street furniture of an Iranian town: the enamel
+   name-plaque on the corner of every street, the فیروزه tile behind it, the
+   brass plate on a municipal door, and the limewashed wall all three are fixed
+   to. See DESIGN.md.
+
+   The `--pm-*` names are kept — every screen already reads them through
+   tokens.ts — but the values are the new language, so one edit here moves the
+   whole app. `--sh-*` are the names added for what the old palette had no word
+   for.
+   ────────────────────────────────────────────────────────────────────────── */
 :root {
-  --pm-green:      #12805c;
-  --pm-green-dark: #0b5f44;
-  --pm-green-soft: #35b98a;
-  --pm-amber:      #c2790b;
-  --pm-red:        #d33b3b;
-  --pm-blue:       #2563eb;
-  --pm-violet:     #7c4dcc;
+  --sh-enamel:      #0f3f6b;
+  --sh-enamel-deep: #0a2d4e;
+  --sh-enamel-lit:  #2e6fb7;
+  --sh-tile:        #1b93a4;
+  --sh-tile-deep:   #14707e;
+  --sh-brass:       #8a5e18;
+  --sh-brass-lit:   #c08b33;
+  --sh-wall:        #f1eee8;
+  --sh-wall-deep:   #e7e2d8;
+  --sh-panel:       #ffffff;
+  --sh-keyline:     rgba(255, 255, 255, 0.72);
 
-  --pm-bg:         #f4f7f5;
-  --pm-bg-subtle:  #eef2ef;
+  /* Enamel as a *surface* is always dark; enamel as *text* has to flip with
+     the theme, or the brand and every link painted in it disappears into the
+     night ground. Two names, because they are two different jobs. */
+  --sh-enamel-ink:  #0f3f6b;
+
+  /* The five services. Each hue belongs to its own module and nothing else. */
+  --sh-waste:      #1c7049;
+  --sh-venues:     #2a63a4;
+  --sh-reports:    #955217;
+  --sh-cartable:   #63449e;
+  --sh-memorials:  #276b64;
+
+  /* Mapped onto the names the screens already use. */
+  --pm-green:      #0f3f6b;  /* the app's primary is the enamel now */
+  --pm-green-dark: #0a2d4e;
+  --pm-green-soft: #2e6fb7;
+  --pm-amber:      #8a5e18;
+  --pm-red:        #b3382f;
+  --pm-blue:       #2a63a4;
+  --pm-violet:     #63449e;
+
+  --pm-bg:         #f1eee8;
+  --pm-bg-subtle:  #e7e2d8;
   --pm-surface:    #ffffff;
-  --pm-surface-2:  #f7faf8;
+  --pm-surface-2:  #faf8f4;
 
-  --pm-hero-start: #0f6f52;
-  --pm-hero-end:   #17a06e;
+  --pm-hero-start: #0f3f6b;
+  --pm-hero-end:   #0a2d4e;
   --pm-on-hero:       #ffffff;
-  --pm-on-hero-muted: rgba(255, 255, 255, 0.78);
+  --pm-on-hero-muted: rgba(240, 246, 252, 0.82);
 
-  --pm-text-strong: #10231c;
-  --pm-text:        #1d3a30;
-  --pm-muted:       #5b7168;
-  --pm-subtle:      #8798918f;
+  --pm-text-strong: #14202b;
+  --pm-text:        #2a3a48;
+  --pm-muted:       #515e6a;
+  --pm-subtle:      #66707a;
   --pm-on-accent:   #ffffff;
 
-  --pm-border:        #e2e9e5;
-  --pm-border-strong: #cfdad4;
+  --pm-border:        #e2ddd2;
+  --pm-border-strong: #cec7b8;
 
-  --pm-shadow-card:  0 1px 2px rgba(16, 35, 28, 0.04), 0 8px 24px rgba(16, 35, 28, 0.06);
-  --pm-shadow-lift:  0 2px 6px rgba(16, 35, 28, 0.06), 0 18px 44px rgba(16, 35, 28, 0.12);
-  --pm-shadow-hero:  0 18px 42px rgba(15, 111, 82, 0.28);
-  --pm-shadow-sheet: 0 -8px 40px rgba(16, 35, 28, 0.18);
+  /* Panels are mounted flat on the wall; only what floats casts anything. */
+  --pm-shadow-card:  0 1px 0 rgba(20, 32, 43, 0.03);
+  --pm-shadow-lift:  0 2px 8px rgba(20, 32, 43, 0.08), 0 16px 36px rgba(20, 32, 43, 0.10);
+  --pm-shadow-hero:  0 10px 26px rgba(10, 45, 78, 0.22);
+  --pm-shadow-sheet: 0 -8px 40px rgba(20, 32, 43, 0.2);
 
-  --pm-status-ok:      #12805c;
-  --pm-status-warn:    #c2790b;
-  --pm-status-info:    #2563eb;
-  --pm-status-danger:  #d33b3b;
-  --pm-status-neutral: #6b7f77;
+  --pm-status-ok:      #1c7049;
+  --pm-status-warn:    #8a5e18;
+  --pm-status-info:    #2a63a4;
+  --pm-status-danger:  #b3382f;
+  --pm-status-neutral: #5e6873;
 
-  --pm-waste-household:    #64748b;
-  --pm-waste-recyclable:   #12805c;
-  --pm-waste-electronic:   #7c4dcc;
-  --pm-waste-bulky:        #c2790b;
-  --pm-waste-automotive:   #2563eb;
-  --pm-waste-construction: #b4530f;
+  --pm-waste-household:    #566274;
+  --pm-waste-recyclable:   #1c7049;
+  --pm-waste-electronic:   #63449e;
+  --pm-waste-bulky:        #8a5e18;
+  --pm-waste-automotive:   #2a63a4;
+  --pm-waste-construction: #8f4718;
 }
 
 html[data-theme='dark'] {
-  --pm-bg:         #0d1512;
-  --pm-bg-subtle:  #101b17;
-  --pm-surface:    #14201b;
-  --pm-surface-2:  #182721;
+  /* Night in the same town: the wall goes to slate, and the plaque stays
+     enamel — a lit sign does not change colour after dark. */
+  --sh-wall:        #101820;
+  --sh-wall-deep:   #16202a;
+  --sh-panel:       #18232e;
+  --sh-enamel:      #123f68;
+  --sh-enamel-deep: #0b2a46;
+  --sh-tile:        #3fb3c2;
+  --sh-brass:       #c79a4a;
 
-  --pm-green:      #35b98a;
-  --pm-green-dark: #12805c;
-  --pm-green-soft: #5fd3a9;
+  /* Everything that carries *words* lightens, because the ground it is read
+     against has flipped: enamel-as-text, the five service hues and the
+     statuses. The plaque's field is not in this list — it stays enamel. */
+  --sh-enamel-ink:  #7ab5e6;
+  --sh-waste:       #4fb387;
+  --sh-venues:      #6aa8e8;
+  --sh-reports:     #dd9a4e;
+  --sh-cartable:    #a98ae0;
+  --sh-memorials:   #5fbdb2;
 
-  --pm-text-strong: #f2f7f4;
-  --pm-text:        #dce8e2;
-  --pm-muted:       #93a89f;
-  --pm-subtle:      #6f847c;
+  --pm-status-ok:      #4fb387;
+  --pm-status-info:    #6aa8e8;
+  --pm-status-warn:    #dd9a4e;
+  --pm-status-danger:  #e2766a;
+  --pm-status-neutral: #93a0ad;
+  --pm-blue:           #6aa8e8;
+  --pm-violet:         #a98ae0;
+  --pm-red:            #e2766a;
 
-  --pm-border:        #22332c;
-  --pm-border-strong: #2e4239;
+  --pm-waste-recyclable:   #4fb387;
+  --pm-waste-electronic:   #a98ae0;
+  --pm-waste-bulky:        #dd9a4e;
+  --pm-waste-automotive:   #6aa8e8;
+  --pm-waste-construction: #d98a5a;
+  --pm-waste-household:    #93a0ad;
 
-  --pm-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
-  --pm-shadow-lift: 0 2px 6px rgba(0, 0, 0, 0.45), 0 18px 44px rgba(0, 0, 0, 0.5);
+  /* In the night theme a filled accent is a LIGHT patch, so what sits on it
+     has to be ink. Enamel is the exception and keeps white text — it is the
+     one fill that stays dark in both themes, which is why it has its own
+     `--pm-on-hero`. */
+  --pm-on-accent:   #0f1a24;
+  --pm-subtle:      #8d99a5;
+  --pm-on-hero-muted: rgba(240, 246, 252, 0.88);
+
+  --pm-bg:         #101820;
+  --pm-bg-subtle:  #16202a;
+  --pm-surface:    #18232e;
+  --pm-surface-2:  #1e2b37;
+
+  --pm-green:      #4f96d8;
+  --pm-green-dark: #2e6fb7;
+  --pm-green-soft: #7db4e4;
+  --pm-amber:      #c79a4a;
+
+  --pm-text-strong: #f2f5f8;
+  --pm-text:        #dbe3ea;
+  --pm-muted:       #98a5b1;
+
+  --pm-border:        #26333f;
+  --pm-border-strong: #33434f;
+
+  --pm-shadow-card: 0 1px 0 rgba(0, 0, 0, 0.4);
+  --pm-shadow-lift: 0 2px 8px rgba(0, 0, 0, 0.45), 0 18px 44px rgba(0, 0, 0, 0.5);
 }
 
 /* The fonts this project bundled were declared in layout.tsx but never applied
@@ -343,7 +441,10 @@ html[data-theme='dark'] {
    Tailwind's `font-sans` now resolves to IRANSans (see tailwind.config.ts);
    this rule covers anything outside a Tailwind class. */
 body {
-  font-family: 'IRANSans', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Estedad', 'IRANSans', ui-sans-serif, system-ui, sans-serif;
+  /* Persian numerals are read down a column all over this product — prices,
+     weights, balances — so they are tabular everywhere by default. */
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -365,16 +466,16 @@ textarea {
   width: 100%;
   min-height: 48px;
   padding: 0 14px;
-  border-radius: 16px;
-  border: 1.5px solid var(--pm-border);
-  background: var(--pm-surface-2);
+  border-radius: 10px;
+  border: 1.5px solid var(--pm-border-strong);
+  background: var(--pm-surface);
   color: var(--pm-text-strong);
   font-family: inherit;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   text-align: start;
   outline: none;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
 }
 
 .pm-field::placeholder,
@@ -385,8 +486,78 @@ textarea {
 
 .pm-field:focus,
 .pm-date-input:focus {
-  border-color: var(--pm-green);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pm-green) 16%, transparent);
+  border-color: var(--sh-tile);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sh-tile) 22%, transparent);
+}
+
+/* ── «تابلوی شهر»: the objects the language is made of ──────────────────── */
+
+/* The wall. A limewashed surface is never flat, but it is never patterned
+   either — two very wide, very faint washes, and nothing a viewer could point
+   at and call a texture. */
+.sh-wall {
+  background-image:
+    radial-gradient(120% 60% at 85% -10%, color-mix(in srgb, var(--sh-brass) 5%, transparent), transparent 60%),
+    radial-gradient(90% 50% at 0% 0%, color-mix(in srgb, var(--sh-enamel) 4%, transparent), transparent 55%);
+  background-attachment: fixed;
+}
+
+/* The plaque settles into place once, then stays put. */
+.sh-plaque {
+  animation: shPlaqueSet 0.34s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes shPlaqueSet {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Panels arrive under it in sequence — the stagger is set per panel with
+   `--i` where a list wants it, and costs nothing where it is not. */
+.sh-rise {
+  animation: pmFadeUp 0.3s ease both;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+.sh-press:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+/* One focus ring for the whole product: فیروزه, offset so it is legible on
+   both the wall and a panel. Never removed — an outline that is invisible is
+   the same as no keyboard support at all. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--sh-tile);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Link lists on the public pages — the footer columns and the «همهٔ ۴ مکان»
+   style links in prose — were 18px-high targets. */
+.ss a:not(.ss-btn):not(.ss-link-card):not(.ss-venue) {
+  padding-block: 9px;
+  display: inline-block;
+}
+
+/* Every link sitting in a section heading is a real 40px target, however
+   short its label. */
+.sh-head > :not(h2) a,
+.sh-head > :not(h2) button,
+.sh-head > a,
+.sh-head > button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding-inline: 8px;
+}
+
+/* Persian sets tighter than Latin at display sizes, and Lalezar has tall
+   ascenders: 1.45 keeps «نهاوند» clear of the line above it. */
+.sh-display {
+  font-family: 'Lalezar', 'Estedad', system-ui, sans-serif;
+  font-weight: 400;
+  line-height: 1.45;
+  letter-spacing: 0;
 }
 
 .pm-field:disabled {
@@ -448,7 +619,12 @@ textarea.pm-field {
 .pm-scroll-x::-webkit-scrollbar { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
-  .pm-fade-up { animation: none; }
+  /* All of it, not some of it: a plaque that still drops in while the panels
+     under it hold still is worse than either. */
+  .pm-fade-up,
+  .sh-plaque,
+  .sh-rise { animation: none; }
+  .sh-press:active:not(:disabled) { transform: none; }
 }
 
 /* Content that belongs to the page but is already shown visually by an
@@ -488,18 +664,21 @@ textarea.pm-field {
 
 .ss {
   /* The board's field, and the ink the headline is set in. */
-  --ss-ink: #06201a;
-  --ss-ink-soft: #0d3227;
+  /* The board is an enamel object now, like every other dark surface in this
+     product — it used to be forest green, which after the palette change left
+     the landing page arguing with its own buttons. */
+  --ss-ink: #0a2d4e;
+  --ss-ink-soft: #123f68;
 
   /* Brass — the colour of the metals this page is about. Two of them, because
      a value that reads on a dark board is unreadable on a light ground. */
-  --ss-brass: #e3ad55;
-  --ss-brass-ink: #7c5a12;
+  --ss-brass: #d9a24e;
+  --ss-brass-ink: #6d4a11;
 
   --ss-line: rgba(255, 255, 255, 0.11);
   --ss-line-strong: rgba(255, 255, 255, 0.2);
 
-  --ss-display: 'VazirmatnDisplay', 'IRANSans', system-ui, sans-serif;
+  --ss-display: 'Lalezar', 'Estedad', system-ui, sans-serif;
 
   /* One fluid scale, so nothing on the page is sized by hand. */
   --ss-h1: clamp(2rem, 1.25rem + 3.4vw, 3.55rem);
@@ -517,7 +696,7 @@ textarea.pm-field {
    meant for a dark ground was painting eyebrows and step numbers at roughly
    1.9:1 on a near-white background. Only the explicit dark theme gets it. */
 html[data-theme='dark'] .ss {
-  --ss-brass-ink: #e3ad55;
+  --ss-brass-ink: #d9a24e;
 }
 
 .ss-display {
@@ -560,8 +739,8 @@ html[data-theme='dark'] .ss {
    dark ground it has to sit *above* the surface rather than melt into it. Its
    field lightens; the numerals do not move. */
 html[data-theme=dark] .ss-board {
-  --ss-ink: #0b2c23;
-  --ss-ink-soft: #12392c;
+  --ss-ink: #092741;
+  --ss-ink-soft: #103558;
 }
 
 .ss-board {
@@ -672,7 +851,7 @@ html[data-theme=dark] .ss-board {
   font-family: var(--ss-display);
   font-size: 13px;
   font-weight: 800;
-  color: var(--ss-brass-ink);
+  color: var(--pm-text-strong);
   letter-spacing: 0.04em;
 }
 

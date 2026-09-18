@@ -35,54 +35,31 @@ export function Navigation() {
   return (
     <nav
       dir="rtl"
+      /**
+       * A bar, not a floating pill.
+       *
+       * The old tab bar hovered above the content with a raised FAB punched
+       * through it, which is the house style of every consumer app and left a
+       * strip of page visible underneath that nothing could ever use. This one
+       * is fixed to the bottom edge, sits on the wall, and marks the tab you
+       * are on with an enamel bar over it — the way a sign marks a platform.
+       */
       style={{
         position: 'fixed', insetInline: 0, bottom: 0, zIndex: 100000,
-        display: 'flex', justifyContent: 'center',
-        padding: `0 ${S.s3}px calc(${S.s3}px + env(safe-area-inset-bottom))`,
-        pointerEvents: 'none',
+        background: C.surface,
+        borderTop: `1px solid ${C.border}`,
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        boxShadow: '0 -1px 0 rgba(20,32,43,0.04)',
       }}
     >
       <div
         style={{
-          pointerEvents: 'auto',
-          width: '100%', maxWidth: 470,
-          display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', alignItems: 'end',
-          background: C.surface,
-          border: `1px solid ${C.border}`,
-          borderRadius: 26,
-          padding: `${S.s2}px ${S.s2}px`,
-          boxShadow: C.shadowLift,
+          width: '100%', maxWidth: 560, margin: '0 auto',
+          display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)',
         }}
       >
         {TABS.map(({ href, label, Icon, primary }) => {
           const active = pathname === href;
-
-          if (primary) {
-            return (
-              <Link
-                key={href}
-                href={href}
-                aria-current={active ? 'page' : undefined}
-                style={{
-                  display: 'grid', justifyItems: 'center', gap: 5, textDecoration: 'none',
-                  marginTop: -26,
-                }}
-              >
-                <span
-                  style={{
-                    width: 52, height: 52, borderRadius: 20, display: 'grid', placeItems: 'center',
-                    background: `linear-gradient(140deg, ${C.heroStart}, ${C.heroEnd})`,
-                    color: C.onHero,
-                    border: `3px solid ${C.surface}`,
-                    boxShadow: `0 10px 22px ${alpha(C.green, 34)}`,
-                  }}
-                >
-                  <Icon className="h-5 w-5" />
-                </span>
-                <span style={{ fontSize: 10, fontWeight: 800, color: active ? C.green : C.muted }}>{label}</span>
-              </Link>
-            );
-          }
 
           return (
             <Link
@@ -90,15 +67,36 @@ export function Navigation() {
               href={href}
               aria-current={active ? 'page' : undefined}
               style={{
-                display: 'grid', justifyItems: 'center', gap: 4, textDecoration: 'none',
-                padding: `${S.s2}px 0 6px`, borderRadius: 16,
-                background: active ? alpha(C.green, 10) : 'transparent',
-                color: active ? C.green : C.muted,
-                transition: 'background .2s ease, color .2s ease',
+                position: 'relative',
+                display: 'grid', justifyItems: 'center', alignContent: 'center', gap: 5,
+                minHeight: 60, padding: '9px 2px 8px', textDecoration: 'none',
+                color: active ? C.enamelInk : C.muted,
+                transition: 'color .16s ease',
               }}
             >
-              <Icon className="h-5 w-5" />
-              <span style={{ fontSize: 10, fontWeight: active ? 800 : 600 }}>{label}</span>
+              {/* The mark of the current tab: a short enamel bar on the top
+                  edge, in line with the rules that head every panel. */}
+              <span
+                aria-hidden
+                style={{
+                  position: 'absolute', top: 0, insetInline: '28%', height: 3,
+                  borderRadius: '0 0 3px 3px',
+                  background: active ? C.enamelInk : 'transparent',
+                }}
+              />
+              <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 1.9} />
+              <span style={{ fontSize: 11, fontWeight: active ? 800 : 600, whiteSpace: 'nowrap' }}>
+                {/* «درخواست» is still the errand most people come for, so it
+                    keeps a mark of its own — a brass underline rather than a
+                    button jumping out of the bar. */}
+                {label}
+                {primary && !active && (
+                  <span aria-hidden style={{
+                    display: 'block', height: 2, marginTop: 3, borderRadius: 2,
+                    background: alpha(C.brass, 55),
+                  }} />
+                )}
+              </span>
             </Link>
           );
         })}

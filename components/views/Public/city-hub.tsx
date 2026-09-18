@@ -148,7 +148,7 @@ export default function CityHub({
                     </span>
                     <span
                       style={{
-                        fontSize: 10.5, fontWeight: 800, whiteSpace: 'nowrap',
+                        fontSize: 11.5, fontWeight: 800, whiteSpace: 'nowrap',
                         color: entry.access === 'open' ? C.green : entry.access === 'browse' ? C.amber : C.subtle,
                       }}
                     >

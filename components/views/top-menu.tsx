@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -89,16 +89,35 @@ export function TopMenu() {
   const { services: cityModules } = useCityServices();
   const pathname = usePathname();
 
+  /**
+   * The plaque on the home screen opens this picker. Keeping one dialog and
+   * calling it from wherever the city is named beats a second copy that can
+   * drift out of step with this one.
+   */
+  useEffect(() => {
+    const open = () => setCityOpen(true);
+    window.addEventListener('shahrshahr:city-picker', open);
+    return () => window.removeEventListener('shahrshahr:city-picker', open);
+  }, []);
+
   return (
     <>
       <header
         dir="rtl"
+        /**
+         * A rail, not a slab.
+         *
+         * The top bar used to be a second green gradient with rounded corners,
+         * which meant two loud objects stacked on every screen — it and the
+         * hero under it — and a citizen's eye had nowhere to rest. The plaque
+         * is the object that speaks now; this is the shelf it hangs from:
+         * panel white, one hairline, and the controls in ink.
+         */
         style={{
           position: 'fixed', insetInline: 0, top: 0, zIndex: 10000,
-          background: `linear-gradient(135deg, ${C.heroStart}, ${C.heroEnd})`,
-          borderEndStartRadius: 22, borderEndEndRadius: 22,
-          boxShadow: C.shadowHero,
-          color: C.onHero,
+          background: C.surface,
+          borderBottom: `1px solid ${C.border}`,
+          color: C.text,
           paddingTop: 'env(safe-area-inset-top)',
         }}
       >
@@ -116,9 +135,9 @@ export function TopMenu() {
                 type="button"
                 aria-label="منو"
                 style={{
-                  display: 'grid', placeItems: 'center', width: 38, height: 38, borderRadius: 13,
-                  background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.22)',
-                  color: C.onHero, cursor: 'pointer', flexShrink: 0,
+                  display: 'grid', placeItems: 'center', width: 44, height: 44, borderRadius: S.r1,
+                  background: 'transparent', border: `1px solid ${C.border}`,
+                  color: C.text, cursor: 'pointer', flexShrink: 0,
                 }}
               >
                 <MenuIcon className="h-5 w-5" />
@@ -136,29 +155,26 @@ export function TopMenu() {
                 <div
                   style={{
                     position: 'relative', overflow: 'hidden',
-                    background: `linear-gradient(140deg, ${C.heroStart}, ${C.heroEnd})`,
+                    background: `linear-gradient(180deg, ${C.enamel}, ${C.enamelDeep})`,
                     color: C.onHero,
                     padding: `calc(${S.s6}px + env(safe-area-inset-top)) ${S.s4}px ${S.s5}px`,
                   }}
                 >
-                  <span aria-hidden style={{ position: 'absolute', insetInlineStart: -50, top: -60, width: 170, height: 170, borderRadius: '50%', background: 'rgba(255,255,255,0.09)' }} />
-                  <span aria-hidden style={{ position: 'absolute', insetInlineEnd: -35, bottom: -70, width: 140, height: 140, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
+                  {/* The drawer opens on the plaque, keyline and all, so it is
+                      recognisably the same object that heads every screen. */}
+                  <span
+                    aria-hidden
+                    style={{
+                      position: 'absolute', insetInline: 8, top: 'calc(env(safe-area-inset-top) + 8px)', bottom: 8,
+                      borderRadius: S.r2, border: `1.5px solid ${C.keyline}`, opacity: 0.5,
+                    }}
+                  />
 
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: S.s3 }}>
-                    <span
-                      style={{
-                        width: 46, height: 46, borderRadius: 16, display: 'grid', placeItems: 'center', flexShrink: 0,
-                        background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.24)',
-                      }}
-                    >
-                      <Leaf className="h-5 w-5" />
-                    </span>
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{ margin: 0, fontSize: S.md, fontWeight: 800 }}>شهر شهر</p>
-                      <p style={{ margin: '4px 0 0', fontSize: S.xs, color: C.onHeroMuted }}>
-                        {isAuthenticated ? 'حساب شما فعال است' : 'برای ثبت درخواست وارد شوید'}
-                      </p>
-                    </div>
+                  <div style={{ position: 'relative' }}>
+                    <p className="sh-display" style={{ margin: 0, fontSize: S.xl }}>شهرشهر</p>
+                    <p style={{ margin: '2px 0 0', fontSize: S.xs, color: C.onHeroMuted }}>
+                      {isAuthenticated ? 'سامانهٔ خدمات شهری — حساب شما فعال است' : 'سامانهٔ خدمات شهری — برای ثبت درخواست وارد شوید'}
+                    </p>
                   </div>
 
                   {/* the city, changeable from inside the drawer too */}
@@ -190,7 +206,7 @@ export function TopMenu() {
                 <nav style={{ padding: `${S.s4}px ${S.s3}px`, display: 'flex', flexDirection: 'column', gap: S.s4, flex: 1 }}>
                   {cityModules.filter((service) => service.key !== 'waste').length > 0 && (
                     <div>
-                      <p style={{ margin: `0 ${S.s2}px ${S.s2}px`, fontSize: 10, fontWeight: 800, letterSpacing: '0.04em', color: C.subtle }}>
+                      <p style={{ margin: `0 ${S.s2}px ${S.s2}px`, fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', color: C.subtle }}>
                         خدمات شهر شما
                       </p>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -222,7 +238,7 @@ export function TopMenu() {
                               </span>
                               <span style={{ flex: 1, minWidth: 0 }}>
                                 <span style={{ display: 'block', fontSize: S.sm, fontWeight: 800, color: C.textStrong }}>{service.title}</span>
-                                <span style={{ display: 'block', marginTop: 2, fontSize: 10, color: C.muted }}>{service.short}</span>
+                                <span style={{ display: 'block', marginTop: 2, fontSize: 11, color: C.muted }}>{service.short}</span>
                               </span>
                               <ChevronLeft className="h-4 w-4" style={{ color: C.subtle, flexShrink: 0 }} />
                             </Link>
@@ -236,7 +252,7 @@ export function TopMenu() {
                     <div key={group.label}>
                       <p
                         style={{
-                          margin: `0 ${S.s2}px ${S.s2}px`, fontSize: 10, fontWeight: 800,
+                          margin: `0 ${S.s2}px ${S.s2}px`, fontSize: 11, fontWeight: 700,
                           letterSpacing: '0.04em', color: C.subtle,
                         }}
                       >
@@ -275,7 +291,7 @@ export function TopMenu() {
                                 <span style={{ display: 'block', fontSize: S.sm, fontWeight: 800, color: active ? color : C.textStrong }}>
                                   {title}
                                 </span>
-                                <span style={{ display: 'block', fontSize: 10, color: C.muted, marginTop: 3 }}>{sub}</span>
+                                <span style={{ display: 'block', fontSize: 11, color: C.muted, marginTop: 3 }}>{sub}</span>
                               </span>
                               <ChevronLeft className="h-3.5 w-3.5" style={{ color: C.subtle, flexShrink: 0 }} />
                             </Link>
@@ -303,7 +319,7 @@ export function TopMenu() {
                       ورود / ثبت‌نام
                     </Link>
                   )}
-                  <p style={{ margin: 0, fontSize: 10, color: C.subtle, textAlign: 'center' }}>
+                  <p style={{ margin: 0, fontSize: 11, color: C.subtle, textAlign: 'center' }}>
                     سامانهٔ خدمات شهری شهرشهر
                   </p>
                 </div>
@@ -311,26 +327,29 @@ export function TopMenu() {
             </SheetContent>
           </Sheet>
 
-          {/* city */}
-          <button
-            type="button"
-            onClick={() => setCityOpen(true)}
+          {/* The product's own name, in the sign-writer's face — the bar is
+              where it belongs. Which *city* you are in is the plaque's job on
+              the screen below, and saying it twice made neither one mean
+              anything; the city is still changed from here through the drawer,
+              and from the plaque itself on the home screen. */}
+          <Link
+            href="/"
+            aria-label="شهرشهر — خانه"
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7, flexShrink: 0,
-              padding: '5px 11px 5px 5px', borderRadius: 999, cursor: 'pointer', fontFamily: 'inherit',
-              background: 'rgba(255,255,255,0.14)', border: '1px solid rgba(255,255,255,0.22)',
-              color: C.onHero, fontSize: S.xs, fontWeight: 800,
+              display: 'inline-flex', alignItems: 'baseline', gap: 6, flexShrink: 0,
+              // A 44px-high target: it was 23px, which is a link you have to
+              // aim at rather than one you can tap.
+              minHeight: 44, paddingBlock: 10, paddingInline: 2,
+              textDecoration: 'none', color: C.enamelInk,
             }}
           >
-            {selectedCity?.icon ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={selectedCity.icon} alt={`نشان شهر ${selectedCity.name}`} style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover' }} />
-            ) : (
-              <MapPin className="h-4 w-4" />
+            <span className="sh-display" style={{ fontSize: S.md }}>شهرشهر</span>
+            {selectedCity?.name && (
+              <span style={{ fontSize: S.xs, fontWeight: 600, color: C.muted, whiteSpace: 'nowrap' }}>
+                <bdi>{selectedCity.name}</bdi>
+              </span>
             )}
-            <span style={{ whiteSpace: 'nowrap' }}>{selectedCity?.name || 'انتخاب شهر'}</span>
-            <ChevronDown className="h-3.5 w-3.5" style={{ opacity: 0.75 }} />
-          </button>
+          </Link>
 
           <span style={{ flex: 1 }} />
 
@@ -342,17 +361,17 @@ export function TopMenu() {
 
           {/* account */}
           {isAuthenticated ? (
-            <Link href="/profile" aria-label="پروفایل" style={{ color: C.onHero, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-              <CircleUser className="h-7 w-7" />
+            <Link href="/profile" aria-label="پروفایل" style={{ color: C.text, display: 'grid', placeItems: 'center', flexShrink: 0, width: 44, height: 44 }}>
+              <CircleUser className="h-6 w-6" />
             </Link>
           ) : (
             <Link
               href="/login"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0, textDecoration: 'none',
-                padding: '9px 14px', borderRadius: 999,
-                background: 'rgba(255,255,255,0.16)', border: '1px solid rgba(255,255,255,0.28)',
-                color: C.onHero, fontSize: S.xs, fontWeight: 800, whiteSpace: 'nowrap',
+                minHeight: 40, padding: '9px 14px', borderRadius: S.r1,
+                background: C.enamel, border: `1px solid ${C.enamel}`,
+                color: C.onHero, fontSize: S.xs, fontWeight: 700, whiteSpace: 'nowrap',
               }}
             >
               <LogIn className="h-4 w-4" />

@@ -134,8 +134,8 @@ function ServiceTile({
                 deciding to go swimming on Thursday. */}
             <span
               style={{
-                fontSize: 10, fontWeight: 700, whiteSpace: 'nowrap',
-                color: entry.access === 'open' ? '#4ade9f' : entry.access === 'browse' ? 'var(--ss-brass)' : INK.faint,
+                fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap',
+                color: entry.access === 'open' ? '#63cddb' : entry.access === 'browse' ? 'var(--ss-brass)' : INK.faint,
               }}
             >
               {entry.note}
@@ -203,7 +203,7 @@ function SessionCard({ slug, item }: { slug: string; item: CityHighlights['soon'
         <span className="ss-fig" style={{ fontSize: 12.5, fontWeight: 800, color: INK.text }}>
           {item.price > 0 ? `${fa(item.price)} تومان` : 'رایگان'}
         </span>
-        <span style={{ fontSize: 10.5, fontWeight: 800, color: item.left <= 3 ? 'var(--ss-brass)' : '#4ade9f' }}>
+        <span style={{ fontSize: 11.5, fontWeight: 800, color: item.left <= 3 ? 'var(--ss-brass)' : '#63cddb' }}>
           {fa(item.left)} جای خالی
         </span>
       </span>
@@ -287,7 +287,7 @@ export default function CityConsole({
                 aria-hidden
                 style={{
                   width: 7, height: 7, borderRadius: '50%', flexShrink: 0,
-                  background: city.isActive ? (index === selected ? '#201603' : '#4ade9f') : 'transparent',
+                  background: city.isActive ? (index === selected ? '#201603' : '#3fb3c2') : 'transparent',
                   border: city.isActive ? 'none' : `1.5px dashed ${index === selected ? '#201603' : '#e3ad55'}`,
                 }}
               />
@@ -346,7 +346,7 @@ export default function CityConsole({
               {city.isActive ? (
                 <>
                   <strong style={{ color: INK.text, fontWeight: 800 }}>شهرداری {city.name}</strong>
-                  <span className="ss-fig" style={{ color: '#4ade9f', fontWeight: 800 }}>{fa(active.length)}</span>
+                  <span className="ss-fig" style={{ color: '#63cddb', fontWeight: 800 }}>{fa(active.length)}</span>
                   خدمت را آنلاین ارائه می‌کند.
                   <Link
                     href={cityHref(city)}
@@ -399,7 +399,7 @@ export default function CityConsole({
                 <p style={{ display: 'flex', alignItems: 'center', gap: 8, margin: `0 0 ${S.s3}px`, fontSize: 12, fontWeight: 800, color: INK.muted }}>
                   <CalendarCheck className="h-3.5 w-3.5" style={{ color: 'var(--ss-brass)' }} aria-hidden />
                   نزدیک‌ترین سانس‌های آزاد در {city.name}
-                  <span style={{ fontSize: 10.5, fontWeight: 700, color: INK.faint }}>
+                  <span style={{ fontSize: 11.5, fontWeight: 700, color: INK.faint }}>
                     برای دیدن و رزرو، ثبت‌نام لازم نیست
                   </span>
                 </p>
@@ -422,7 +422,7 @@ export default function CityConsole({
                   >
                     <span>
                       همهٔ اماکن
-                      <span style={{ display: 'block', marginTop: 4, fontSize: 10.5, color: INK.faint, fontWeight: 700 }}>
+                      <span style={{ display: 'block', marginTop: 4, fontSize: 11.5, color: INK.faint, fontWeight: 700 }}>
                         و تقویم کامل
                       </span>
                     </span>

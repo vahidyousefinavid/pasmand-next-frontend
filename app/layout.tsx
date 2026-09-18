@@ -107,8 +107,8 @@ export default function RootLayout({
             headings. Fetching them alongside the CSS rather than after it
             removes a round trip on a cold load; Medium is left to load on
             demand, since little above the fold is set in it. */}
-        <link rel="preload" href="/fonts/iransans/IRANSansWeb.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preload" href="/fonts/iransans/IRANSansWeb_Bold.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/estedad/Estedad-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
+        <link rel="preload" href="/fonts/lalezar/Lalezar.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         {/* Who runs this site, what it does and where — stated once, in the form
             Google reads directly instead of inferring from the copy. */}
         <JsonLd data={ORGANISATION_LD} />
