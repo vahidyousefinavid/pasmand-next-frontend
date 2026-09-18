@@ -132,7 +132,7 @@ export function PublicHeader({ signedIn }: { signedIn: boolean }) {
           <span style={{ display: 'block', fontSize: 11, color: C.muted }}>سامانهٔ خدمات شهری</span>
         </span>
 
-        <nav style={{ display: 'flex', alignItems: 'center', gap: S.s4 }}>
+        <nav className="ss-head-nav" style={{ display: 'flex', alignItems: 'center', gap: S.s4, minWidth: 0 }}>
           {HEADER_LINKS.map((link) => (
             <Link
               key={link.href}
@@ -146,14 +146,18 @@ export function PublicHeader({ signedIn }: { signedIn: boolean }) {
           <Link
             href={signedIn ? '/' : '/login'}
             style={{
-              display: 'inline-flex', alignItems: 'center', gap: 6, textDecoration: 'none',
-              padding: '10px 17px', borderRadius: 999,
-              background: C.green, color: C.onAccent, fontSize: 13, fontWeight: 800,
-              boxShadow: `0 6px 16px ${alpha(C.green, 26)}`,
+              display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0,
+              textDecoration: 'none', whiteSpace: 'nowrap',
+              minHeight: 40, padding: '10px 15px', borderRadius: S.r1,
+              background: C.enamel, color: C.onHero, fontSize: 13, fontWeight: 700,
             }}
           >
             {signedIn ? <LayoutGrid className="h-3.5 w-3.5" /> : <LogIn className="h-3.5 w-3.5" />}
-            {signedIn ? 'ورود به برنامه' : 'ورود شهروندان'}
+            ورود
+            {/* The qualifier is the first thing to go when the row is tight —
+                losing it costs nothing, losing the menu button costs the site's
+                navigation. */}
+            <span className="ss-hide-tight">{signedIn ? ' به برنامه' : ' شهروندان'}</span>
           </Link>
 
           <button
@@ -163,8 +167,8 @@ export function PublicHeader({ signedIn }: { signedIn: boolean }) {
             aria-expanded={menuOpen}
             aria-label={menuOpen ? 'بستن منو' : 'منوی سایت'}
             style={{
-              alignItems: 'center', justifyContent: 'center',
-              width: 40, height: 40, padding: 0, borderRadius: 12,
+              alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              width: 44, height: 44, padding: 0, borderRadius: S.r1,
               background: C.surface, border: `1px solid ${C.border}`, color: C.textStrong, cursor: 'pointer',
             }}
           >

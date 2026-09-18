@@ -159,7 +159,7 @@ export default function Landing({
             style={{
               position: 'absolute', inset: 0, zIndex: -1,
               background:
-                'linear-gradient(to left, rgba(6,32,24,.35) 0%, rgba(6,32,24,.86) 55%, rgba(6,32,24,.95) 100%)',
+                'linear-gradient(to left, rgba(10,45,78,.35) 0%, rgba(10,45,78,.88) 55%, rgba(10,45,78,.96) 100%)',
             }}
           />
 

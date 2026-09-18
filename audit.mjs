@@ -13,7 +13,7 @@ import { chromium } from '/root/.claude/skills/playwright-skill/node_modules/pla
 const THEME = process.argv[2] || 'light';
 /** Optional comma-separated paths, for re-running what a crashed run missed. */
 const ONLY = (process.argv[3] || '').split(',').filter(Boolean);
-const BASE = 'http://127.0.0.1:3020';
+const BASE = process.env.BASE || 'http://127.0.0.1:3020';
 
 const AUTHED = ['/', '/activity', '/new-request', '/history', '/venues', '/reports',
   '/cartable', '/deceased', '/wallet', '/messages', '/notifications', '/profile', '/addresses'];
@@ -39,7 +39,8 @@ async function audit(paths, { authed }) {
     } catch {}
   }, THEME);
   if (authed) {
-    await context.addCookies([{ name: 'auth_token', value: 'dev-token', domain: '127.0.0.1', path: '/' }]);
+    const host = new URL(BASE).hostname;
+    await context.addCookies([{ name: 'auth_token', value: 'dev-token', domain: host, path: '/' }]);
   }
 
   for (const path of paths) {

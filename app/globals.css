@@ -1046,6 +1046,12 @@ html[data-theme=dark] .ss-board {
    hiding them used to leave a phone with the mark and «ورود» alone, so every
    other public page was reachable only from the footer, under a long landing
    page. */
+.ss-hide-tight { display: none; }
+
+@media (min-width: 480px) {
+  .ss-hide-tight { display: inline; }
+}
+
 .ss-only-wide { display: none; }
 .ss-only-narrow { display: inline-flex; }
 

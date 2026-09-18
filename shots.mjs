@@ -13,7 +13,7 @@ import { mkdirSync } from 'node:fs';
 
 const OUT = process.argv[2] || 'shots';
 const ONLY = process.argv[3] || '';
-const BASE = 'http://127.0.0.1:3020';
+const BASE = process.env.BASE || 'http://127.0.0.1:3020';
 
 const SCREENS = [
   ['welcome', '/welcome', 'public'],
