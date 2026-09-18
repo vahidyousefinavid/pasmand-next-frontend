@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   CircleUser, MenuIcon, LogIn, Leaf, MapPin, ChevronDown, ChevronLeft, Check, X,
   PackagePlus, FileClock, Wallet, MapPinned, Banknote, Trash2, BookOpen, User, Headphones,
+  Settings,
   MessagesSquare, Bell, ListChecks,
   Globe,
   type LucideIcon,
@@ -63,6 +64,10 @@ const MENU_GROUPS: { label: string; items: { title: string; sub: string; href: s
     label: 'حساب',
     items: [
       { title: 'پروفایل', sub: 'اطلاعات شخصی شما', href: '/profile', Icon: User, color: C.statusNeutral },
+      // `/settings` had no inbound link anywhere in the app, and it is the only
+      // place the light/dark theme can be changed — the setting existed but
+      // could be reached only by typing the URL.
+      { title: 'تنظیمات', sub: 'ظاهر برنامه و حالت روشن/تاریک', href: '/settings', Icon: Settings, color: C.statusNeutral },
       { title: 'پشتیبانی', sub: 'تماس، ایمیل و گفتگو', href: '/contact-us', Icon: Headphones, color: C.statusNeutral },
       // The public site is a one-way door without this. `/` serves the landing
       // page only to visitors with no cookie, so once you are signed in the

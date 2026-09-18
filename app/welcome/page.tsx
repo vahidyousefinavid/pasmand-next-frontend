@@ -18,13 +18,40 @@ import { HOME_FAQS } from '@/lib/faq';
  */
 export const dynamic = 'force-dynamic';
 
+/**
+ * Lets the 60-second data cache in lib/publicData.ts actually apply:
+ * `force-dynamic` alone forces every fetch to `no-store`. Rendering stays
+ * per-request; only the upstream call is reused, which is what keeps a
+ * momentary API timeout from blanking the services section — the API on this
+ * box timed out eighteen times in half an hour when this was measured.
+ *
+ * The 30-minute version of this was reverted once because a municipality
+ * switching a service on did not appear on the public site for half an hour.
+ * Sixty seconds keeps the resilience without that.
+ */
+export const fetchCache = 'default-cache';
+
+
+/**
+ * No `fetchCache` override here, deliberately.
+ *
+ * `force-dynamic` also flips every `fetch` on the route to `no-store`, which
+ * looks wasteful next to the 30-minute `revalidate` in lib/publicData.ts — so
+ * this route briefly carried `fetchCache = 'default-cache'` to «restore» it.
+ * That was wrong twice over: it made no measurable difference to TTFB, and it
+ * meant a municipality switching a service on in the panel did not appear on
+ * the public site for up to half an hour. Which services a city runs has to be
+ * true the moment it is changed; a cached rate board is not worth a city
+ * believing its own panel is broken.
+ */
+
 export const metadata = {
   ...pageMeta({
     title: 'شهر شهر | سامانهٔ خدمات شهری — شهروند سبز',
     // Named services rather than one service, because there are five of them
     // now and each city chooses its own — which is also what the page shows.
     description:
-      'شهرشهر (شهر شهر) سامانهٔ خدمات شهری است؛ خدمات شهرداری را از تلفن همراه به شهروندان می‌رساند: جمع‌آوری و خرید پسماند خشک از درِ خانه، سامانهٔ ۱۳۷، کارتابل شهروندی، رزرو اماکن و جست‌وجوی درگذشتگان — خدمات فعالِ هر شهر را بدون ثبت‌نام ببینید.',
+      'شهرشهر (شهر شهر) سامانهٔ خدمات شهری است؛ با همکاری شهرداری‌ها خدمات شهر را از تلفن همراه به شهروندان می‌رساند: جمع‌آوری و خرید پسماند خشک از درِ خانه، سامانهٔ ۱۳۷، کارتابل شهروندی، رزرو اماکن و جست‌وجوی درگذشتگان — خدمات فعالِ هر شهر را بدون ثبت‌نام ببینید.',
     path: '/',
     keywords: [...MUNICIPAL_KEYWORDS, ...SERVICE_KEYWORDS, ...cityKeywords(['خدمات شهری', 'خرید ضایعات'])],
   }),

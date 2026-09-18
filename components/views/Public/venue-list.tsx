@@ -47,7 +47,7 @@ export default function PublicVenueList({
 
       <header style={{ marginTop: S.s4, maxWidth: '58ch' }}>
         <h1 className="ss-display" style={{ margin: 0, fontSize: 'var(--ss-h2)', color: C.textStrong }}>
-          اماکن قابل رزرو شهرداری {city.name}
+          اماکن قابل رزرو {city.name}
         </h1>
         <p style={{ margin: '12px 0 0', fontSize: S.sm, color: C.muted, lineHeight: 2.1 }}>
           {venues.length > 0 ? (

@@ -21,7 +21,7 @@ const APP_NAME = 'شهرشهر';
 const APP_DEFAULT_TITLE = 'شهر شهر | سامانهٔ خدمات شهری — شهروند سبز';
 const APP_TITLE_TEMPLATE = '%s | شهرشهر';
 const APP_DESCRIPTION =
-  'شهرشهر (شهر شهر) سامانهٔ خدمات شهری است و خدمات شهرداری را از تلفن همراه به شهروندان می‌رساند. خدمت فعال امروز: جمع‌آوری و خرید پسماند خشک از درِ خانه، توزین در محل و پرداخت به کیف پول.';
+  'شهرشهر (شهر شهر) سامانهٔ خدمات شهری است و با همکاری شهرداری‌ها خدمات شهری را از تلفن همراه به شهروندان می‌رساند. خدمت فعال امروز: جمع‌آوری و خرید پسماند خشک از درِ خانه، توزین در محل و پرداخت به کیف پول.';
 
 // The typeface is declared once as an @font-face in globals.css and served from
 // /public/fonts. It used to be four next/font/local faces here, none of which

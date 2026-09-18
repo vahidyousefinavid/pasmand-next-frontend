@@ -61,7 +61,7 @@ export default function CityHub({
 
       <header style={{ marginTop: S.s4, maxWidth: '60ch' }}>
         <h1 className="ss-display" style={{ margin: 0, fontSize: 'var(--ss-h2)', color: C.textStrong }}>
-          خدمات شهرداری {city.name}
+          خدمات شهر {city.name}
         </h1>
         <p style={{ margin: '12px 0 0', fontSize: S.sm, color: C.muted, lineHeight: 2.1 }}>
           {active.length > 0 ? (

@@ -126,7 +126,7 @@ export default function ActivityPage() {
       <Hero
         icon={<ListChecks className="h-6 w-6" />}
         title="کارهای من"
-        sub="هر چیزی که در شهرداری در جریان دارید — درخواست، رزرو، گزارش و نامه — در یک فهرست."
+        sub="هر چیزی که در شهر در جریان دارید — درخواست، رزرو، گزارش و نامه — در یک فهرست."
         aside={
           <div style={{ textAlign: 'start' }}>
             <p style={{ margin: 0, fontSize: S.xs, color: C.onHeroMuted, fontWeight: 600 }}>در جریان</p>
@@ -179,7 +179,7 @@ export default function ActivityPage() {
               sub={
                 filter === 'open'
                   ? 'هر درخواست، رزرو، گزارش یا نامه‌ای که ثبت کنید تا بسته‌شدنش همین‌جا دنبال می‌شود.'
-                  : 'از خانه یکی از خدمات شهرداری را انتخاب کنید تا اولین کارتان این‌جا بنشیند.'
+                  : 'از خانه یکی از خدمات شهر را انتخاب کنید تا اولین کارتان این‌جا بنشیند.'
               }
               action={
                 <Link

@@ -3,12 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "browserslist": [
-    ">0.2%",
+    ">0.3%",
     "not dead",
     "not op_mini all",
-    "ie >= 11",
-    "Android >= 5",
-    "iOS >= 10"
+    "iOS >= 12",
+    "Android >= 8"
   ],
   "scripts": {
     "dev": "next dev",

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Cookies from 'js-cookie';
-import { LayoutGrid, LogIn } from 'lucide-react';
+import { LayoutGrid, LogIn, Menu, X } from 'lucide-react';
 
 import { C, S, alpha } from '@/components/ui/tokens';
 
@@ -82,8 +82,28 @@ export function useSignedIn() {
   return signedIn;
 }
 
+/**
+ * The public site's own sections.
+ *
+ * One list, rendered twice: inline when the header has room, and inside the
+ * phone's menu when it does not. It is a single list on purpose — the two used
+ * to disagree, because only the wide one existed.
+ */
+const HEADER_LINKS = [
+  { href: '/tariff', label: 'قیمت روز' },
+  { href: '/waste-types', label: 'انواع پسماند' },
+  { href: '/guide', label: 'راهنمای جمع‌آوری' },
+];
+
+/** What the phone's menu adds beyond the inline links: the rest of the site. */
+const MENU_EXTRA_LINKS = [
+  { href: '/contact-us', label: 'پشتیبانی شهروندان' },
+  { href: '/report', label: 'معرفی سامانه' },
+];
+
 export function PublicHeader({ signedIn }: { signedIn: boolean }) {
   const [stuck, setStuck] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setStuck(window.scrollY > 12);
@@ -91,6 +111,15 @@ export function PublicHeader({ signedIn }: { signedIn: boolean }) {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // A menu that stays open behind a tap on a link is the phone equivalent of a
+  // stuck dropdown; Escape closes it too, for the keyboard.
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
 
   return (
       <header className="ss-head" data-stuck={stuck}>
@@ -104,15 +133,16 @@ export function PublicHeader({ signedIn }: { signedIn: boolean }) {
         </span>
 
         <nav style={{ display: 'flex', alignItems: 'center', gap: S.s4 }}>
-          <Link href="/tariff" className="ss-only-wide" style={{ fontSize: 13, fontWeight: 700, color: C.text, textDecoration: 'none' }}>
-            قیمت روز
-          </Link>
-          <Link href="/waste-types" className="ss-only-wide" style={{ fontSize: 13, fontWeight: 700, color: C.text, textDecoration: 'none' }}>
-            انواع پسماند
-          </Link>
-          <Link href="/guide" className="ss-only-wide" style={{ fontSize: 13, fontWeight: 700, color: C.text, textDecoration: 'none' }}>
-            راهنما
-          </Link>
+          {HEADER_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="ss-only-wide"
+              style={{ fontSize: 13, fontWeight: 700, color: C.text, textDecoration: 'none' }}
+            >
+              {link.label === 'راهنمای جمع‌آوری' ? 'راهنما' : link.label}
+            </Link>
+          ))}
           <Link
             href={signedIn ? '/' : '/login'}
             style={{
@@ -125,8 +155,61 @@ export function PublicHeader({ signedIn }: { signedIn: boolean }) {
             {signedIn ? <LayoutGrid className="h-3.5 w-3.5" /> : <LogIn className="h-3.5 w-3.5" />}
             {signedIn ? 'ورود به برنامه' : 'ورود شهروندان'}
           </Link>
+
+          <button
+            type="button"
+            className="ss-only-narrow"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? 'بستن منو' : 'منوی سایت'}
+            style={{
+              alignItems: 'center', justifyContent: 'center',
+              width: 40, height: 40, padding: 0, borderRadius: 12,
+              background: C.surface, border: `1px solid ${C.border}`, color: C.textStrong, cursor: 'pointer',
+            }}
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
         </nav>
       </div>
+
+      {menuOpen && (
+        <div
+          className="ss-only-narrow"
+          style={{ display: 'block', borderTop: `1px solid ${C.border}`, background: C.surface }}
+        >
+          <nav className="ss-wrap" aria-label="منوی سایت" style={{ display: 'grid', gap: 2, padding: `${S.s3}px 0 ${S.s4}px` }}>
+            {[...HEADER_LINKS, ...MENU_EXTRA_LINKS].map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                style={{
+                  display: 'block', padding: '13px 4px', borderRadius: 10,
+                  fontSize: 14, fontWeight: 700, color: C.text, textDecoration: 'none',
+                }}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <p style={{ margin: `${S.s3}px 0 6px`, padding: '0 4px', fontSize: 11, fontWeight: 800, color: C.subtle }}>شهرها</p>
+            {CITY_LINKS.map((city) => (
+              <Link
+                key={city.slug}
+                href={`/city/${city.slug}`}
+                onClick={() => setMenuOpen(false)}
+                style={{
+                  display: 'block', padding: '11px 4px', borderRadius: 10,
+                  fontSize: 13, fontWeight: 700, color: C.muted, textDecoration: 'none',
+                }}
+              >
+                خدمات شهر {city.name}
+              </Link>
+            ))}
+          </nav>
+        </div>
+      )}
     </header>
 
   );
@@ -197,7 +280,7 @@ export function PublicFooter({ signedIn }: { signedIn: boolean }) {
             furniture rather than only on the front page's console. */}
         <FooterColumn
           title="شهرها"
-          links={CITY_LINKS.map((city) => ({ href: `/city/${city.slug}`, label: `خدمات شهرداری ${city.name}` }))}
+          links={CITY_LINKS.map((city) => ({ href: `/city/${city.slug}`, label: `خدمات شهر ${city.name}` }))}
         />
 
         <FooterColumn
@@ -225,7 +308,8 @@ export function PublicFooter({ signedIn }: { signedIn: boolean }) {
 
       <div className="ss-wrap" style={{ paddingBottom: S.s5 }}>
         <p style={{ margin: 0, paddingTop: S.s4, borderTop: `1px solid ${C.border}`, fontSize: 11, color: C.subtle, lineHeight: 2 }}>
-          شهرشهر — شهروند سبز · خدمات شهری هر شهر زیر نظر شهرداری همان شهر ارائه می‌شود.
+          شهرشهر — شهروند سبز · پلتفرمی که با همکاری شهرداری‌ها خدمات شهری را آنلاین می‌کند؛
+          هر خدمت را شهرداری همان شهر ارائه می‌دهد.
         </p>
       </div>
     </footer>

@@ -8,8 +8,8 @@
  * side leaking into the other.
  */
 
-import { ReactNode, CSSProperties } from 'react';
-import { Check } from 'lucide-react';
+import { ReactNode, CSSProperties, useEffect } from 'react';
+import { Check, X } from 'lucide-react';
 import { C, S, alpha } from './tokens';
 
 /* ── page chrome ─────────────────────────────────────────────────────────── */
@@ -411,6 +411,26 @@ export function StepRail({
 /* ── overlays ────────────────────────────────────────────────────────────── */
 
 export function Modal({ children, onClose, wide }: { children: ReactNode; onClose: () => void; wide?: boolean }) {
+  /**
+   * Escape closes it, and so does a visible button.
+   *
+   * Tapping the backdrop used to be the only way out. That is fine for a
+   * confirmation the size of a postcard and useless for the ones that are not:
+   * the construction form is taller than the screen, so the backdrop is
+   * scrolled off and there is nothing to tap — a sheet with no way back.
+   */
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    // A page scrolling behind an open sheet is the other half of feeling stuck.
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = previous;
+    };
+  }, [onClose]);
+
   return (
     <div
       dir="rtl"
@@ -422,12 +442,30 @@ export function Modal({ children, onClose, wide }: { children: ReactNode; onClos
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
         onClick={(e) => e.stopPropagation()}
         style={{
+          position: 'relative',
           width: '100%', maxWidth: wide ? 620 : 420, maxHeight: '88vh', overflowY: 'auto',
           background: C.surface, borderRadius: S.r4, boxShadow: C.shadowSheet, color: C.text,
         }}
       >
+        {/* Sticky, so it is still reachable at the bottom of a long form. */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="بستن"
+          style={{
+            position: 'sticky', top: S.s3, insetInlineStart: '100%',
+            display: 'grid', placeItems: 'center', flexShrink: 0,
+            width: 34, height: 34, marginInlineEnd: S.s3, marginBottom: -34,
+            borderRadius: 999, cursor: 'pointer', zIndex: 2,
+            background: C.surface2, border: `1px solid ${C.border}`, color: C.muted,
+          }}
+        >
+          <X className="h-4 w-4" />
+        </button>
         {children}
       </div>
     </div>

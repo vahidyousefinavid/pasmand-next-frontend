@@ -12,8 +12,8 @@ import type { BoardCity, PublicCity, PublicService } from '@/lib/publicData';
 import type { CityHighlights } from '@/lib/publicVenues';
 import RateBoard from './rate-board';
 import IranMap from './iran-map';
-import CityConsole from './city-console';
 import { PublicFooter, PublicHeader, SectionHead, useSignedIn } from './public-chrome';
+import ServiceGrid from './service-grid';
 
 /**
  * The front door of شهرشهر.
@@ -122,49 +122,96 @@ export default function Landing({
       <PublicHeader signedIn={signedIn} />
 
       <main>
-        {/* ── hero: your city, and what it can do for you today ──
-            The headline used to share this screen with the price board, and
-            everything a city actually offers began four sections further down.
-            Somebody who came to book a hall met a paragraph about waste. The
-            console is now the first thing on the page, because «شهرداری شهر من
-            چه کاری را آنلاین انجام می‌دهد، و چطور همین حالا انجامش بدهم؟» is
-            the question this site exists to answer. */}
-        <section className="ss-wrap" style={{ paddingTop: 'clamp(18px, 2.6vw, 38px)', paddingBottom: 'clamp(24px, 3.4vw, 46px)' }}>
-          <div className="ss-hero">
-            <div>
-              <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', color: 'var(--ss-brass-ink)' }}>
-                خدمات شهری شهرشهر · شهروند سبز
-              </p>
+        {/* ── hero ──
+            A photograph, because the page had none and a wall of green cards
+            asks a newcomer to read before it gives them anything to look at.
+            It is a real place — the garden at Avicenna's tomb in همدان, from
+            Wikimedia Commons — not stock: a municipal site showing a city that
+            is not its own would be the first thing it got wrong. The overlay
+            is heavy on purpose; the picture sets a mood and the words have to
+            stay readable on a phone in sunlight. */}
+        <section
+          style={{
+            position: 'relative',
+            isolation: 'isolate',
+            overflow: 'hidden',
+            // Deliberately short. A full-screen hero on a phone means the
+            // services — the reason anybody is here — start below the fold.
+            minHeight: 'clamp(300px, 42vh, 420px)',
+            display: 'grid',
+            alignItems: 'center',
+          }}
+        >
+          <img
+            src="/img/hero-city.jpg"
+            alt="باغ آرامگاه بوعلی‌سینا در همدان"
+            loading="eager"
+            /* eslint-disable-next-line @next/next/no-img-element */
+            style={{
+              position: 'absolute', inset: 0, zIndex: -2,
+              width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 58%',
+            }}
+          />
+          {/* Two layers: a brand-tinted wash so the photo reads as ours, and a
+              directional gradient that keeps the text side darkest. */}
+          <span
+            aria-hidden
+            style={{
+              position: 'absolute', inset: 0, zIndex: -1,
+              background:
+                'linear-gradient(to left, rgba(6,32,24,.35) 0%, rgba(6,32,24,.86) 55%, rgba(6,32,24,.95) 100%)',
+            }}
+          />
 
-              <h1 className="ss-display" style={{ margin: '12px 0 0', color: C.textStrong }}>
-                خدمات شهرداریِ شهر شما،
-                <br />
-                <span style={{ color: C.green }}>همین‌جا</span>.
-              </h1>
+          <div className="ss-wrap" style={{ paddingBlock: 'clamp(28px, 4vw, 56px)' }}>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', color: 'var(--ss-brass-on-dark, #e6c98a)' }}>
+              شهرشهر · شهروند سبز · با همکاری شهرداری‌ها
+            </p>
 
-              <p style={{ margin: '14px 0 0', fontSize: S.base, color: C.muted, lineHeight: 2, maxWidth: '34ch' }}>
-                شهر خود را انتخاب کنید و ببینید شهرداری‌تان چه خدماتی را آنلاین ارائه می‌کند — بدون
-                ثبت‌نام.
-              </p>
+            <h1
+              className="ss-display"
+              style={{ margin: '14px 0 0', color: '#fff', maxWidth: '18ch', textWrap: 'balance' as any }}
+            >
+              خدمات شهرِ شما،
+              <br />
+              همین‌جا.
+            </h1>
+
+            <p style={{ margin: '16px 0 0', fontSize: S.base, color: 'rgba(255,255,255,.82)', lineHeight: 2, maxWidth: '40ch' }}>
+              رزرو سالن، گزارش مشکل شهری، قیمت روز پسماند — بیشترشان بدون ثبت‌نام.
+            </p>
+
+            <div style={{ display: 'flex', gap: S.s3, flexWrap: 'wrap', marginTop: S.s5 }}>
+              <a href="#services" className="ss-cta-primary">
+                خدمات شهرم را ببین
+              </a>
+              <Link href={signedIn ? '/' : '/login'} className="ss-cta-ghost">
+                {signedIn ? 'ورود به برنامه' : 'ورود شهروندان'}
+              </Link>
             </div>
 
-            {/* The one thing on this screen that is not a sentence. */}
-            <CityConsole cities={cities} catalogue={catalogue} highlights={highlights} />
+            {cityNames.length > 0 && (
+              <p style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: `${S.s5}px 0 0`, fontSize: S.sm, color: 'rgba(255,255,255,.72)' }}>
+                <MapPin className="h-4 w-4" style={{ color: '#7fd4ab' }} aria-hidden />
+                فعال در
+                <strong style={{ color: '#fff', fontWeight: 800 }}>{cityNames.join('، ')}</strong>
+              </p>
+            )}
           </div>
-
-          {cityNames.length > 0 && (
-            <p style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: `${S.s4}px 0 0`, fontSize: S.sm, color: C.muted }}>
-              <MapPin className="h-4 w-4" style={{ color: C.green }} aria-hidden />
-              فعال در
-              <strong style={{ color: C.textStrong, fontWeight: 800 }}>{cityNames.join('، ')}</strong>
-              {mostServices > 1 && (
-                <span>
-                  · تا <strong className="ss-fig" style={{ color: C.textStrong, fontWeight: 800 }}>{fa(mostServices)}</strong> خدمت در یک شهر
-                </span>
-              )}
-            </p>
-          )}
         </section>
+
+        {/* The question the site exists to answer, asked before anything else
+            is explained. */}
+        <div id="services" style={{ scrollMarginTop: 80 }}>
+          <ServiceGrid cities={cities} catalogue={catalogue} />
+        </div>
+
+        {/* The city console used to live here and is gone: it answered the
+            same question the grid above now answers — «کدام خدمت در شهر من
+            هست» — in a denser, less pressable form, and keeping both made the
+            phone page longer than the one this redesign set out to shorten.
+            Its per-venue detail belongs on the city's own page, which is where
+            a visitor who wants that depth is already headed. */}
 
         {/* ── نرخ امروز ──
             The board is the waste service's own proof, so it now stands with
@@ -329,72 +376,28 @@ export default function Landing({
           </div>
         </section>
 
-        {/* ── coverage: the country, and the two states a city can be in ── */}
+        {/* ── coverage ──
+            This was a 865px panel: a map of Iran, a stats pair and a list of
+            every city linking to its price page. All true, and none of it
+            something a citizen does — they already know which city they are
+            in, and they chose it two sections ago. It is now one line of fact
+            and a link, which is the part that was load-bearing: proof the
+            platform is real in more than one place. */}
         {cities.length > 0 && (
-          <section className="ss-wrap" style={{ paddingBottom: 'clamp(44px, 6vw, 88px)' }}>
-            <SectionHead
-              eyebrow="پوشش خدمات"
-              title={liveNames ? `امروز ${liveNames}. ساخته‌شده برای همهٔ ایران.` : 'ساخته‌شده برای همهٔ ایران.'}
-              sub="نقشه همان است که هست: شهرهای روشن، شهرهایی‌اند که خدمات در آن‌ها فعال است. شهرداری هر شهر تازه، با پنل و تعرفهٔ خودش به همین سامانه اضافه می‌شود."
-            />
-
-            <div
-              className="ss-board"
-              style={{
-                display: 'grid', gap: 'clamp(18px, 3vw, 36px)', alignItems: 'center',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                padding: 'clamp(18px, 3vw, 32px)',
-              }}
-            >
-              <IranMap cities={mapCities} />
-
-              {/* The same information as text and links — which is what a
-                  keyboard, a screen reader and a crawler actually read. */}
-              <div>
-                <div style={{ display: 'flex', gap: S.s3, flexWrap: 'wrap', marginBottom: S.s4 }}>
-                  <CoverageStat value={live.length} label="شهر فعال" tone="#4ade9f" />
-                  <CoverageStat value={soon.length} label="شهر در نوبت" tone="#e3ad55" />
-                </div>
-
-                <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'grid', gap: 8 }}>
-                  {cities.map((city) => (
-                    <li key={city._id}>
-                      <Link
-                        href={city.slug ? `/tariff/${city.slug}` : '/tariff'}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none',
-                          padding: '11px 14px', borderRadius: 14,
-                          background: 'rgba(255,255,255,0.05)', border: '1px solid var(--ss-line)',
-                        }}
-                      >
-                        <span
-                          aria-hidden
-                          style={{
-                            width: 9, height: 9, borderRadius: '50%', flexShrink: 0,
-                            background: city.isActive ? '#4ade9f' : 'transparent',
-                            border: city.isActive ? 'none' : '1.5px dashed #e3ad55',
-                            boxShadow: city.isActive ? '0 0 10px rgba(74,222,159,0.8)' : 'none',
-                          }}
-                        />
-                        <span style={{ flex: 1, minWidth: 0, fontSize: 14, fontWeight: 800, color: '#eef5f1' }}>
-                          {city.name}
-                        </span>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: city.isActive ? '#4ade9f' : '#e3ad55' }}>
-                          {city.isActive ? 'فعال' : 'به‌زودی'}
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-
-                <p style={{ margin: `${S.s4}px 0 0`, fontSize: 12, color: 'rgba(233,244,239,0.6)', lineHeight: 2 }}>
-                  شهر شما در فهرست نیست؟{' '}
-                  <Link href="/contact-us" style={{ color: 'var(--ss-brass)', fontWeight: 800 }}>
-                    به شهرداری‌تان معرفی‌اش کنید
-                  </Link>
-                  .
-                </p>
-              </div>
+          <section className="ss-wrap" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
+            <div className="ss-coverage">
+              <span className="ss-coverage-dot" aria-hidden />
+              <p style={{ margin: 0, fontSize: S.sm, color: C.text, lineHeight: 2 }}>
+                امروز در{' '}
+                <strong style={{ color: C.textStrong, fontWeight: 800 }}>{liveNames}</strong>{' '}
+                فعال است.
+                <span style={{ color: C.muted }}>
+                  {' '}شهرداری هر شهر تازه با پنل و تعرفهٔ خودش اضافه می‌شود.
+                </span>
+              </p>
+              <Link href="/tariff" className="ss-coverage-link">
+                قیمت هر شهر
+              </Link>
             </div>
           </section>
         )}
@@ -443,7 +446,7 @@ export default function Landing({
           </h2>
           <p style={{ margin: '14px auto 0', fontSize: S.sm, color: C.muted, lineHeight: 2.1, maxWidth: '48ch' }}>
             دیدن قیمت‌ها، اماکن و سانس‌ها ثبت‌نام نمی‌خواهد. برای رزرو، ثبت درخواست یا پیگیری نامه
-            یک‌بار با شمارهٔ موبایل وارد می‌شوید — کمتر از یک دقیقه — و هر خدمتی که شهرداری شهرتان بعد
+            یک‌بار با شمارهٔ موبایل وارد می‌شوید — کمتر از یک دقیقه — و هر خدمتی که شهرتان بعد
             از این اضافه کند، با همین حساب در دسترستان است.
           </p>
           <Link
@@ -460,72 +463,18 @@ export default function Landing({
           </Link>
         </section>
 
-        {/* ── for the municipalities themselves ── */}
-        <section className="ss-wrap" style={{ paddingBottom: 'clamp(44px, 6vw, 88px)' }}>
-          <div
-            className="ss-board"
-            style={{ padding: 'clamp(24px, 4vw, 44px)', display: 'grid', gap: S.s4, gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', alignItems: 'center' }}
-          >
-            <div>
-              <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', color: 'var(--ss-brass)' }}>
-                برای شهرداری‌ها
-              </p>
-              <h2 className="ss-display" style={{ margin: '12px 0 0', fontSize: 'var(--ss-h2)', color: '#f4f9f6' }}>
-                شهر خودتان را روی همین سامانه بیاورید
-              </h2>
-              <p style={{ margin: '14px 0 0', fontSize: 14, color: 'rgba(233,244,239,0.72)', lineHeight: 2.1, maxWidth: '48ch' }}>
-                هر شهر پنل مستقل خودش را دارد: تعرفه، خدمات، جمع‌آوران، شهروندان و گزارش‌ها — جدا از
-                شهرهای دیگر و زیر نظر مدیر همان شهر. حساب بانکی و تسویهٔ شهروندان هم از حساب خودِ
-                شهرداری انجام می‌شود.
-              </p>
-
-              {/* آنچه هر خدمت از روز اول دارد.
-                  This was a section of its own in the middle of the page —
-                  five feature cards, a screen and a third — addressed to
-                  nobody in particular. It is an argument for adopting the
-                  platform, so it belongs to the people being asked to adopt
-                  it, and it fits here in a fraction of the height. */}
-              <ul style={{ listStyle: 'none', margin: `${S.s4}px 0 0`, padding: 0, display: 'grid', gap: 9 }}>
-                {PLATFORM.map((item) => (
-                  <li key={item.title} style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
-                    <span style={{ flexShrink: 0, marginTop: 2, color: 'var(--ss-brass)' }} aria-hidden>
-                      ✦
-                    </span>
-                    <span style={{ minWidth: 0, fontSize: 13, color: 'rgba(233,244,239,0.82)', lineHeight: 1.9 }}>
-                      <strong style={{ color: '#f4f9f6', fontWeight: 800 }}>{item.title}</strong>
-                      {' — '}
-                      {item.body}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div style={{ display: 'flex', gap: S.s3, flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-              <Link
-                href="/contact-us"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none',
-                  padding: '14px 24px', borderRadius: 14,
-                  background: 'var(--ss-brass)', color: '#201603', fontSize: 14, fontWeight: 800,
-                }}
-              >
-                <Building2 className="h-4 w-4" aria-hidden />
-                تماس برای همکاری
-              </Link>
-              <Link
-                href="/report"
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 8, textDecoration: 'none',
-                  padding: '14px 22px', borderRadius: 14,
-                  background: 'rgba(255,255,255,0.08)', border: '1px solid var(--ss-line-strong)',
-                  color: '#eef5f1', fontSize: 14, fontWeight: 800,
-                }}
-              >
-                معرفی سامانه
-              </Link>
-            </div>
-          </div>
+        {/* The «برای شهرداری‌ها» pitch used to sit here and is gone.
+            It was 743px of a citizen's page addressed to somebody else — a
+            municipality deciding whether to buy the platform — and the site
+            already has a page for that audience at /report, linked from the
+            footer as «معرفی سامانه». One line is enough here. */}
+        <section className="ss-wrap" style={{ paddingBottom: 'clamp(36px, 5vw, 72px)' }}>
+          <p style={{ margin: 0, fontSize: S.sm, color: C.muted, textAlign: 'center', lineHeight: 2 }}>
+            شهرداری هستید و می‌خواهید شهرتان روی شهرشهر بیاید؟{' '}
+            <Link href="/report" style={{ color: C.green, fontWeight: 800, textDecoration: 'none' }}>
+              معرفی سامانه و مدل همکاری
+            </Link>
+          </p>
         </section>
 
       </main>

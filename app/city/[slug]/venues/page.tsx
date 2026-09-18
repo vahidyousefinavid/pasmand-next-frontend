@@ -15,11 +15,11 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const city = await getCityBySlug(params.slug);
-  if (!city) return pageMeta({ title: 'اماکن قابل رزرو', description: 'اماکن شهرداری‌ها روی شهرشهر.', path: '/' });
+  if (!city) return pageMeta({ title: 'اماکن قابل رزرو', description: 'اماکن شهرها روی شهرشهر.', path: '/' });
 
   return pageMeta({
-    title: `رزرو اماکن و سالن‌های شهرداری ${city.name}`,
-    description: `سالن ورزشی، استخر، فرهنگسرا و سالن اجتماعات شهرداری ${city.name}: سانس‌ها، ظرفیت و قیمت هر ساعت را ببینید و آنلاین رزرو کنید.`,
+    title: `رزرو اماکن و سالن‌های شهر ${city.name}`,
+    description: `سالن ورزشی، استخر، فرهنگسرا و سالن اجتماعات شهر ${city.name}: سانس‌ها، ظرفیت و قیمت هر ساعت را ببینید و آنلاین رزرو کنید.`,
     path: `/city/${city.slug}/venues`,
     keywords: [
       `رزرو سالن ${city.name}`,
@@ -52,7 +52,7 @@ export default async function CityVenues({
         data={{
           '@context': 'https://schema.org',
           '@type': 'ItemList',
-          name: `اماکن قابل رزرو شهرداری ${city.name}`,
+          name: `اماکن قابل رزرو شهر ${city.name}`,
           numberOfItems: data.venues.length,
           itemListElement: data.venues.map((venue, index) => ({
             '@type': 'ListItem',

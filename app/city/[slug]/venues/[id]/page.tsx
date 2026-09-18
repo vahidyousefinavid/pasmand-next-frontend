@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: { slug: string; id:
   const data = city ? await getCityVenue(city.slug || city._id, params.id) : null;
 
   if (!city || !data) {
-    return pageMeta({ title: 'رزرو اماکن', description: 'اماکن شهرداری‌ها روی شهرشهر.', path: '/' });
+    return pageMeta({ title: 'رزرو اماکن', description: 'اماکن شهرها روی شهرشهر.', path: '/' });
   }
 
   return pageMeta({

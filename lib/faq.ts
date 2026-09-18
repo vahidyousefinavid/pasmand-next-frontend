@@ -43,12 +43,22 @@ export const GUIDE_FAQS: Faq[] = [
  * visitor who arrived to book a hall met «حداقل مقدار پسماند چقدر است؟» as the
  * page's idea of what they might be wondering.
  *
- * These three come first because they are the questions somebody has about a
- * municipal platform they have never seen — what is on it, whether they must
- * register, and what to do if their city is not listed — and the waste ones
- * follow, still answered, no longer speaking for every service.
+ * These four come first because they are the questions somebody has about a
+ * municipal platform they have never seen — who runs it, what is on it, whether
+ * they must register, and what to do if their city is not listed — and the
+ * waste ones follow, still answered, no longer speaking for every service.
+ *
+ * The first one exists because nothing else on the site answered it. A citizen
+ * meeting a page full of «خدمات شهرداری» reasonably assumes the شهرداری built
+ * it; a شهرداری evaluating it needs to know it is a partner's platform, not a
+ * claim on their own name. It states the division plainly — they provide the
+ * service, شهرشهر provides the software.
  */
 export const HOME_FAQS: Faq[] = [
+  {
+    q: 'شهرشهر را چه کسی اداره می‌کند؟',
+    a: 'شهرشهر یک شرکت خصوصی فعال در حوزهٔ خدمات شهری است که با همکاری شهرداری‌ها کار می‌کند. هر شهرداری تصمیم می‌گیرد کدام خدمات را روی شهرشهر ارائه کند و خودِ شهرداری آن خدمت را انجام می‌دهد؛ شهرشهر بستر فنی، اپلیکیشن و پشتیبانی شهروندان را فراهم می‌کند.',
+  },
   {
     q: 'شهرداری من چه خدماتی روی شهرشهر دارد؟',
     a: 'هر شهرداری خودش تعیین می‌کند کدام خدمت فعال باشد. شهر خود را بالای همین صفحه انتخاب کنید تا فهرست خدمات فعال همان شهر را ببینید — از جمع‌آوری پسماند و رزرو اماکن تا سامانهٔ ۱۳۷، کارتابل شهروندی و جست‌وجوی درگذشتگان.',

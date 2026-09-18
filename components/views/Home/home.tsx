@@ -24,6 +24,7 @@ import { useCity } from '@/context/data-context';
 import { C, S, alpha, fa } from '@/components/ui/tokens';
 import { Screen, Hero, Card, IconBadge, SectionTitle, Shimmer } from '@/components/ui/kit';
 import { serviceIcon, useCityServices } from '@/lib/cityServices';
+import PageSkeleton from '@/components/views/page-skeleton';
 
 /**
  * Home.
@@ -134,7 +135,12 @@ export default function HomeView() {
    * The modules this municipality has switched on — the first thing on the
    * screen now, and the reason this app is not a waste app.
    */
-  const { services: cityModules, loading: modulesLoading } = useCityServices();
+  const {
+    services: cityModules,
+    loading: modulesLoading,
+    failed: modulesFailed,
+    retry: retryModules,
+  } = useCityServices();
 
   const [mounted, setMounted] = useState(false);
   const [slide, setSlide] = useState(0);
@@ -158,7 +164,11 @@ export default function HomeView() {
     return () => clearInterval(id);
   }, []);
 
-  if (!mounted) return null;
+  // Returning null here used to blank the whole screen for the frame between
+  // paint and hydration — on every single visit to the app's home. The guard is
+  // still needed (what follows reads the browser's own state), but it can hand
+  // back the same skeleton the rest of the app uses instead of nothing.
+  if (!mounted) return <PageSkeleton />;
 
   const name = (user as any)?.firstName || (user as any)?.name || '';
 
@@ -175,9 +185,9 @@ export default function HomeView() {
             // lets its halls, answers ۱۳۷ and keeps a cartable.
             selectedCity?.name
               ? cityModules.length > 1
-                ? `خدمات شهرداری ${selectedCity.name}، از همین‌جا.`
+                ? `خدمات شهر ${selectedCity.name}، از همین‌جا.`
                 : `پسماند خانه‌تان را در ${selectedCity.name} بفروشید؛ ما درِ خانه تحویل می‌گیریم.`
-              : 'خدمات شهرداری شهرتان، از همین‌جا.'
+              : 'خدمات شهر شما، از همین‌جا.'
           }
           aside={
             <Link href="/new-request" style={{ textDecoration: 'none' }}>
@@ -202,7 +212,7 @@ export default function HomeView() {
             separate services, and a citizen who came to book a hall should not
             have to read about waste collection to find one. */}
         <SectionTitle
-          title={selectedCity?.name ? `خدمات شهرداری ${selectedCity.name}` : 'خدمات شهر شما'}
+          title={selectedCity?.name ? `خدمات شهر ${selectedCity.name}` : 'خدمات شهر شما'}
           action={
             !modulesLoading && cityModules.length > 0 ? (
               <span className="tnum" style={{ fontSize: S.xs, color: C.muted, fontWeight: 700 }}>
@@ -248,6 +258,30 @@ export default function HomeView() {
               );
             })}
         </div>
+
+        {/* The services grid is the only route to ۱۳۷، کارتابل، اماکن and
+            درگذشتگان, so a failed lookup must say so rather than quietly fall
+            back to the waste tile and look like a city that runs one service. */}
+        {!modulesLoading && modulesFailed && (
+          <Card style={{ marginTop: S.s3 }}>
+            <div style={{ padding: S.s4, display: 'flex', alignItems: 'center', gap: S.s3, flexWrap: 'wrap' }}>
+              <p style={{ margin: 0, flex: 1, minWidth: '18ch', fontSize: S.xs, color: C.muted, lineHeight: 1.9 }}>
+                فهرست خدمات شهر شما بارگذاری نشد؛ ممکن است خدمات دیگری هم فعال باشد.
+              </p>
+              <button
+                type="button"
+                onClick={retryModules}
+                style={{
+                  padding: '9px 16px', borderRadius: 999, cursor: 'pointer',
+                  background: alpha(C.green, 10), border: `1px solid ${alpha(C.green, 28)}`,
+                  color: C.green, fontSize: S.xs, fontWeight: 800,
+                }}
+              >
+                تلاش دوباره
+              </button>
+            </div>
+          </Card>
+        )}
 
         {/* ── rotating notice ──
             Its own air above it: the services grid ended and this began with

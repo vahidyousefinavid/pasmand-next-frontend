@@ -863,11 +863,16 @@ html[data-theme=dark] .ss-board {
 }
 
 /* Header links that only exist when there is room for them. Below this the
-   header is the mark and one action, which is all a phone has space for. */
+   header carries the same links behind `.ss-only-narrow`'s menu button —
+   hiding them used to leave a phone with the mark and «ورود» alone, so every
+   other public page was reachable only from the footer, under a long landing
+   page. */
 .ss-only-wide { display: none; }
+.ss-only-narrow { display: inline-flex; }
 
 @media (min-width: 720px) {
   .ss-only-wide { display: inline; }
+  .ss-only-narrow { display: none; }
 }
 
 /* The FAQ opens without JavaScript; only its marker needs help. */
@@ -884,3 +889,359 @@ html[data-theme=dark] .ss-board {
 }
 
 .ss details[open] > summary::after { content: '−'; }
+
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   صفحهٔ نخست — hero actions and the services section.
+
+   Replaces the first pass, which was seven identical white cards in an even
+   three-column grid. Two things were wrong with it: an even grid claims every
+   service is equally important, and a flat white rectangle gives a visitor
+   nothing to recognise a service *by*. Here the layout is weighted and each
+   card carries its own hue.
+   Scoped as `.ss-scard`, deliberately: `.ss-card` is a shared public-site
+   class used by the FAQ, the city hub, the venue list and the venue page.
+   Restyling it here silently restyled all of them.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── hero actions ─────────────────────────────────────────────────────── */
+
+.ss-cta-primary,
+.ss-cta-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px 26px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform .24s cubic-bezier(.22,.8,.3,1),
+              background-color .24s ease, box-shadow .24s ease;
+}
+
+.ss-cta-primary {
+  background: var(--pm-green);
+  color: #fff;
+  border: 1px solid var(--pm-green);
+  /* Tinted with the brand, not black, so it belongs to the photograph. */
+  box-shadow: 0 12px 28px rgba(6, 60, 42, .42);
+}
+.ss-cta-primary:hover { background: var(--pm-green-dark); transform: translateY(-2px); }
+.ss-cta-primary:active { transform: translateY(0) scale(.985); transition-duration: .09s; }
+
+.ss-cta-ghost {
+  background: rgba(255,255,255,.10);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,.34);
+  backdrop-filter: blur(4px);
+}
+.ss-cta-ghost:hover { background: rgba(255,255,255,.19); transform: translateY(-2px); }
+.ss-cta-ghost:active { transform: translateY(0) scale(.985); transition-duration: .09s; }
+
+/* ── section frame ────────────────────────────────────────────────────── */
+
+.ss-services { padding-block: clamp(44px, 6vw, 92px); }
+
+.ss-services-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: clamp(22px, 3vw, 36px);
+}
+
+.ss-eyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  color: var(--ss-brass-ink);
+}
+
+.ss-services-title {
+  margin: 10px 0 0;
+  font-size: var(--ss-h2);
+  /* Large Persian display text needs its line closed up, not spaced out —
+     letter-spacing would break the cursive joins. */
+  line-height: 1.35;
+  color: var(--pm-text-strong);
+  text-wrap: balance;
+}
+
+.ss-city-switch { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.ss-city-pill {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  background: transparent;
+  color: var(--pm-text);
+  border: 1px solid var(--pm-border);
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
+}
+.ss-city-pill:hover { border-color: var(--pm-green); color: var(--pm-green); }
+.ss-city-pill:active { transform: scale(.97); }
+.ss-city-pill[data-on='true'] {
+  background: var(--pm-green);
+  border-color: var(--pm-green);
+  color: #fff;
+}
+
+/* ── the weighted grid ────────────────────────────────────────────────── */
+
+.ss-bento { display: grid; gap: 14px; }
+
+@media (min-width: 860px) {
+  .ss-bento { grid-template-columns: repeat(2, 1fr); grid-auto-rows: minmax(150px, auto); }
+  /* The headline service spans both rows on the right; the two behind it
+     stack beside it. With fewer than three services the spans collapse on
+     their own rather than leaving a hole. */
+  .ss-bento > :first-child { grid-row: span 2; }
+  .ss-bento[data-count='1'] > :first-child { grid-row: span 1; grid-column: span 2; }
+}
+
+.ss-svc-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+@media (min-width: 720px) {
+  .ss-svc-list { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ── the card ─────────────────────────────────────────────────────────── */
+
+.ss-scard {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  border-radius: 20px;
+  text-decoration: none;
+  color: inherit;
+  /* The hue lifts off the surface rather than sitting on it: a wash from the
+     corner the icon is in, fading to the page's own white. */
+  background:
+    radial-gradient(120% 90% at 100% 0%, var(--svc-wash) 0%, transparent 62%),
+    var(--pm-surface);
+  border: 1px solid var(--pm-border);
+  transition: transform .3s cubic-bezier(.22,.8,.3,1),
+              box-shadow .3s cubic-bezier(.22,.8,.3,1),
+              border-color .3s ease;
+}
+
+.ss-scard[data-size='row'] {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+}
+.ss-scard[data-size='row'] .ss-scard-body { flex: 1; min-width: 0; }
+.ss-scard[data-size='row'] .ss-scard-cta { margin: 0; }
+
+/* The watermark. Very faint, deliberately cropped by the corner. */
+.ss-scard-ghost {
+  position: absolute;
+  z-index: -1;
+  inset-block-start: -22px;
+  inset-inline-start: -18px;
+  width: 132px;
+  height: 132px;
+  color: var(--svc);
+  opacity: .05;
+  stroke-width: 1.1;
+  transition: transform .45s cubic-bezier(.22,.8,.3,1), opacity .3s ease;
+}
+.ss-scard[data-size='row'] .ss-scard-ghost { display: none; }
+
+.ss-scard-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ss-scard[data-size='row'] .ss-scard-top { flex-shrink: 0; }
+.ss-scard[data-size='row'] .ss-scard-flag { display: none; }
+
+.ss-scard-icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  color: var(--svc);
+  background: var(--svc-wash);
+  border: 1px solid var(--svc-line);
+  transition: transform .34s cubic-bezier(.22,.8,.3,1);
+}
+.ss-scard-icon > svg { width: 24px; height: 24px; }
+.ss-scard[data-size='row'] .ss-scard-icon { width: 42px; height: 42px; border-radius: 13px; }
+.ss-scard[data-size='row'] .ss-scard-icon > svg { width: 20px; height: 20px; }
+.ss-scard[data-size='lead'] .ss-scard-icon { width: 58px; height: 58px; border-radius: 19px; }
+.ss-scard[data-size='lead'] .ss-scard-icon > svg { width: 28px; height: 28px; }
+
+/* The one fact a visitor wants before tapping. */
+.ss-scard-flag {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--svc);
+  background: var(--svc-wash);
+}
+.ss-scard-flag[data-locked='true'] {
+  color: var(--pm-subtle);
+  background: var(--pm-surface-2);
+}
+
+.ss-scard-body { display: block; }
+
+.ss-scard-title {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.5;
+  color: var(--pm-text-strong);
+}
+.ss-scard[data-size='lead'] .ss-scard-title { font-size: 23px; }
+.ss-scard[data-size='row'] .ss-scard-title { font-size: 15.5px; }
+
+.ss-scard-line {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  line-height: 1.95;
+  color: var(--pm-muted);
+  max-width: 34ch;
+}
+.ss-scard[data-size='row'] .ss-scard-line { font-size: 12.5px; margin-top: 3px; }
+
+.ss-scard-detail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 14px;
+}
+.ss-scard-detail > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--pm-muted);
+}
+.ss-scard-detail svg { color: var(--svc); }
+
+.ss-scard-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: auto;
+  padding-top: 4px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--svc);
+}
+.ss-scard-cta svg { transition: transform .3s cubic-bezier(.22,.8,.3,1); }
+
+/* ── how it responds ──────────────────────────────────────────────────── */
+
+.ss-scard:hover {
+  transform: translateY(-5px);
+  border-color: var(--svc-line);
+  /* Shadow carries the card's own hue rather than generic black. */
+  box-shadow: 0 22px 46px -18px var(--svc-glow), 0 3px 10px rgba(9,40,30,.05);
+}
+.ss-scard:active { transform: translateY(-1px) scale(.995); transition-duration: .1s; }
+.ss-scard:hover .ss-scard-icon { transform: scale(1.07) rotate(-3deg); }
+.ss-scard:hover .ss-scard-cta svg { transform: translateX(-5px); }
+.ss-scard:hover .ss-scard-ghost { transform: scale(1.09) rotate(5deg); opacity: .08; }
+
+.ss-scard:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--pm-surface), 0 0 0 5px var(--svc);
+}
+
+.ss-svc-off {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 18px 0 0;
+  font-size: 12.5px;
+  line-height: 1.95;
+  color: var(--pm-subtle);
+}
+.ss-svc-off svg { flex-shrink: 0; margin-top: 5px; }
+
+/* ── entrance ─────────────────────────────────────────────────────────── */
+
+.ss-rise { animation: ss-rise .55s cubic-bezier(.22,.8,.3,1) both; }
+@keyframes ss-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ss-rise { animation: none; }
+  .ss-scard, .ss-scard-icon, .ss-scard-ghost, .ss-scard-cta svg,
+  .ss-cta-primary, .ss-cta-ghost, .ss-city-pill { transition: none; }
+  .ss-scard:hover, .ss-cta-primary:hover, .ss-cta-ghost:hover { transform: none; }
+  .ss-scard:hover .ss-scard-icon,
+  .ss-scard:hover .ss-scard-ghost,
+  .ss-scard:hover .ss-scard-cta svg { transform: none; }
+}
+
+/* The coverage line that replaced an 865px map panel. */
+.ss-coverage {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 16px 20px;
+  border-radius: 16px;
+  background: var(--pm-surface);
+  border: 1px solid var(--pm-border);
+}
+.ss-coverage > p { flex: 1; min-width: 220px; }
+.ss-coverage-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  background: var(--pm-green);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pm-green) 16%, transparent);
+}
+.ss-coverage-link {
+  flex-shrink: 0;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  color: var(--pm-green);
+  background: color-mix(in srgb, var(--pm-green) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pm-green) 22%, transparent);
+  transition: background-color .2s ease, transform .2s ease;
+}
+.ss-coverage-link:hover { background: color-mix(in srgb, var(--pm-green) 16%, transparent); transform: translateY(-1px); }

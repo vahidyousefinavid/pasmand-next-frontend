@@ -59,7 +59,7 @@ function CityServiceStrip({ city, catalogue }: { city: PublicCity; catalogue: Pu
     <div style={{ marginTop: S.s5 }}>
       <p style={{ display: 'flex', alignItems: 'center', gap: 6, margin: `0 0 ${S.s3}px`, fontSize: S.xs, fontWeight: 700, color: C.muted }}>
         <Building2 className="h-3.5 w-3.5" style={{ color: C.green }} aria-hidden />
-        خدمات شهرداری {city.name} روی شهرشهر
+        خدمات شهر {city.name} روی شهرشهر
       </p>
 
       <div style={{ display: 'grid', gap: S.s2, gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))' }}>

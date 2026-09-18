@@ -40,26 +40,45 @@ const ICONS: Record<string, LucideIcon> = {
 
 export const serviceIcon = (name: string): LucideIcon => ICONS[name] || Building2;
 
-/** The modules this citizen's city runs. Empty until it answers. */
+/**
+ * The modules this citizen's city runs. Empty until it answers.
+ *
+ * `failed` matters as much as the list does. This one call decides which
+ * services exist in the whole app — ۱۳۷, کارتابل, اماکن and درگذشتگان have no
+ * static entry anywhere, they are only ever rendered from this array. When the
+ * call was swallowed with `.catch(() => undefined)`, a citizen of a city that
+ * runs four services saw a waste-only app with no error and nothing to retry,
+ * indistinguishable from a city that genuinely runs one. So the failure is
+ * reported and the caller can offer «تلاش دوباره».
+ */
 export function useCityServices() {
   const [services, setServices] = useState<CityService[]>([]);
   const [city, setCity] = useState<{ _id: string; name: string; slug: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     const token = Cookies.get('auth_token');
     if (!token) { setLoading(false); return; }
 
+    let alive = true;
+    setLoading(true);
+    setFailed(false);
+
     axiosService({ url: '/api/v1/services', method: 'get', token })
       .then((res: any) => {
+        if (!alive) return;
         setServices(res?.data?.services || []);
         setCity(res?.data?.city || null);
       })
-      .catch(() => undefined)
-      .finally(() => setLoading(false));
-  }, []);
+      .catch(() => { if (alive) setFailed(true); })
+      .finally(() => { if (alive) setLoading(false); });
 
-  return { services, city, loading };
+    return () => { alive = false; };
+  }, [attempt]);
+
+  return { services, city, loading, failed, retry: () => setAttempt((n) => n + 1) };
 }
 
 /** Status vocabulary shared by the module screens. */

@@ -92,7 +92,21 @@ const API = process.env.DOMAIN_API || 'http://pasmand-api:3008';
  * into the image at build time either. Both pages are `force-dynamic` and share
  * this cache entry, which makes the whole site cost two API calls per half hour.
  */
-const REVALIDATE = 1800;
+/**
+ * چرا شصت ثانیه.
+ *
+ * These routes are `force-dynamic`, which also sets every fetch to `no-store`
+ * — so each visit re-asked the API, and the API on this box times out often
+ * enough to matter (eighteen times in half an hour when this was measured).
+ * Every one of those blanked the services section, the rate board and the
+ * coverage map for whoever was unlucky.
+ *
+ * A short revalidate fixes that without bringing back the bug it replaced: a
+ * stale value is served *while* the refetch happens, so a hiccup costs nobody
+ * anything, and a municipality switching a service on still sees it on the
+ * public site within a minute rather than in half an hour.
+ */
+const REVALIDATE = 60;
 
 async function get<T>(path: string): Promise<T | null> {
   try {
@@ -120,6 +134,27 @@ async function get<T>(path: string): Promise<T | null> {
  */
 const getCityPayload = () =>
   get<{ cities: any[]; services?: any[] }>('/api/v1/cities?includeInactive=true');
+
+/**
+ * How many not-yet-open cities the public pages will name.
+ *
+ * `includeInactive` exists so somebody in a town that has not joined can still
+ * find it on the price list, labelled «به‌زودی». That was four rows. Once every
+ * city in the country was imported it became fifteen hundred and sixty-two —
+ * and the front page grew to twenty megabytes and took sixteen seconds,
+ * because a coverage map does not get more honest by drawing every settlement
+ * in Iran.
+ *
+ * The cap is zero, and that is a correctness decision before it is a
+ * performance one. «به‌زودی» is a promise: it said this city is being brought
+ * on. The imported rows are not — they are every settlement in the country,
+ * loaded so that a municipality can be opened without typing it in first.
+ * Showing an arbitrary two dozen of them under that label would tell a
+ * visitor in one of them that their service is on the way, which nobody has
+ * agreed to. The open cities are the honest list; the rest are reachable by
+ * name once their municipality joins.
+ */
+const COMING_SOON_SHOWN = 0;
 
 /**
  * خدمات شهرشهر — the catalogue, in catalogue order.
@@ -162,7 +197,11 @@ export async function getCities(): Promise<PublicCity[]> {
     getMaterials(),
   ]);
 
-  return (payload?.cities || [])
+  const all = payload?.cities || [];
+  const open = all.filter((c: any) => c?.isActive !== false);
+  const closed = all.filter((c: any) => c?.isActive === false).slice(0, COMING_SOON_SHOWN);
+
+  return [...open, ...closed]
     .map((c) => {
       const id = String(c._id);
       return {

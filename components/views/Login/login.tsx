@@ -238,7 +238,9 @@ export default function LoginPage() {
             شهر شهر
           </h1>
           <p style={{ margin: 0, fontSize: S.sm, color: C.muted, textAlign: 'center', lineHeight: 1.9, maxWidth: '34ch' }}>
-            {cityData ? `سامانهٔ خدمات شهری ${cityData.name}` : 'خدمات شهری، از تلفن همراه تا درِ خانه.'}
+            {cityData
+              ? `خدمات شهری ${cityData.name} با همکاری شهرداری`
+              : 'خدمات شهری، از تلفن همراه تا درِ خانه.'}
           </p>
         </div>
 

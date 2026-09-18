@@ -26,6 +26,10 @@ const PUBLIC_PATHS = [
   // Somebody looking for a relative's grave arrives from a search engine and
   // should not meet a login form; the register is published on purpose.
   '/deceased',
+  // The city's published plan — see components/views/Urban/city-map.tsx.
+  '/city-map',
+  // The geocoder behind the city map's address box.
+  '/geo-search',
 ];
 
 /**

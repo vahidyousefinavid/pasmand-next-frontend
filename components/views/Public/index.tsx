@@ -706,7 +706,7 @@ function Slide01Cover() {
                 <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 rounded-full px-5 py-2 mb-8">
                     <Globe className="w-4 h-4 text-violet-400" />
                     <span className="text-violet-300 text-sm font-medium">
-                        سامانه ملی هوشمند مدیریت پسماند شهری
+                        سامانهٔ سراسری هوشمند مدیریت پسماند شهری
                     </span>
                 </div>
 
@@ -717,7 +717,7 @@ function Slide01Cover() {
                 </h1>
 
                 <p className="text-xl md:text-2xl text-gray-400 mb-2 font-light">
-                    مدل ملی مدیریت هوشمند پسماند شهری
+                    مدلی سراسری برای مدیریت هوشمند پسماند شهری
                 </p>
                 <p className="text-gray-500 text-base mb-12">
                     از نهاوند تا سراسر کشور — تحولی دیجیتال در خدمات شهری
@@ -849,7 +849,7 @@ function Slide02Executive() {
 
             <div className="mt-8 bg-gradient-to-r from-violet-500/10 via-indigo-500/5 to-transparent border border-violet-500/20 rounded-2xl p-6">
                 <p className="text-gray-300 text-base leading-relaxed">
-                    <strong className="text-violet-300">هدف اصلی:</strong> ایجاد نظامی ملی و
+                    <strong className="text-violet-300">هدف اصلی:</strong> ایجاد نظامی سراسری و
                     دیجیتال برای مدیریت پسماند شهری که هزینه‌ها را کاهش دهد، کیفیت خدمات
                     را افزایش دهد و شهرها را به‌سوی پایداری محیط‌زیستی سوق دهد. این سامانه
                     با رویکردی قابل‌انطباق برای تمام شهرها — از کوچک تا کلان‌شهر — طراحی
@@ -880,7 +880,7 @@ function Slide03Vision() {
         },
         {
             icon: <Globe className="w-6 h-6" />,
-            title: "زیرساخت ملی",
+            title: "زیرساخت سراسری",
             desc: "فراهم‌سازی زیرساخت نرم‌افزاری مشترک برای همه‌ی شهرها با مدل قرارداد منعطف",
             color: "emerald",
         },
