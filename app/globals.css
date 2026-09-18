@@ -534,9 +534,12 @@ textarea {
 
 /* Link lists on the public pages — the footer columns and the «همهٔ ۴ مکان»
    style links in prose — were 18px-high targets. */
-.ss a:not(.ss-btn):not(.ss-link-card):not(.ss-venue) {
+/* `display` is deliberately NOT set here: `.ss-only-wide` hides the header's
+   link row below 720px with `display: none`, and an `inline-block` in this
+   rule out-specifies it — which put four desktop links back into a phone's
+   header, overran the row by 32px and pushed the menu button off-screen. */
+.ss a:not(.ss-btn):not(.ss-link-card):not(.ss-venue):not(.ss-only-wide) {
   padding-block: 9px;
-  display: inline-block;
 }
 
 /* Every link sitting in a section heading is a real 40px target, however
@@ -1372,7 +1375,7 @@ html[data-theme=dark] .ss-board {
   margin: 18px 0 0;
   font-size: 12.5px;
   line-height: 1.95;
-  color: var(--pm-subtle);
+  color: var(--pm-text);
 }
 .ss-svc-off svg { flex-shrink: 0; margin-top: 5px; }
 
