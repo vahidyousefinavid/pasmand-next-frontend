@@ -212,8 +212,20 @@ export default function HeroMap({
   const activeServices = active
     ? catalogue.filter((s) => active.services.includes(s.key))
     : catalogue;
-  // Doubled so the strip can loop without a seam.
-  const marquee = [...activeServices, ...activeServices];
+  /**
+   * Repeated until the row is long enough to loop.
+   *
+   * Doubling was right for a city running five modules and silly for one
+   * running a single service — ملایر showed «جمع‌آوری پسماند» twice, side by
+   * side, which reads as a bug rather than as a loop. The row is filled to at
+   * least eight chips and always an even number of copies, so translating by
+   * half its width lands exactly where it started.
+   */
+  const marquee = useMemo(() => {
+    if (!activeServices.length) return [];
+    const copies = Math.max(2, Math.ceil(8 / activeServices.length) * 2);
+    return Array.from({ length: copies }, () => activeServices).flat();
+  }, [activeServices]);
 
   return (
     <div style={{ display: 'grid', gap: 14, width: '100%' }}>
