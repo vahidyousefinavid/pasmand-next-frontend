@@ -611,6 +611,24 @@ textarea {
   border-radius: 6px;
 }
 
+/* The hero: words and globe side by side where there is room, stacked on a
+   phone with the globe under the call to action — the message has to be the
+   thing above the fold, not the ornament. */
+.ss-hero-grid {
+  display: grid;
+  gap: clamp(18px, 3vw, 40px);
+  align-items: center;
+}
+
+.ss-hero-globe {
+  display: flex;
+  justify-content: center;
+}
+
+@media (min-width: 900px) {
+  .ss-hero-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 420px); }
+}
+
 /* Link lists on the public pages — the footer columns and the «همهٔ ۴ مکان»
    style links in prose — were 18px-high targets. */
 /* `display` is deliberately NOT set here: `.ss-only-wide` hides the header's

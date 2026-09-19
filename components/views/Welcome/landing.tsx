@@ -11,6 +11,7 @@ import { HOME_FAQS } from '@/lib/faq';
 import type { BoardCity, PublicCity, PublicService } from '@/lib/publicData';
 import type { CityHighlights } from '@/lib/publicVenues';
 import RateBoard from './rate-board';
+import ServiceGlobe from './service-globe';
 import IranMap from './iran-map';
 import { PublicFooter, PublicHeader, SectionHead, useSignedIn } from './public-chrome';
 import ServiceGrid from './service-grid';
@@ -123,13 +124,15 @@ export default function Landing({
 
       <main>
         {/* ── hero ──
-            A photograph, because the page had none and a wall of green cards
-            asks a newcomer to read before it gives them anything to look at.
-            It is a real place — the garden at Avicenna's tomb in همدان, from
-            Wikimedia Commons — not stock: a municipal site showing a city that
-            is not its own would be the first thing it got wrong. The overlay
-            is heavy on purpose; the picture sets a mood and the words have to
-            stay readable on a phone in sunlight. */}
+            The globe, not a photograph. A picture of one city — it was the
+            garden at Avicenna's tomb in همدان — is the wrong first image for a
+            platform whose argument is that *any* municipality can join, and it
+            said nothing about what the product does. What is drawn instead is
+            the product's own claim: the cities this platform runs in, burning
+            at their real coordinates on a turning globe, with the services a
+            municipality offers orbiting around them. Canvas, no image and no
+            library, so it costs a few kilobytes and carries real data — see
+            service-globe.tsx. */}
         <section
           style={{
             position: 'relative',
@@ -140,36 +143,26 @@ export default function Landing({
             minHeight: 'clamp(300px, 42vh, 420px)',
             display: 'grid',
             alignItems: 'center',
+            background: 'linear-gradient(200deg, var(--sh-enamel), var(--sh-enamel-deep) 62%)',
           }}
         >
-          <img
-            src="/img/hero-city.jpg"
-            alt="باغ آرامگاه بوعلی‌سینا در همدان"
-            loading="eager"
-            /* eslint-disable-next-line @next/next/no-img-element */
-            style={{
-              position: 'absolute', inset: 0, zIndex: -2,
-              width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 58%',
-            }}
-          />
-          {/* Two layers: a brand-tinted wash so the photo reads as ours, and a
-              directional gradient that keeps the text side darkest. */}
+          {/* The night sky the globe hangs in: two faint washes, no image. */}
           <span
             aria-hidden
             style={{
               position: 'absolute', inset: 0, zIndex: -1,
               background:
-                // The wash over the photograph is the skin's own dark, so the
-                // hero changes colour with the rest of the product.
-                'linear-gradient(to left,'
-                + ' color-mix(in srgb, var(--sh-enamel-deep) 35%, transparent) 0%,'
-                + ' color-mix(in srgb, var(--sh-enamel-deep) 88%, transparent) 55%,'
-                + ' color-mix(in srgb, var(--sh-enamel-deep) 96%, transparent) 100%)',
+                'radial-gradient(60% 55% at 22% 18%, color-mix(in srgb, var(--sh-tile) 22%, transparent), transparent 70%),'
+                + ' radial-gradient(55% 60% at 85% 90%, color-mix(in srgb, var(--ss-brass) 12%, transparent), transparent 70%)',
             }}
           />
 
-          <div className="ss-wrap" style={{ paddingBlock: 'clamp(28px, 4vw, 56px)' }}>
-            <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', color: 'var(--ss-brass-on-dark, #e6c98a)' }}>
+          <div
+            className="ss-wrap ss-hero-grid"
+            style={{ paddingBlock: 'clamp(28px, 4vw, 56px)' }}
+          >
+            <div>
+            <p style={{ margin: 0, fontSize: 12, fontWeight: 800, letterSpacing: '0.08em', color: '#f3daa2' }}>
               شهرشهر · شهروند سبز · با همکاری شهرداری‌ها
             </p>
 
@@ -197,11 +190,23 @@ export default function Landing({
 
             {cityNames.length > 0 && (
               <p style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', margin: `${S.s5}px 0 0`, fontSize: S.sm, color: 'rgba(255,255,255,.72)' }}>
-                <MapPin className="h-4 w-4" style={{ color: '#7fd4ab' }} aria-hidden />
+                <MapPin className="h-4 w-4" style={{ color: '#63cddb' }} aria-hidden />
                 فعال در
                 <strong style={{ color: '#fff', fontWeight: 800 }}>{cityNames.join('، ')}</strong>
               </p>
             )}
+            </div>
+
+            {/* The globe carries the same facts as the words beside it, which
+                is why it can be aria-hidden: the cities are named in the line
+                above and listed again further down the page. */}
+            <div className="ss-hero-globe" aria-hidden>
+              <ServiceGlobe
+                size={480}
+                cities={mapCities.map((c) => ({ name: c.name, lat: c.lat, lng: c.lng, isActive: c.isActive }))}
+                services={catalogue.map((s) => ({ title: s.title, color: s.color }))}
+              />
+            </div>
           </div>
         </section>
 
