@@ -41,3 +41,5 @@ public/sw.js.map
 public/sw-worker-development.js
 public/workbox-*.js
 public/workbox-*.json
+# next-pwa writes this on every `next dev` run; it is not part of the app.
+public/worker-development.js
