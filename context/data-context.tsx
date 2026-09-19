@@ -1,6 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+
+import { refreshCityServices } from '@/lib/cityServices';
 import Cookies from 'js-cookie';
 import { cities as FALLBACK_CITIES } from '@/variables';
 import { City } from '@/lib/types/types';
@@ -102,6 +104,11 @@ export const CityProvider = ({ children }: { children: React.ReactNode }) => {
         // keyed on, so they remount and ask again — the services grid, the
         // venues, the tariff, «کارهای من», all of it, without each screen
         // having to know that a city can change underneath it.
+        //
+        // The one thing a remount does not clear is the shared services cache,
+        // which lives in a module and therefore outlives the tree: the drawer,
+        // the tab bar and «خدمات شهر» would keep answering for the old city.
+        refreshCityServices();
         setScope(city.id);
       })
       .catch(() => {

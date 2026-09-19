@@ -73,7 +73,27 @@ type ServicesState = {
 
 const EMPTY: ServicesState = { services: [], city: null, loading: true, failed: false };
 
+/**
+ * Which city the cached answer belongs to.
+ *
+ * Switching city is the one thing that makes this list wrong. The app's own
+ * design for that is `cityScope` in data-context: the server is told first, and
+ * only when it agrees does the tree remount and every screen ask again. A
+ * module-level cache sails straight through a remount, so without this the
+ * drawer, the tab bar and «خدمات شهر» kept answering for the previous city
+ * until the citizen reloaded the page by hand.
+ */
+const currentScope = () => {
+  if (typeof window === 'undefined') return '';
+  try {
+    return `${window.localStorage.getItem('selectedCity') || ''}|${Cookies.get('auth_token') ? '1' : '0'}`;
+  } catch {
+    return '';
+  }
+};
+
 let cache: ServicesState = EMPTY;
+let cachedScope = '';
 let inflight: Promise<void> | null = null;
 const listeners = new Set<(state: ServicesState) => void>();
 
@@ -84,6 +104,7 @@ const publish = (next: ServicesState) => {
 
 function load(force = false): Promise<void> {
   if (inflight && !force) return inflight;
+  cachedScope = currentScope();
   const token = Cookies.get('auth_token');
   if (!token) {
     // Nothing to ask with. Not a failure — an anonymous visitor simply has no
@@ -110,14 +131,28 @@ function load(force = false): Promise<void> {
   return inflight;
 }
 
+/**
+ * Throw the cached list away and fetch again.
+ *
+ * Called the moment the server agrees to a new city (data-context), so a
+ * component that does *not* remount — anything above CityScope — still stops
+ * showing the old city's services.
+ */
+export function refreshCityServices() {
+  load(true);
+}
+
 export function useCityServices() {
   const [state, setState] = useState<ServicesState>(cache);
 
   useEffect(() => {
     listeners.add(setState);
     setState(cache);
-    // Only the first mount fetches; everything else joins the same request.
-    if (cache === EMPTY || (cache.loading && !inflight)) load();
+    // The first mount fetches; everything else joins the same request — unless
+    // the city has moved under the cache, in which case the cached answer is
+    // about a different municipality and has to be replaced.
+    const stale = cachedScope !== currentScope();
+    if (cache === EMPTY || stale || (cache.loading && !inflight)) load(stale);
     return () => { listeners.delete(setState); };
   }, []);
 
