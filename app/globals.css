@@ -629,6 +629,46 @@ textarea {
   .ss-hero-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 420px); }
 }
 
+/* The services strip under the hero map: one row, sliding, and stopped dead
+   for anybody who asked for less motion. */
+.ss-hero-ticker {
+  overflow: hidden;
+  mask-image: linear-gradient(to left, transparent, #000 8%, #000 92%, transparent);
+  -webkit-mask-image: linear-gradient(to left, transparent, #000 8%, #000 92%, transparent);
+}
+
+.ss-hero-track {
+  display: flex;
+  gap: 10px;
+  width: max-content;
+  animation: ssHeroSlide 26s linear infinite;
+}
+
+.ss-hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+@keyframes ssHeroSlide {
+  /* The row is doubled, so half a loop returns it exactly where it started. */
+  from { transform: translateX(0); }
+  to   { transform: translateX(50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ss-hero-track { animation: none; flex-wrap: wrap; width: auto; }
+  .ss-hero-ticker { mask-image: none; -webkit-mask-image: none; }
+}
+
 /* Link lists on the public pages — the footer columns and the «همهٔ ۴ مکان»
    style links in prose — were 18px-high targets. */
 /* `display` is deliberately NOT set here: `.ss-only-wide` hides the header's

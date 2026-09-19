@@ -11,7 +11,7 @@ import { HOME_FAQS } from '@/lib/faq';
 import type { BoardCity, PublicCity, PublicService } from '@/lib/publicData';
 import type { CityHighlights } from '@/lib/publicVenues';
 import RateBoard from './rate-board';
-import ServiceGlobe from './service-globe';
+import HeroMap from './hero-map';
 import IranMap from './iran-map';
 import { PublicFooter, PublicHeader, SectionHead, useSignedIn } from './public-chrome';
 import ServiceGrid from './service-grid';
@@ -197,14 +197,16 @@ export default function Landing({
             )}
             </div>
 
-            {/* The globe carries the same facts as the words beside it, which
-                is why it can be aria-hidden: the cities are named in the line
-                above and listed again further down the page. */}
-            <div className="ss-hero-globe" aria-hidden>
-              <ServiceGlobe
-                size={480}
-                cities={mapCities.map((c) => ({ name: c.name, lat: c.lat, lng: c.lng, isActive: c.isActive }))}
-                services={catalogue.map((s) => ({ title: s.title, color: s.color }))}
+            {/* Iran in dots, one city at a time, with that city's services
+                sliding underneath — see hero-map.tsx. The canvas is
+                aria-hidden; the caption under it is real text. */}
+            <div className="ss-hero-globe">
+              <HeroMap
+                cities={mapCities.map((c) => ({
+                  name: c.name, slug: c.slug, lat: c.lat, lng: c.lng,
+                  isActive: c.isActive, services: c.services,
+                }))}
+                catalogue={catalogue.map((s) => ({ key: s.key, title: s.title, icon: s.icon, color: s.color }))}
               />
             </div>
           </div>
