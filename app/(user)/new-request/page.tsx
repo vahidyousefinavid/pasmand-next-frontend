@@ -1,6 +1,8 @@
 import NewRequestView from '@/components/views/NewRequest/new-request';
 import type { Metadata } from 'next';
 
+import WasteGate from '@/components/views/Services/waste-gate';
+
 // Behind the auth gate and disallowed in robots.ts, so this title is for the
 // browser tab and the share sheet rather than for a search result.
 export const metadata: Metadata = {
@@ -10,5 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <NewRequestView />;
+  return (
+    <WasteGate>
+      <NewRequestView />
+    </WasteGate>
+  );
 }

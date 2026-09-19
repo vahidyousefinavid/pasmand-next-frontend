@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, ListChecks, PackagePlus, Wallet, User } from 'lucide-react';
 import { C, S, alpha } from '@/components/ui/tokens';
+import { useHasService } from '@/lib/cityServices';
 
 /**
  * The tab bar.
@@ -24,13 +25,24 @@ import { C, S, alpha } from '@/components/ui/tokens';
 const TABS = [
   { href: '/', label: 'خانه', Icon: Home },
   { href: '/activity', label: 'کارهای من', Icon: ListChecks },
-  { href: '/new-request', label: 'درخواست', Icon: PackagePlus, primary: true },
+  /**
+   * The waste request, which is only a tab where the city collects waste.
+   * Every other service is reached from the home screen's list; this one has a
+   * tab because it is the errand most people come for — in a city that runs
+   * it. A municipality that has switched collection off should not have a
+   * permanent button for it at the bottom of every screen.
+   */
+  { href: '/new-request', label: 'درخواست', Icon: PackagePlus, primary: true, service: 'waste' },
   { href: '/wallet', label: 'کیف پول', Icon: Wallet },
   { href: '/profile', label: 'پروفایل', Icon: User },
 ];
 
 export function Navigation() {
   const pathname = usePathname();
+  // `undefined` while the answer is unknown — the tab stays until the city
+  // actually says no, so a slow call does not make the bar jump.
+  const { has: hasWaste } = useHasService('waste');
+  const tabs = TABS.filter((tab) => !tab.service || hasWaste !== false);
 
   return (
     <nav
@@ -55,10 +67,10 @@ export function Navigation() {
       <div
         style={{
           width: '100%', maxWidth: 560, margin: '0 auto',
-          display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)',
+          display: 'grid', gridTemplateColumns: `repeat(${tabs.length}, 1fr)`,
         }}
       >
-        {TABS.map(({ href, label, Icon, primary }) => {
+        {tabs.map(({ href, label, Icon, primary }) => {
           const active = pathname === href;
 
           return (

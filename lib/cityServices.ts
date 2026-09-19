@@ -51,34 +51,113 @@ export const serviceIcon = (name: string): LucideIcon => ICONS[name] || Building
  * indistinguishable from a city that genuinely runs one. So the failure is
  * reported and the caller can offer «تلاش دوباره».
  */
+/**
+ * One answer, shared by everything that asks.
+ *
+ * Which services a city runs now decides the tab bar, the drawer, the home
+ * screen and the gate in front of every waste route — five or six components on
+ * a single screen. Each used to mount its own copy of this hook and fire its
+ * own `/api/v1/services`, so a phone on a slow connection paid for the same
+ * answer five times before it could draw a tab bar.
+ *
+ * The result lives in the module and the subscribers share it: the first
+ * caller makes the request, the rest wait on the same promise, and a `retry()`
+ * from any of them refreshes all of them.
+ */
+type ServicesState = {
+  services: CityService[];
+  city: { _id: string; name: string; slug: string } | null;
+  loading: boolean;
+  failed: boolean;
+};
+
+const EMPTY: ServicesState = { services: [], city: null, loading: true, failed: false };
+
+let cache: ServicesState = EMPTY;
+let inflight: Promise<void> | null = null;
+const listeners = new Set<(state: ServicesState) => void>();
+
+const publish = (next: ServicesState) => {
+  cache = next;
+  listeners.forEach((listener) => listener(next));
+};
+
+function load(force = false): Promise<void> {
+  if (inflight && !force) return inflight;
+  const token = Cookies.get('auth_token');
+  if (!token) {
+    // Nothing to ask with. Not a failure — an anonymous visitor simply has no
+    // city yet, and the callers treat "no services" as "not signed in".
+    publish({ services: [], city: null, loading: false, failed: false });
+    return Promise.resolve();
+  }
+
+  publish({ ...cache, loading: true, failed: false });
+  inflight = axiosService({ url: '/api/v1/services', method: 'get', token })
+    .then((res: any) => {
+      publish({
+        services: res?.data?.services || [],
+        city: res?.data?.city || null,
+        loading: false,
+        failed: false,
+      });
+    })
+    .catch(() => {
+      publish({ ...cache, loading: false, failed: true });
+    })
+    .finally(() => { inflight = null; });
+
+  return inflight;
+}
+
 export function useCityServices() {
-  const [services, setServices] = useState<CityService[]>([]);
-  const [city, setCity] = useState<{ _id: string; name: string; slug: string } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [failed, setFailed] = useState(false);
-  const [attempt, setAttempt] = useState(0);
+  const [state, setState] = useState<ServicesState>(cache);
 
   useEffect(() => {
-    const token = Cookies.get('auth_token');
-    if (!token) { setLoading(false); return; }
+    listeners.add(setState);
+    setState(cache);
+    // Only the first mount fetches; everything else joins the same request.
+    if (cache === EMPTY || (cache.loading && !inflight)) load();
+    return () => { listeners.delete(setState); };
+  }, []);
 
-    let alive = true;
-    setLoading(true);
-    setFailed(false);
+  return {
+    services: state.services,
+    city: state.city,
+    loading: state.loading,
+    failed: state.failed,
+    retry: () => load(true),
+  };
+}
 
-    axiosService({ url: '/api/v1/services', method: 'get', token })
-      .then((res: any) => {
-        if (!alive) return;
-        setServices(res?.data?.services || []);
-        setCity(res?.data?.city || null);
-      })
-      .catch(() => { if (alive) setFailed(true); })
-      .finally(() => { if (alive) setLoading(false); });
-
-    return () => { alive = false; };
-  }, [attempt]);
-
-  return { services, city, loading, failed, retry: () => setAttempt((n) => n + 1) };
+/**
+ * Does this citizen's city run a given module?
+ *
+ * Waste is the reason this exists. It predates the module system, so on the
+ * server it is opt-*out* (`features.requests !== false`) where the other five
+ * are opt-in — but a municipality that does not buy waste collection can
+ * switch it off, and until now the app ignored that: it kept a «درخواست» tab,
+ * a price table and a «ثبت درخواست جمع‌آوری» button for a city that does not
+ * collect anything. Every other service already disappears when its city has
+ * not asked for it; this makes waste behave the same.
+ *
+ * `unknown` is not `false`. While the call is in flight, or after it has
+ * failed, the answer is "we do not know yet" — hiding half the app because a
+ * request timed out would be worse than showing it. Callers render nothing,
+ * or a skeleton, until `settled`.
+ */
+export function useHasService(key: string) {
+  const { services, city, loading, failed, retry } = useCityServices();
+  const settled = !loading && !failed;
+  return {
+    has: settled ? services.some((service) => service.key === key) : undefined,
+    settled,
+    loading,
+    failed,
+    retry,
+    city,
+    services,
+  };
 }
 
 /** Status vocabulary shared by the module screens. */

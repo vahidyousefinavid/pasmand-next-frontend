@@ -233,7 +233,13 @@ export default function Prices({
           sub={
             city && !city.isActive
               ? 'خدمات شهرشهر هنوز در این شهر آغاز نشده است. با آغاز کار، قیمت‌های همین‌جا منتشر می‌شود.'
-              : 'قیمت‌ها را شهرداری همین شهر منتشر می‌کند؛ به‌زودی این‌جا خواهند بود.'
+              // A city that runs other services but not collection is a
+              // different answer from one whose prices are simply late, and a
+              // citizen waiting for prices that will never come deserves the
+              // first one.
+              : city && !(city.services || []).includes('waste')
+                ? `شهرداری ${city.name} خدمت جمع‌آوری پسماند را ارائه نمی‌دهد؛ تعرفه‌ای هم منتشر نمی‌شود.`
+                : 'قیمت‌ها را شهرداری همین شهر منتشر می‌کند؛ به‌زودی این‌جا خواهند بود.'
           }
           action={
             <Link

@@ -38,16 +38,23 @@ import MessagesBell from '@/components/messages-bell';
  * grouping says which one the app is for (ثبت درخواست), which are the user's own
  * records, and which are reference material you read once.
  */
-const MENU_GROUPS: { label: string; items: { title: string; sub: string; href: string; Icon: LucideIcon; color: string }[] }[] = [
+const MENU_GROUPS: {
+  label: string;
+  items: {
+    title: string; sub: string; href: string; Icon: LucideIcon; color: string;
+    /** Only shown where the city actually collects waste. */
+    waste?: boolean;
+  }[];
+}[] = [
   {
     label: 'کارهای من',
     items: [
       // First, because it is the answer to the question the rest of this group
       // asks one service at a time.
       { title: 'همهٔ کارهای من', sub: 'درخواست، رزرو، گزارش و نامه — در یک فهرست', href: '/activity', Icon: ListChecks, color: C.green },
-      { title: 'ثبت درخواست', sub: 'جمع‌آوری پسماند از درِ خانه', href: '/new-request', Icon: PackagePlus, color: C.green },
-      { title: 'پیگیری درخواست‌ها', sub: 'مسیر هر درخواست پسماند، مرحله به مرحله', href: '/history', Icon: FileClock, color: C.statusInfo },
-      { title: 'پیام‌ها', sub: 'گفتگو با جمع‌آوران', href: '/messages', Icon: MessagesSquare, color: C.statusInfo },
+      { title: 'ثبت درخواست', sub: 'جمع‌آوری پسماند از درِ خانه', href: '/new-request', Icon: PackagePlus, color: C.waste, waste: true },
+      { title: 'پیگیری درخواست‌ها', sub: 'مسیر هر درخواست پسماند، مرحله به مرحله', href: '/history', Icon: FileClock, color: C.waste, waste: true },
+      { title: 'پیام‌ها', sub: 'گفتگو با جمع‌آوران', href: '/messages', Icon: MessagesSquare, color: C.waste, waste: true },
       { title: 'اعلان‌ها', sub: 'هر خبری که برای شما آمده', href: '/notifications', Icon: Bell, color: C.amber },
       { title: 'کیف پول', sub: 'موجودی و برداشت', href: '/wallet', Icon: Wallet, color: C.amber },
       { title: 'آدرس‌های من', sub: 'آدرس‌های ذخیره‌شده', href: '/addresses', Icon: MapPinned, color: C.violet },
@@ -56,9 +63,9 @@ const MENU_GROUPS: { label: string; items: { title: string; sub: string; href: s
   {
     label: 'اطلاعات',
     items: [
-      { title: 'تعرفهٔ قیمت‌ها', sub: 'قیمت روز اقلام بازیافتی', href: '/tariff', Icon: Banknote, color: C.green },
-      { title: 'انواع پسماند', sub: 'کدام پسماند در کدام دسته', href: '/waste-types', Icon: Trash2, color: C.statusNeutral },
-      { title: 'راهنمای استفاده', sub: 'از ثبت تا تسویه', href: '/guide', Icon: BookOpen, color: C.statusNeutral },
+      { title: 'تعرفهٔ قیمت‌ها', sub: 'قیمت روز اقلام بازیافتی', href: '/tariff', Icon: Banknote, color: C.waste, waste: true },
+      { title: 'انواع پسماند', sub: 'کدام پسماند در کدام دسته', href: '/waste-types', Icon: Trash2, color: C.statusNeutral, waste: true },
+      { title: 'راهنمای استفاده', sub: 'از ثبت تا تسویه', href: '/guide', Icon: BookOpen, color: C.statusNeutral, waste: true },
     ],
   },
   {
@@ -87,8 +94,15 @@ export function TopMenu() {
   const { selectedCity, setSelectedCity, cities, switching } = useCity();
   // Whatever this city runs beyond the waste service — the drawer is where
   // somebody goes looking for a service they were told about.
-  const { services: cityModules } = useCityServices();
+  const { services: cityModules, failed: modulesFailed } = useCityServices();
   const { skin, setSkin } = useSkin();
+  /**
+   * A city that does not collect waste has no ثبت درخواست, no پیگیری, no
+   * conversations with collectors and no tariff — the same way it has no ۱۳۷
+   * if it has not asked for one. A *failed* lookup keeps them: taking half the
+   * drawer away because a call timed out is the worse mistake.
+   */
+  const hasWaste = modulesFailed || cityModules.some((service) => service.key === 'waste');
   const pathname = usePathname();
 
   /**
@@ -250,7 +264,15 @@ export function TopMenu() {
                     </div>
                   )}
 
-                  {MENU_GROUPS.map((group) => (
+                  {MENU_GROUPS
+                    .map((group) => ({
+                      ...group,
+                      items: group.items.filter((item) => hasWaste || !item.waste),
+                    }))
+                    // A group whose every entry belonged to a service this city
+                    // does not run prints no heading either.
+                    .filter((group) => group.items.length > 0)
+                    .map((group) => (
                     <div key={group.label}>
                       <p
                         style={{

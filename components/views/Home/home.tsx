@@ -87,8 +87,10 @@ const FIRST_TIME = [
 
 /**
  * If `/api/v1/services` never answers — a restarting API, a phone that lost the
- * network — the list still has to be a list. Waste is the one module every city
- * on this platform runs, so it is the honest floor.
+ * network — the list still has to be a list, and waste is the likeliest module
+ * to be there: it is opt-*out* on the server, where the other five are opt-in.
+ * It is a fallback for a failed call only. When the API answers and does not
+ * include waste, this list is not used and every waste surface disappears.
  */
 const FALLBACK_MODULES = [
   {
@@ -102,10 +104,12 @@ const FALLBACK_MODULES = [
 ];
 
 const EXTRAS = [
-  { href: '/tariff', title: 'تعرفهٔ قیمت‌ها', icon: <Banknote className="h-4 w-4" /> },
-  { href: '/waste-types', title: 'انواع پسماند', icon: <Trash2 className="h-4 w-4" /> },
+  // `waste: true` — reference material about collection, which is worth
+  // nothing in a city that does not collect.
+  { href: '/tariff', title: 'تعرفهٔ قیمت‌ها', icon: <Banknote className="h-4 w-4" />, waste: true },
+  { href: '/waste-types', title: 'انواع پسماند', icon: <Trash2 className="h-4 w-4" />, waste: true },
   { href: '/addresses', title: 'نشانی‌های من', icon: <MapPinned className="h-4 w-4" /> },
-  { href: '/guide', title: 'راهنما', icon: <HelpCircle className="h-4 w-4" /> },
+  { href: '/guide', title: 'راهنما', icon: <HelpCircle className="h-4 w-4" />, waste: true },
   { href: '/contact-us', title: 'پشتیبانی', icon: <Phone className="h-4 w-4" /> },
 ];
 
@@ -162,7 +166,18 @@ export default function HomeView() {
   const cityName = selectedCity?.name || serviceCity?.name || '';
   const cityId = (selectedCity as any)?._id || (serviceCity as any)?._id;
   const announcement = (selectedCity as any)?.settings?.announcement || (selectedCity as any)?.announcement || '';
-  const modules = cityModules.length ? cityModules : FALLBACK_MODULES;
+  const modules = cityModules.length ? cityModules : (modulesFailed ? FALLBACK_MODULES : []);
+
+  /**
+   * Does this city collect waste?
+   *
+   * Everything below that is about pesmand — the rate table, the four steps,
+   * «ثبت درخواست جمع‌آوری» and the تعرفه/انواع پسماند links — hangs off this
+   * one answer, the same way ۱۳۷ or اماکن appear only where they are run.
+   * A failed lookup is not a "no": the screen keeps what it had and offers
+   * «تلاش دوباره».
+   */
+  const hasWaste = modulesFailed || cityModules.some((service: any) => service.key === 'waste');
 
   const cityPrices = prices
     .filter((p) => (cityId ? p.city === cityId : true) && Number(p.pricePerUnit) > 0)
@@ -255,7 +270,9 @@ export default function HomeView() {
           </>
         ) : (
           /* Nothing open is not an empty state to apologise for — it is the
-             moment to explain how the thing works. */
+             moment to explain how the thing works. Only where there is a
+             collection service to explain. */
+          hasWaste && (
           <>
             <SectionTitle title="چطور کار می‌کند" tone={C.brass} />
             <Card>
@@ -283,6 +300,7 @@ export default function HomeView() {
               </ol>
             </Card>
           </>
+          )
         )}
 
         {/* ── the city's services, as a directory ──
@@ -372,7 +390,7 @@ export default function HomeView() {
             The rate a scrap yard chalks on the wall. Brass, tabular, and read
             down a column; the arrow is a triangle rather than an arrow glyph,
             which is not mirrored in RTL and would point the wrong way. */}
-        {cityPrices.length > 0 && (
+        {hasWaste && cityPrices.length > 0 && (
           <>
             <SectionTitle
               title="نرخ امروزِ پسماند خشک"
@@ -422,9 +440,10 @@ export default function HomeView() {
           </>
         )}
 
-        {/* The errand most people came for. A link, not a <Btn>: a button
-            inside an anchor is invalid markup and costs keyboard users a
-            second focus stop for one action. */}
+        {/* The errand most people came for — where it exists. A link, not a
+            <Btn>: a button inside an anchor is invalid markup and costs
+            keyboard users a second focus stop for one action. */}
+        {hasWaste && (
         <Link
           href="/new-request"
           style={{
@@ -437,10 +456,11 @@ export default function HomeView() {
           <PackagePlus className="h-4 w-4" aria-hidden />
           ثبت درخواست جمع‌آوری
         </Link>
+        )}
 
         {/* ── reference and account ── */}
         <div style={{ display: 'flex', gap: S.s2, flexWrap: 'wrap', marginTop: S.s4 }}>
-          {EXTRAS.map((item) => (
+          {EXTRAS.filter((item) => hasWaste || !item.waste).map((item) => (
             <Link
               key={item.href}
               href={item.href}
